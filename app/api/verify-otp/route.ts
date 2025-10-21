@@ -1,21 +1,35 @@
-import { corsHeaders } from "@/lib/corsHeaders";
-import { otpStore } from "@/utils/otpStore";
-
-
-export async function OPTIONS() {
-  return new Response(null, { status: 200, headers: corsHeaders });
-}
-
+import { NextResponse } from "next/server";
+import { otpStore } from "../send-otp/route";
 
 export async function POST(req: Request) {
-  const { email, otp } = await req.json();
-  const stored = otpStore.get(email);
-  if (!stored) return Response.json({ success: false, message: 'No OTP found' }, { status: 400 });
-  if (stored.otp !== otp) return Response.json({ success: false, message: 'Invalid OTP' }, { status: 400 });
-  if (Date.now() > stored.expires) return Response.json({ success: false, message: 'OTP Expired' }, { status: 400 });
-  otpStore.delete(email);
+  try {
+    const { email, otp } = await req.json();
 
-  return Response.json({ success: true });
+    const record = otpStore.get(email);
+
+    if (!record) {
+      return NextResponse.json({ success: false, message: "No OTP found" }, { status: 400 });
+    }
+
+    if (Date.now() > record.expiresAt) {
+      otpStore.delete(email);
+      return NextResponse.json({ success: false, message: "OTP expired" }, { status: 400 });
+    }
+
+
+
+    
+    if (record.otp !== otp) {
+      return NextResponse.json({ success: false, message: "Invalid OTP" }, { status: 400 });
+    }
+
+    // OTP valid
+    otpStore.delete(email);
+    return NextResponse.json({ success: true, message: "OTP verified successfully" });
+  } catch (error) {
+    console.error("OTP verify error:", error);
+    return NextResponse.json({ success: false, message: "Verification failed" }, { status: 500 });
+  }
 }
 
 

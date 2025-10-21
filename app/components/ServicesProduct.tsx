@@ -21,9 +21,7 @@ const ProductImageSlider = ({ images, name }: { images: string[], name: string }
         ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-
   // auto slide every 3s
-
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % filledImages.length);
@@ -46,7 +44,7 @@ const ProductImageSlider = ({ images, name }: { images: string[], name: string }
         {filledImages.map((_, i) => (
           <div
             key={i}
-            className={`h-1 w-7 md:w-15 lg:w-15 md:h-1 lg:h-1 rounded-full ${
+            className={`h-1 w-7 md:w-15 lg:w-20 md:h-1 lg:h-1 rounded-full ${
               i === currentIndex ? "bg-pink-500" : "bg-gray-400/50"
             }`}
           ></div>
@@ -373,6 +371,7 @@ const ServicesProduct = () => {
                                       {/* product */}
                                       <div
                                       >
+
                                         <Image 
                                             src={selectedProduct.image[0]}
                                             alt={selectedProduct.name}
@@ -388,7 +387,7 @@ const ServicesProduct = () => {
 
                                       </div>
                                       {/* form */}
-                                   <FakeInquiryForm/>
+                                   <FakeInquiryForm  product={selectedProduct}/>
                             </motion.div>
                             </motion.div>
                         )}

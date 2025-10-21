@@ -1,171 +1,35 @@
-'use client'
-import React, { useState } from 'react'
-import { Menu, X, Home, Settings, LogOut, Edit3 } from 'lucide-react'
+const handleSubmit = async () => {
+  try {
+    const res = await fetch("/api/send-inquiry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: formName,
+        email: formEmail,
+        message: formMessage,
+        imageBase64,
+        productName: product.name,
+        productPrice: product.price,
+      }),
+    });
 
-const AdminDashboard = () => {
-  const [isOpen, setIsOpen] = useState(true)
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to send inquiry");
 
-  return (
-    <div className="flex min-h-screen bg-gray-100">
+    // ✅ Reset form fields
+    setFormName("");
+    setFormEmail("");
+    setFormMessage("");
+    setImageBase64("");
+    setOtp(""); // if you're using OTP field
+    setIsOtpVerified(false); // if using OTP verification
 
-      {/* SIDEBAR */}
-      <div
-        className={`${
-          isOpen ? 'w-64' : 'w-20'
-        } bg-white border-r border-gray-200 transition-all duration-300 flex flex-col`}
-      >
-        {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h1
-            className={`text-xl font-bold text-pink-600 transition-all duration-300 ${
-              !isOpen && 'hidden'
-            }`}
-          >
-            Admin Panel
-          </h1>
-          <button onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-        </div>
+    // ✅ Set success feedback
+    setIsSuccess(true);
+    setTimeout(() => setIsSuccess(false), 2000);
 
-
-        {/* Sidebar Menu */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-3 text-gray-700">
-            <li className="flex items-center gap-3 hover:bg-pink-100 rounded-lg p-2 cursor-pointer">
-              <Home size={20} />
-              {isOpen && <span>Dashboard</span>}
-            </li>
-            <li className="flex items-center gap-3 hover:bg-pink-100 rounded-lg p-2 cursor-pointer">
-              <Edit3 size={20} />
-              {isOpen && <span>Edit Website</span>}
-            </li>
-            <li className="flex items-center gap-3 hover:bg-pink-100 rounded-lg p-2 cursor-pointer">
-              <Settings size={20} />
-              {isOpen && <span>Settings</span>}
-            </li>
-          </ul>
-        </nav>
-
-        {/* Logout Button */}
-        <div className="p-4 border-t border-gray-200">
-          <button className="flex items-center gap-3 text-gray-700 hover:text-pink-600 w-full">
-            <LogOut size={20} />
-            {isOpen && <span>Logout</span>}
-          </button>
-        </div>
-      </div>
-
-      {/* MAIN CONTENT AREA */}
-      <div className="flex-1 p-6">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800">Dashboard Overview</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Example Cards */}
-          <div className="bg-white shadow-md rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-800">Inquiries</h3>
-            <p className="text-3xl font-bold text-pink-600 mt-3">120</p>
-          </div>
-
-          <div className="bg-white shadow-md rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-800">Products</h3>
-            <p className="text-3xl font-bold text-pink-600 mt-3">25</p>
-          </div>
-
-          <div className="bg-white shadow-md rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-800">Visitors</h3>
-            <p className="text-3xl font-bold text-pink-600 mt-3">530</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default AdminDashboard
-
-
-
-"use client";
-import React, { useState } from "react";
-
-export default function LatestToOldPopup() {
-  const [isOld, setIsOld] = useState(false);     // for main button label
-  const [showPopup, setShowPopup] = useState(false); // for showing the small "Old" popup
-
-  return (
-    <div className="flex justify-center items-center h-screen bg-black">
-      {/* Main button */}
-      <div className="relative">
-        <button
-          onClick={() => setShowPopup(true)}
-          className="bg-gradient-to-r from-black/20 via-pink/60 border border-pink/70 text-pink-200 font-bold text-xs px-4 py-2 rounded"
-        >
-          {isOld ? "Old" : "Latest"}
-        </button>
-
-        {/* Small pop-up (same size as button) */}
-        {showPopup && (
-          <div
-            onClick={() => {
-              setIsOld(true);      // change main button text to Old
-              setShowPopup(false); // hide popup
-            }}
-            className="absolute top-full left-0 mt-2 bg-gradient-to-r from-pink-600 to-pink-400 border border-pink-300 text-white font-bold text-xs px-4 py-2 rounded cursor-pointer shadow-lg"
-          >
-            Old
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div className='flex items-center justify-between p-4 border border-gray-200'>
-  {/* Left side: logo + toggle button */}
-  <div className="flex items-center gap-2">
-    <Image
-      src="/bblogo.png"
-      alt='logo'
-      width={50}
-      height={50}
-      className={`transition-all duration-300 ${!isOpen && 'hidden'}`}
-    />
-    <button onClick={() => setIsOpen(!isOpen)}>
-      {isOpen ? (
-        <X size={22} className='text-pink/60'/>
-      ) : (
-        <Menu size={22} className='w-9' />
-      )}
-    </button>
-  </div>
-
-  {/* Right side: user icon */}
-  <FaUserCircle size={30} className='hover:text-pink/100 ml-auto'/>
-</div>
+  } catch (err) {
+    console.error("Inquiry send failed:", err);
+    setError("Failed to send inquiry.");
+  }
+};

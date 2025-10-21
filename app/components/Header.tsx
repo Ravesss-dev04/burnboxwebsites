@@ -46,6 +46,10 @@ const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsLoading(false);
   }, 500)
 };
+
+
+
+
 const handleClearSearch = () => {
   setSearchValue("");
   setIsSearchActive(false);
