@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User2Icon, MailIcon, Loader2, ImageIcon, X } from "lucide-react";
 
@@ -17,11 +17,15 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
   const [formEmail, setFormEmail] = useState("");
   const [formMessage, setFormMessage] = useState("");
 
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isVerified, setIsVerified] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpMessage, setOtpMessage] = useState("");
   const [message, setMessage] = useState("");
+
+  // New state for OTP popup
+  const [showOtpPopup, setShowOtpPopup] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Convert file to base64
   const toBase64 = (file: File) =>
@@ -124,6 +128,52 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     setBlockReason("");
   };
 
+  // OTP Input Handlers
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d?$/.test(value)) return; // Only allow numbers
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      // Move to previous input on backspace
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").slice(0, 6);
+    if (/^\d+$/.test(pastedData)) {
+      const newOtp = [...otp];
+      pastedData.split("").forEach((char, index) => {
+        if (index < 6) {
+          newOtp[index] = char;
+        }
+      });
+      setOtp(newOtp);
+      
+      // Focus the next empty input or the last one
+      const nextIndex = Math.min(pastedData.length, 5);
+      inputRefs.current[nextIndex]?.focus();
+    }
+  };
+
+  // Focus first input when popup opens
+  useEffect(() => {
+    if (showOtpPopup && inputRefs.current[0]) {
+      setTimeout(() => inputRefs.current[0]?.focus(), 100);
+    }
+  }, [showOtpPopup]);
+
   // Send OTP
   const sendOtp = async () => {
     if (!formEmail) {
@@ -140,7 +190,10 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       const data = await res.json();
       if (res.ok) {
         setIsOtpSent(true);
+        setShowOtpPopup(true);
         setMessage("OTP sent to email.");
+        // Reset OTP when sending new code
+        setOtp(["", "", "", "", "", ""]);
       } else setMessage(data.error || "Failed to send OTP.");
     } catch (err) {
       setMessage("Failed to send OTP.");
@@ -151,8 +204,9 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
 
   // Verify OTP
   const verifyOtp = async () => {
-    if (!otp) {
-      setOtpMessage("Enter OTP.");
+    const otpString = otp.join("");
+    if (otpString.length !== 6) {
+      setOtpMessage("Please enter 6-digit OTP.");
       return;
     }
     setLoading(true);
@@ -160,14 +214,16 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       const res = await fetch("/api/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formEmail, otp }),
+        body: JSON.stringify({ email: formEmail, otp: otpString }),
       });
       const data = await res.json();
       if (data.success) {
         setIsVerified(true);
-        setOtpMessage("✅ OTP verified!");
+        setOtpMessage("OTP verified!");
+        setShowOtpPopup(false);
+        setOtp(["", "", "", "", "", ""]);
       } else {
-        setOtpMessage("❌ Invalid OTP. Try again.");
+        setOtpMessage("Invalid OTP. Try again.");
       }
     } catch (err) {
       setOtpMessage("Failed to verify OTP.");
@@ -176,8 +232,28 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     }
   };
 
+  // Close OTP popup
+  const closeOtpPopup = () => {
+    setShowOtpPopup(false);
+    setOtp(["", "", "", "", "", ""]);
+    setOtpMessage("");
+  };
 
-
+  // Reset form function
+  const resetForm = () => {
+    setFormName("");
+    setFormEmail("");
+    setFormMessage("");
+    setImageBase64("");
+    setOtp(["", "", "", "", "", ""]);
+    setIsOtpSent(false);
+    setIsVerified(false);
+    setImages([]);
+    setIsBlock(false);
+    setBlockReason("");
+    setMessage("");
+    setOtpMessage("");
+  };
 
   // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
@@ -187,15 +263,12 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       setMessage("Please verify your email first.");
       return;
     }
+
     if (images.length === 0) {
       setIsBlock(true);
       setBlockReason("Please upload a sample layout before sending inquiry.");
       return;
     }
-
-
-
-
 
     setIsSubmitting(true);
     try {
@@ -218,14 +291,8 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send inquiry");
-
-      setFormName("");
-      setFormEmail("");
-      setFormMessage("");
-      setImageBase64("");
-      setOtp("")
-      setIsOtpSent(false);
       
+      resetForm();
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 2000);
     } catch (err) {
@@ -287,6 +354,108 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
         )}
       </AnimatePresence>
 
+      {/* OTP Popup Modal - Box Style */}
+      <AnimatePresence>
+        {showOtpPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+            onClick={closeOtpPopup}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", damping: 20 }}
+              className="bg-gray-900 border border-pink/40 rounded-lg p-6 max-w-sm w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-semibold text-white">Verify Email</h3>
+                <button
+                  type="button"
+                  onClick={closeOtpPopup}
+                  className="text-gray-400 hover:text-white transition"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              {/* Check your email text */}
+              <div className="text-center mb-6">
+                <p className="text-white text-lg font-medium mb-2">
+                  check your email
+                </p>
+                <p className="text-gray-300 text-sm mb-4">
+                  to continue to inquire
+                </p>
+                <p className="text-pink text-sm font-medium">
+                  {formEmail}
+                </p>
+              </div>
+              
+              {/* OTP Boxes */}
+              <div className="flex justify-between gap-2 mb-6">
+                {[0, 1, 2, 3, 4, 5].map((index) => (
+                  <input
+                    key={index}
+                    ref={(el) => { inputRefs.current[index] = el; }}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={1}
+                    value={otp[index]}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    onPaste={handlePaste}
+                    className="w-12 h-12 bg-black/50 border border-pink/40 rounded-md text-center text-white text-xl font-semibold focus:ring-2 focus:ring-pink outline-none transition-colors"
+                  />
+                ))}
+              </div>
+              
+              {/* Verify Button */}
+              <button
+                type="button"
+                onClick={verifyOtp}
+                disabled={loading || otp.join("").length !== 6}
+                className="w-full bg-pink text-white py-3 rounded-md font-medium hover:bg-pink/80 transition disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+              >
+                {loading ? "Verifying..." : "Verify OTP"}
+              </button>
+              
+              {/* Resend OTP */}
+              <div className="text-center">
+                <p className="text-gray-400 text-sm">
+                  didn't receive the code?{" "}
+                  <button
+                    type="button"
+                    onClick={sendOtp}
+                    disabled={loading}
+                    className="text-pink hover:text-pink/80 transition disabled:opacity-50"
+                  >
+                    Resend
+                  </button>
+                </p>
+              </div>
+              
+              {/* Error/Success Message */}
+              {otpMessage && (
+                <div className={`mt-4 p-2 rounded text-center text-sm ${
+                  otpMessage.includes("verified") 
+                    ? "bg-green-500/10 text-green-400 border border-green-600" 
+                    : "bg-red-500/10 text-red-400 border border-red-600"
+                }`}>
+                  {otpMessage}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Rest of your form remains the same */}
       {/* Name */}
       <div className="relative">
         <User2Icon className="text-pink absolute left-3 top-2.5" size={18} />
@@ -300,7 +469,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
           required
         />
       </div>
-
+      
       {/* Email */}
       <div className="relative">
         <MailIcon className="text-pink absolute left-3 top-2.5" size={18} />
@@ -315,38 +484,33 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
         />
       </div>
 
-      {/* OTP */}
+      {/* OTP Button */}
       {!isVerified && (
-        <div className="flex gap-2 items-center mt-2">
+        <div className="mt-2">
           <button
             type="button"
             onClick={sendOtp}
-            disabled={loading || isOtpSent}
-            className="bg-pink text-white text-sm px-3 py-1 rounded hover:bg-pink/80 transition"
+            disabled={loading || !formEmail}
+            className="bg-pink text-white text-sm px-4 py-2 rounded hover:bg-pink/80 transition disabled:opacity-50 w-full"
           >
-            {isOtpSent ? "OTP Sent" : "Send OTP"}
+            {loading ? "Sending..." : "Send OTP"}
           </button>
-          {isOtpSent && (
-            <>
-              <input
-                type="text"
-                placeholder="Enter OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="border border-gray-300 rounded px-2 py-1 text-sm w-32"
-              />
-              <button
-                type="button"
-                onClick={verifyOtp}
-                className="bg-pink text-white text-sm px-3 py-1 rounded hover:bg-pink/80 transition"
-              >
-                Verify
-              </button>
-            </>
-          )}
         </div>
       )}
-      {otpMessage && <p className="text-xs text-gray-400">{otpMessage}</p>}
+
+      {/* Verification Status */}
+      <AnimatePresence>
+        {isVerified && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-green-500/10 border border-green-600 text-green-300 text-sm p-2 rounded-lg text-center overflow-hidden"
+          >
+            ✓ Email verified successfully
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Message */}
       <textarea
@@ -358,7 +522,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
         disabled={isSubmitting}
         required
       />
-
+      
       {/* Image Upload */}
       <div
         onDragOver={(e) => {
@@ -406,13 +570,13 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
           </div>
         )}
       </div>
-
+      
       {isBlock && (
         <div className="bg-red-500/10 border border-red-600 text-red-300 text-sm p-2 rounded-lg">
           {blockReason}
         </div>
       )}
-
+      
       {/* Submit */}
       <motion.button
         whileHover={{ scale: isSubmitting || isBlock ? 1 : 1.03 }}
@@ -420,14 +584,14 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
         type="submit"
         disabled={isSubmitting || isBlock || !isVerified}
         className={`bg-pink/70 hover:bg-pink transition-all text-white py-2 rounded-md font-medium ${
-          (isSubmitting || isBlock) && "cursor-not-allowed opacity-70"
+          (isSubmitting || isBlock || !isVerified) && "cursor-not-allowed opacity-70"
         }`}
       >
         {isSubmitting ? "Submitting..." : !isVerified ? "Verify Email to Send" : "Send Inquiry"}
       </motion.button>
 
       {message && <p className="text-sm text-gray-500 mt-2">{message}</p>}
-
+      
       <p className="text-xs text-gray-400 text-center mt-3">
         We'll get back to you within hours via email.
       </p>

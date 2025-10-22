@@ -448,7 +448,7 @@ const handleMobileNavClick = (id: string) => {
       </div>
       {isMobileMenuOpen && (
   <div
-    className={`absolute top-full left-0 w-full bg-black text-white px-7 space-y-4 transition-[max-height,opacity,transform] duration-300 ease-in-out max-h-screen opacity-100`}
+    className={`absolute top-full left-0 w-full  bg-black text-white px-7 space-y-4 transition-[max-height,opacity,transform] duration-300 ease-in-out max-h-screen opacity-100`}
   >
  {['Home', 'About', 'Services', 'Contact'].map((item, index) => {
   const isAbout = item === 'About';
@@ -665,6 +665,8 @@ const handleMobileNavClick = (id: string) => {
     />
   )}
 
+
+
  <button
     onClick={() => {
       setIsMobileSearchActive(prev => !prev);
@@ -672,7 +674,8 @@ const handleMobileNavClick = (id: string) => {
     }}
     className='relative w-8 h-8 transition-all duration-500 ease-in-out transform hover:rotate-90'
   >
-    
+  
+
     {/* Search Icon */}
     <HiOutlineSearch
       className={`
