@@ -2,6 +2,8 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { useHeaderContext } from "../context/HeaderContext";
+import { useTooltip } from "../context/TooltipContext";
 
 interface TooltipServicesProps {
   services: { id: number; name: string; nestedTooltip?: string[] }[];
@@ -13,7 +15,29 @@ const TooltipServices: React.FC<TooltipServicesProps> = ({
   onServiceClick,
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const { selectProductByName } = useHeaderContext(); // Fixed function name
+  const { setShowServices } = useTooltip();
 
+  const handleServiceClick = (serviceName: string) => {
+    // Close the tooltip
+    setShowServices(false);
+    
+    // Select the corresponding product
+    selectProductByName(serviceName); // Fixed function name
+    
+    // Scroll to products section
+    const productsSection = document.getElementById("products-section");
+    if (productsSection) {
+      productsSection.scrollIntoView({ behavior: "smooth" });
+    }
+    
+    // Call any additional callback
+    onServiceClick?.(serviceName);
+  };
+
+
+  
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -29,7 +53,7 @@ const TooltipServices: React.FC<TooltipServicesProps> = ({
             className="px-4 py-2 hover:bg-pink-600 hover:text-white cursor-pointer transition-colors duration-200 relative"
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
-            onClick={() => onServiceClick?.(service.name)}  
+            onClick={() => handleServiceClick(service.name)}
           >
             {service.name}
             {/* Nested tooltip */}
@@ -59,6 +83,5 @@ const TooltipServices: React.FC<TooltipServicesProps> = ({
     </motion.div>
   );
 };
+
 export default TooltipServices;
-
-

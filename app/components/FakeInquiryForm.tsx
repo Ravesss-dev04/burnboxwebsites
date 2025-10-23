@@ -12,11 +12,9 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formMessage, setFormMessage] = useState("");
-
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isVerified, setIsVerified] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -322,7 +320,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Success */}
       <AnimatePresence>
         {isSuccess && (
@@ -353,7 +350,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* OTP Popup Modal - Box Style */}
       <AnimatePresence>
         {showOtpPopup && (
@@ -369,11 +365,10 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: "spring", damping: 20 }}
-              className="bg-gray-900 border border-pink/40 rounded-lg p-6 max-w-sm w-full"
+              className="bg-[#1A1A1A] border border-pink/40 rounded-lg p-6 max-w-sm w-full"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold text-white">Verify Email</h3>
                 <button
                   type="button"
                   onClick={closeOtpPopup}
@@ -382,10 +377,10 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
                   <X size={20} />
                 </button>
               </div>
-              
+
               {/* Check your email text */}
               <div className="text-center mb-6">
-                <p className="text-white text-lg font-medium mb-2">
+                <p className="text-white text-[20px]  font-medium mb-2">
                   check your email
                 </p>
                 <p className="text-gray-300 text-sm mb-4">
@@ -395,7 +390,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
                   {formEmail}
                 </p>
               </div>
-              
               {/* OTP Boxes */}
               <div className="flex justify-between gap-2 mb-6">
                 {[0, 1, 2, 3, 4, 5].map((index) => (
@@ -410,11 +404,10 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={handlePaste}
-                    className="w-12 h-12 bg-black/50 border border-pink/40 rounded-md text-center text-white text-xl font-semibold focus:ring-2 focus:ring-pink outline-none transition-colors"
+                    className="w-full lg:w-12  h-10 lg:h-12  bg-black/30 border border-pink/40 rounded-md text-center text-white text-xl font-semibold focus:ring-2 focus:ring-pink outline-none transition-colors"
                   />
                 ))}
               </div>
-              
               {/* Verify Button */}
               <button
                 type="button"
@@ -424,7 +417,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
               >
                 {loading ? "Verifying..." : "Verify OTP"}
               </button>
-              
               {/* Resend OTP */}
               <div className="text-center">
                 <p className="text-gray-400 text-sm">

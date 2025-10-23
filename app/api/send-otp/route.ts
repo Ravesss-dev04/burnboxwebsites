@@ -1,7 +1,9 @@
-// app/api/send-otp/route.ts
+// Alternative version with attached image
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { otpStore } from "@/lib/otp-store";
+import fs from 'fs';
+import path from 'path';
 
 export async function POST(req: Request) {
   try {
@@ -30,7 +32,7 @@ export async function POST(req: Request) {
 
     // Email content
     const mailOptions = {
-      from: `"Your Company Name" <${process.env.EMAIL_USER}>`,
+      from: `"BurnBox Printing" <${process.env.BUSINESS_EMAIL}>`,
       to: email,
       subject: "Your OTP Code",
       html: `
@@ -45,68 +47,85 @@ export async function POST(req: Request) {
                     max-width: 600px; 
                     margin: 0 auto; 
                     padding: 20px;
+                    background-color: #f9f9f9;
+                }
+                .container {
+                    background: white;
+                    border-radius: 10px;
+                    padding: 30px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 }
                 .header { 
-                    background: #f8f9fa; 
-                    padding: 20px; 
-                    border-radius: 8px; 
-                    margin-bottom: 20px;
                     text-align: center;
+                    margin-bottom: 30px;
+                }
+                .logo {
+                    width: 80px;
+                    height: 80px;
+                    margin-bottom: 15px;
                 }
                 .otp-code { 
-                    font-size: 32px; 
+                    font-size: 42px; 
                     font-weight: bold; 
                     text-align: center; 
-                    color: #007bff; 
-                    margin: 20px 0;
-                    padding: 15px;
-                    background: #f8f9fa;
-                    border-radius: 8px;
-                    letter-spacing: 5px;
+                    color: #F43C6D; 
+                    margin: 30px 0;
+                    padding: 20px;
+                    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+                    border-radius: 10px;
+                    letter-spacing: 8px;
+                    border: 2px dashed #F43C6D;
                 }
                 .note { 
                     background: #fff3cd; 
                     border: 1px solid #ffeaa7; 
-                    border-radius: 5px; 
-                    padding: 15px; 
-                    margin: 15px 0;
+                    border-radius: 8px; 
+                    padding: 20px; 
+                    margin: 20px 0;
                     color: #856404;
                 }
             </style>
         </head>
         <body>
-            <div class="header">
-                <h1 style="margin: 0; color: #333;">Verification Code</h1>
-                <p style="margin: 5px 0 0 0; color: #666;">Use this code to verify your email</p>
+            <div class="container">
+                <div class="header">
+                    <!-- Using CID reference for attached image -->
+                    <img src="cid:companyLogo" alt="Company Logo" class="logo" />
+                    <h1 style="margin: 0; color: #333; font-size: 28px;">Verification Code</h1>
+                    <p style="margin: 10px 0 0 0; color: #666; font-size: 16px;">Use this code to verify your email</p>
+                </div>
+                
+                <p>Hello,</p>
+                <p>Please use the following verification code to complete your inquiry:</p>
+                
+                <div class="otp-code">${otp}</div>
+                
+                <div class="note">
+                    <p><strong>Note:</strong></p>
+                    <ul>
+                        <li>This code will expire in 10 minutes</li>
+                        <li>Do not share this code with anyone</li>
+                    </ul>
+                </div>
+                
+                <p>Best regards,<br>Burnbox Team</p>
             </div>
-            
-            <p>Hello,</p>
-            <p>Please use the following verification code to complete your inquiry:</p>
-            
-            <div class="otp-code">${otp}</div>
-            
-            <div class="note">
-                <p><strong>Note:</strong></p>
-                <ul>
-                    <li>This code will expire in 5 minutes</li>
-                </ul>
-            </div>
-            
-            <p>Best regards,<br>${email}</p>
-            
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-            <p style="text-align: center; color: #666; font-size: 12px;">
-                This is an automated message. Please do not reply to this email.
-            </p>
         </body>
         </html>
       `,
+      attachments: [
+        {
+          filename: 'bblogo.png',
+          path: path.join(process.cwd(), 'public', 'bblogo.png'), // Path to your logo
+          cid: 'companyLogo' // same cid value as in the html img src
+        }
+      ]
     };
 
     // Send the email
     await transporter.sendMail(mailOptions);
 
-    console.log(`OTP sent to ${email}: ${otp}`); // Keep for debugging
+    console.log(`OTP sent to ${email}: ${otp}`);
 
     return NextResponse.json({ 
       success: true, 

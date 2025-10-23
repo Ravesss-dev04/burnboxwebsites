@@ -89,7 +89,7 @@ const GalleryPhotos: React.FC = () => {
           const [pageId, postId] = post.id.split('_');
           const fbPostUrl = `https://www.facebook.com/${pageId}/posts/${postId}`;
           const images: string[] = [];
-
+          
           if (post.full_picture) images.push(post.full_picture);
           if (post.attachments?.subattachments?.length) {
             post.attachments.subattachments.slice(0, 2).forEach(sub => {

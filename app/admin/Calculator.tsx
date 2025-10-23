@@ -112,29 +112,29 @@ const ProductCalculator: React.FC = () => {
   const pricePerUnit = selectedProduct ? products[selectedProduct]?.price.toString() : ""
 
   return (
-    <div className="min-h-screen flex justify-center items-start bg-[#1a1a1a] text-white font-[Poppins] py-20 px-4">
-      <div className="w-full max-w-lg bg-[#2b2b2b] rounded-lg shadow-lg border-t-8 border-pink-600 p-10">
+    <div className="min-h-auto flex justify-center text-white font-[Poppins] py-20 px-4">
+      <div className="w-60 max-w-lg bg-[#2b2b2b] text-black rounded-lg shadow-lg border-t-8 border-pink-600 p-10">
         <div className="flex flex-col items-center mb-6">
           <img 
             src="https://github.com/ravenprevendido/updatedbbsitesversion4/raw/master/public/bblogo.png" 
             alt="logo" 
             className="w-20 mb-2"
           />
-          <h2 className="text-center text-lg font-semibold text-gray-300 tracking-wide">
+          <h2 className="text-center text-lg font-semibold text-black tracking-wide">
             PRODUCT AREA PRICE CALCULATOR (AUTO)
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="product" className="block text-sm text-white/80 font-medium mb-1">
+            <label htmlFor="product" className="block  text-sm text-black font-medium mb-1">
               Product / Service:
             </label>
             <select 
               id="product"
               value={selectedProduct}
               onChange={(e) => setSelectedProduct(e.target.value)}
-              className="w-full bg-[#3a3a3a] border border-transparent focus:border-pink-600 rounded-md px-3 py-2 text-sm focus:outline-none"
+              className="w-full border border-pink/70 bg-[#3a3a3a] focus:border-pink-600 rounded-md px-3 py-2 text-sm focus:outline-none"
             >
               <option value="">Select Product</option>
               {Object.keys(products).map((product) => (
