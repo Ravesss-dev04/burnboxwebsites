@@ -13,7 +13,7 @@ export async function GET() {
   } catch (error) {
     console.error("Fetch gallery error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch gallery" },
+      { error:`Failed to fetch Error, ${error}`},
       { status: 500 }
     );
   } finally {
