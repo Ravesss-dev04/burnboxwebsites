@@ -4,7 +4,6 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN!;
 const GITHUB_USERNAME = process.env.GITHUB_USERNAME!;
 const GITHUB_REPO = process.env.GITHUB_REPO!;
 
-
 export async function POST(req: NextRequest) {
   try {
     const { images } = await req.json(); // [{ name, content (base64) }]
@@ -33,8 +32,11 @@ export async function POST(req: NextRequest) {
         throw new Error(`Failed to upload ${img.name}`);
       }
 
+      // FIX: Correct the raw.githubusercontent.com URL (not row.githubusercontent.com)
       const imageUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${filePath}`;
       uploadedUrls.push(imageUrl);
+      
+      console.log('Uploaded image URL:', imageUrl); // Debug log
     }
     return NextResponse.json({ success: true, urls: uploadedUrls });
   } catch (error: any) {

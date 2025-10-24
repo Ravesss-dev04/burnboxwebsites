@@ -4,9 +4,11 @@ import { Header } from '../components'
 import WhyChooseBurnboxPage from '../components/WhyChooseBurnBox'
 import Home from '../page'
 
+interface CustomizeDarkmodeOpen {
+  darkmode?: boolean;
+}
 
-
-const Customize = () => {
+const Customize = ({darkmode =  false}: CustomizeDarkmodeOpen) => {
   return (
     <div className=' bg-white shadow-md rounded-xl p-6 w-full h-full'>
 

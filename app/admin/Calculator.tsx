@@ -11,7 +11,11 @@ interface Products {
   [key: string]: Product;
 }
 
-const ProductCalculator: React.FC = () => {
+interface CalculatorManagerProps {
+  darkMode?: boolean;
+}
+
+const ProductCalculator: React.FC = ({darkMode = false}: CalculatorManagerProps) => {
   const [selectedProduct, setSelectedProduct] = useState<string>('')
   const [inputUnit, setInputUnit] = useState<string>('sqm')
   const [length, setLength] = useState<string>('')

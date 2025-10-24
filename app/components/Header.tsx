@@ -623,7 +623,6 @@ const Header: React.FC = () => {
               </div>
             );
           })}
-
           {/* Mobile Search and Cart */}
           <div className='relative flex items-center gap-4 mt-6 py-4 animate-fadeInUp transition-all duration-300 overflow-visible z-[9999]' style={{ animationDelay: '0.7s'}}>
             {/* Cart Icon */}

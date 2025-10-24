@@ -108,6 +108,9 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     }
   };
 
+
+
+  
   const handleFiles = (files: FileList) => {
     const newFiles = Array.from(files);
     setImages(newFiles);

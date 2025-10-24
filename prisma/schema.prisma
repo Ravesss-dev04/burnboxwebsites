@@ -9,10 +9,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model user {
   id         Int      @id @default(autoincrement())
   email      String?  @unique(map: "email") @db.VarChar(255)
   password   String?  @db.VarChar(255)
   created_at DateTime @default(now()) @map("created_at")
+}
+
+model gallery {
+  id Int @id @default(autoincrement())
+  imageUrl String @db.Text
+  title String? @db.VarChar(255)
+  altText String? @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
