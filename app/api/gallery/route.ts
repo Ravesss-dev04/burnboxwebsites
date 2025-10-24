@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 // GET all gallery images
 export async function GET() {
   try {
-    const gallery = await (prisma as any).gallery.findMany({
+    const gallery = await prisma.gallery.findMany({
       orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json(gallery);
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    const newImage = await (prisma as any).gallery.create({
+    const newImage = await prisma.gallery.create({
       data: {
         imageUrl,
         title: title || "",
