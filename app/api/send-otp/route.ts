@@ -19,11 +19,13 @@ export async function POST(req: Request) {
     // Store OTP with 10-minute expiration
     otpStore.set(email, otp, 10 * 60 * 1000);
 
+
+
     // Create email transporter
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: Number(process.env.EMAIL_PORT),
-      secure: true,
+      secure: false,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -95,8 +97,8 @@ export async function POST(req: Request) {
                     <p style="margin: 10px 0 0 0; color: #666; font-size: 16px;">Use this code to verify your email</p>
                 </div>
                 
-                <p>Hello,</p>
-                <p>Please use the following verification code to complete your inquiry:</p>
+                <p>Hello, Thank you for your Interest to us!</p>
+                <p>Please use the verification code below to complete your inquiry:</p>
                 
                 <div class="otp-code">${otp}</div>
                 
