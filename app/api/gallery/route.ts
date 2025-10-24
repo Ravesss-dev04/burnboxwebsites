@@ -42,12 +42,14 @@ export async function POST(req: NextRequest) {
     });
     
     return NextResponse.json(newImage);
-  } catch (error) {
-    console.error("Create gallery error:", error);
-    return NextResponse.json(
-      { error: "Failed to add image to gallery" },
-      { status: 500 }
-    );
+  }  catch (error: unknown) {
+  if (error instanceof Error) {
+    console.error("Gallery fetch error:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  } else {
+    console.error("Unknown gallery error:", error);
+    return NextResponse.json({ error: "Unknown error occurred" }, { status: 500 });
+  }
   } finally {
     await prisma.$disconnect();
   }
