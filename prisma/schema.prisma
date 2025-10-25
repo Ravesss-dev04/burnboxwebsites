@@ -17,10 +17,10 @@ model user {
 }
 
 model gallery {
-  id Int @id @default(autoincrement())
-  imageUrl String @db.Text
-  title String? @db.VarChar(255)
-  altText String? @db.VarChar(255)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  imageUrl   String   @db.Text
+  title      String?  @db.VarChar(255)
+  altText    String?  @db.VarChar(255)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
