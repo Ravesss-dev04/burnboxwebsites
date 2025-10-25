@@ -6,14 +6,14 @@ const prisma = new PrismaClient();
 // GET all gallery images
 export async function GET() {
   try {
-    const gallery = await prisma.gallery.findMany({
+    const gallery = await (prisma as any).gallery.findMany({
       orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json(gallery);
   } catch (error) {
     console.error("Fetch gallery error:", error);
     return NextResponse.json(
-      { error:`Failed to fetch Error, ${error}`},
+      { error: "Failed to fetch gallery" },
       { status: 500 }
     );
   } finally {
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    const newImage = await prisma.gallery.create({
+    const newImage = await (prisma as any).gallery.create({
       data: {
         imageUrl,
         title: title || "",
@@ -42,14 +42,12 @@ export async function POST(req: NextRequest) {
     });
     
     return NextResponse.json(newImage);
-  }  catch (error: unknown) {
-  if (error instanceof Error) {
-    console.error("Gallery fetch error:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  } else {
-    console.error("Unknown gallery error:", error);
-    return NextResponse.json({ error: "Unknown error occurred" }, { status: 500 });
-  }
+  } catch (error) {
+    console.error("Create gallery error:", error);
+    return NextResponse.json(
+      { error: "Failed to add image to gallery" },
+      { status: 500 }
+    );
   } finally {
     await prisma.$disconnect();
   }
