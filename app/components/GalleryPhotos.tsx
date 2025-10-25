@@ -23,7 +23,7 @@ const GalleryPhotos: React.FC = () => {
 
   const loadImages = async () => {
     try {
-      const res = await fetch('/api/gallery');
+      const res = await fetch('/app/gallery');
       if (!res.ok) {
         throw new Error('Failed to fetch gallery images');
       }
