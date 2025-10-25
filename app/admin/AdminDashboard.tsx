@@ -10,6 +10,7 @@ import DashboardContent from './DashboardContent';
 import Customize from './Customize';
 import CalculatorPage from './Calculator';
 import GalleryManager from './GalleryManager';
+import CalculatorBox from './components/CalculatorBox';
 
 interface AdminDashboardProps {
   userMail?: string;
@@ -133,7 +134,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
             <MoonIcon size={20} />
           )}
         </button>
-        
         {/* User Avatar */}
         <div className="flex items-center space-x-2">
           {userMail ? (
@@ -217,7 +217,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
         <nav className='flex-1 p-4'>
           {[
             { id: "dashboard", icon: <HomeIcon size={20} />, label: "Dashboard" },
-            { id: "product", icon: <MdOutlineProductionQuantityLimits size={20} />, label: "Product" },
+            { id: "product", icon: <MdOutlineProductionQuantityLimits size={20} />, label: "Services" },
             { id: "inquiry", icon: <RiMailSendFill size={20} />, label: "Inquiry" },
             { id: "customize", icon: <BiSolidCustomize size={25} />, label: "Customize" },
             { id: "calculator", icon: <CalculatorIcon size={25}/>, label: "Calculator" },
@@ -241,7 +241,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
             </div>
           ))}
         </nav>
-
+        <CalculatorBox/>
         {/* Logout */}
         <div className={`p-4 border-t ${
           darkMode ? 'border-gray-600' : 'border-gray-400'
@@ -266,6 +266,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
       }`}>
         {sectionMap[activeSection]}
       </div>
+    
     </div>
   )
 }
