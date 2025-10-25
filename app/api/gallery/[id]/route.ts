@@ -11,11 +11,9 @@ export async function DELETE(
   try {
     // Await the params first
     const { id } = await params;
-    
     await (prisma as any).gallery.delete({
       where: { id: parseInt(id) } // Use the awaited id
     });
-    
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete error:", error);
@@ -27,7 +25,6 @@ export async function DELETE(
     await prisma.$disconnect();
   }
 }
-
 // Also update the GET function if you have one
 export async function GET(
   req: NextRequest,
@@ -43,11 +40,10 @@ export async function GET(
         { status: 400 }
       );
     }
-
+    
     const image = await (prisma as any).gallery.findUnique({
       where: { id: imageId }
     });
-
     if (!image) {
       return NextResponse.json(
         { error: "Image not found" },
@@ -66,3 +62,6 @@ export async function GET(
     await prisma.$disconnect();
   }
 }
+
+
+

@@ -3,45 +3,55 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// GET all gallery images
+// ✅ GET all gallery items
 export async function GET() {
   try {
-    const gallery = await (prisma as any).gallery.findMany({
-      orderBy: { createdAt: 'desc' }
+    const gallery = await prisma.gallery.findMany({
+      orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(gallery);
   } catch (error) {
     console.error("Fetch gallery error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch gallery" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch gallery" }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
 }
 
-// POST new gallery image
+// ✅ POST: save uploaded image URLs from GitHub upload route
 export async function POST(req: NextRequest) {
   try {
-    const { imageUrl, title, altText } = await req.json();
-    
-    if (!imageUrl) {
-      return NextResponse.json(
-        { error: "Image URL is required" },
-        { status: 400 }
-      );
+    const { urls } = await req.json(); // Expecting { urls: ["https://raw.githubusercontent.com/..."] }
+
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+      return NextResponse.json({ error: "No image URLs provided" }, { status: 400 });
     }
-    
-    const newImage = await (prisma as any).gallery.create({
-      data: {
-        imageUrl,
-        title: title || "",
-        altText: altText || ""
-      }
+
+    const createdImages = [];
+
+    for (const url of urls) {
+      const fileName = url.split("/").pop() || "untitled";
+      const title = fileName
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[-_]+/g, " ")
+        .replace(/\b\w/g, (char: string) => char.toUpperCase());
+
+      const newImage = await prisma.gallery.create({
+        data: {
+          imageUrl: url,
+          title,
+          altText: title,
+        },
+      });
+
+      createdImages.push(newImage);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Images added to gallery successfully",
+      data: createdImages,
     });
-    
-    return NextResponse.json(newImage);
   } catch (error) {
     console.error("Create gallery error:", error);
     return NextResponse.json(
