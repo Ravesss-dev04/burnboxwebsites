@@ -144,6 +144,8 @@ export async function POST(req: Request) {
     { headers: corsHeaders}
   );
 
+
+  
   } catch (error) {
     console.error("OTP send error:", error);
     return NextResponse.json({ 
