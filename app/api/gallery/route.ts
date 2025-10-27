@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(newImage);
+    return NextResponse.json(newImage, {headers: corsHeaders });
   } catch (error) {
     console.error("Create gallery error:", error);
     return NextResponse.json(

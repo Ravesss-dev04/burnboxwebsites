@@ -54,7 +54,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'If an account with that email exists, a reset link has been sent'
-    });
+    },
+    {headers: corsHeaders}
+  );
 
   } catch (error) {
     console.error('Forgot password error:', error);
