@@ -183,7 +183,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     }
     setLoading(true);
     try {
-      const res = await fetch("https://bburnboxsites.vercel.app/send-otp", {
+      const res = await fetch("https://bburnboxsites.vercel.app/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formEmail }),
@@ -212,7 +212,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     }
     setLoading(true);
     try {
-      const res = await fetch("https://bburnboxsites.vercel.app/verify-otp", {
+      const res = await fetch("https://bburnboxsites.vercel.app/api/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formEmail, otp: otpString }),
@@ -278,7 +278,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       if (isBlock) return;
 
       // Send inquiry
-      const res = await fetch("https://bburnboxsites.vercel.app/send-inquiry", {
+      const res = await fetch("https://bburnboxsites.vercel.app/api/send-inquiry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
