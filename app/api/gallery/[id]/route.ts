@@ -25,6 +25,10 @@ export async function DELETE(
     await prisma.$disconnect();
   }
 }
+
+
+
+
 // Also update the GET function if you have one
 export async function GET(
   req: NextRequest,
