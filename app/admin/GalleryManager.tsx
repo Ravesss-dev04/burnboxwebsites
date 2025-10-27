@@ -25,7 +25,7 @@ export default function GalleryManager({darkMode = false}: GalleryManagerProps) 
   // Fetch gallery images
   const fetchImages = async () => {
     try {
-      const response = await fetch('/api/gallery');
+      const response = await fetch('https://bburnboxsites.vercel.app/api/gallery');
       const data = await response.json();
       setImages(data);
     } catch (error) {
@@ -71,7 +71,7 @@ export default function GalleryManager({darkMode = false}: GalleryManagerProps) 
       const imagesData = await Promise.all(imagePromises);
 
       // Upload to GitHub
-      const uploadResponse = await fetch('/api/uploadimages', {
+      const uploadResponse = await fetch('https://bburnboxsites.vercel.app/api/uploadimages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ export default function GalleryManager({darkMode = false}: GalleryManagerProps) 
     if (!confirm('Are you sure you want to delete this image?')) return;
 
     try {
-      const response = await fetch(`/api/gallery/${id}`, {
+      const response = await fetch(`https://bburnboxsites.vercel.app/api/gallery/${id}`, {
         method: 'DELETE',
       });
 

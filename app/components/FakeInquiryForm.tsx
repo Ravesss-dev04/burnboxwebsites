@@ -85,7 +85,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       const base64 = await toBase64(file);
       setImageBase64(base64);
 
-      const res = await fetch("/api/moderate", {
+      const res = await fetch("https://bburnboxsites.vercel.app/api/moderate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageBase64: base64 }),
@@ -148,7 +148,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     }
   };
 
-  
+
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text").slice(0, 6);
@@ -182,7 +182,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     }
     setLoading(true);
     try {
-      const res = await fetch("/api/send-otp", {
+      const res = await fetch("https://bburnboxsites.vercel.app/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formEmail }),
@@ -211,7 +211,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     }
     setLoading(true);
     try {
-      const res = await fetch("/api/verify-otp", {
+      const res = await fetch("https://bburnboxsites.vercel.app/api/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formEmail, otp: otpString }),
@@ -277,7 +277,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       if (isBlock) return;
 
       // Send inquiry
-      const res = await fetch("/api/send-inquiry", {
+      const res = await fetch("https://bburnboxsites.vercel.app/api/send-inquiry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
