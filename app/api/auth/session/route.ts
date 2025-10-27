@@ -2,6 +2,14 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { cookies } from 'next/headers'
+import { corsHeaders } from '@/lib/corsHeaders';
+
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
+
 
 export async function GET() {
   try {
@@ -24,7 +32,6 @@ export async function GET() {
         }
       }
     })
-
     if (!session || session.expires_at < new Date()) {
       // Clear invalid session
       (await
@@ -40,8 +47,15 @@ export async function GET() {
       user: session.user
     })
 
+
+
   } catch (error) {
-    console.error('Session error:', error)
-    return NextResponse.json({ user: null })
+    console.error('Session error:', error);
+    return NextResponse.json(
+      { user: null, error: 'Internal Server Error' },
+      { status: 500, headers: corsHeaders }
+    );
   }
 }
+
+

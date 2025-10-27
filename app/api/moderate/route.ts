@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import FormData from "form-data";
 import axios from "axios";
+import { corsHeaders } from "@/lib/corsHeaders";
 
 const SIGHTENGINE_URL = "https://api.sightengine.com/1.0/check.json";
+
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 
 export async function POST(req: Request) {
   try {
@@ -71,7 +78,7 @@ export async function POST(req: Request) {
     console.error("Moderation failed:", err?.response?.data || err);
     return NextResponse.json(
       { error: "Failed to moderate image" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

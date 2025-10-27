@@ -1,5 +1,11 @@
+import { corsHeaders } from "@/lib/corsHeaders";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 
 export async function POST(req: Request) {
     try {
@@ -170,6 +176,6 @@ export async function POST(req: Request) {
 
     } catch (err) {
         console.log("Email send failed:", err);
-        return NextResponse.json({error: "Failed to send inquiry."}, {status: 500})
+        return NextResponse.json({error: "Failed to send inquiry."}, {status: 500, headers: corsHeaders})
     }
 }

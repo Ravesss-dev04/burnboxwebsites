@@ -2,6 +2,14 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { cookies } from 'next/headers'
+import { corsHeaders } from '@/lib/corsHeaders';
+
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
+
 
 export async function POST() {
   try {
@@ -28,7 +36,7 @@ export async function POST() {
     console.error('Logout error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     )
   }
 }

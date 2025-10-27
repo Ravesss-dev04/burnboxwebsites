@@ -2,24 +2,20 @@
 import { useState } from "react";
 import { Users, Mail, BarChart3 } from "lucide-react";
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from "recharts";
-
 export default function AdminDashboard() {
   const [inquiries] = useState([
     { name: "John Doe", product: "Decal Sticker cut-out", date: "Oct 25, 2025", status: "New" },
     { name: "Jane Smith", product: "Tarp Printing", date: "Oct 24, 2025", status: "Contacted" },
   ]);
-
   const [visitors] = useState([
     { ip: "203.177.xxx.xxx", location: "Philippines", status: "Active" },
     { ip: "110.92.xxx.xxx", location: "Singapore", status: "Active" },
   ]);
-
   const [productData] = useState([
     { name: "Decal Sticker", inquiries: 25 },
     { name: "Tarp Printing", inquiries: 18 },
     { name: "Vinyl Sticker", inquiries: 12 },
   ]);
-
   return (
     <div className="flex min-h-screen bg-zinc-950 text-white">
       {/* Sidebar */}
@@ -32,7 +28,6 @@ export default function AdminDashboard() {
           <a href="#" className="hover:bg-pink-600 p-2 rounded-md">Settings</a>
         </nav>
       </aside>
-
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
         {/* Header */}
@@ -40,7 +35,6 @@ export default function AdminDashboard() {
           <h2 className="text-3xl font-bold">Admin Dashboard</h2>
           <span className="text-sm text-gray-400">Welcome, Admin</span>
         </header>
-
         {/* Overview Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* Total Inquiries */}
@@ -60,7 +54,6 @@ export default function AdminDashboard() {
             </div>
             <Users size={32} className="text-pink-400" />
           </div>
-
           {/* Top Product */}
           <div className="bg-zinc-900 border border-pink-600 rounded-2xl shadow-lg p-5 flex items-center justify-between hover:border-pink-400 transition">
             <div>
@@ -70,7 +63,6 @@ export default function AdminDashboard() {
             <BarChart3 size={32} className="text-pink-400" />
           </div>
         </div>
-
         {/* Middle Section: Inquiries + Chart */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Inquiries */}
