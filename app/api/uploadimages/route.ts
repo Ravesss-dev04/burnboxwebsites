@@ -5,8 +5,9 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN!;
 const GITHUB_USERNAME = process.env.GITHUB_USERNAME!;
 const GITHUB_REPO = process.env.GITHUB_REPO!;
 
+
 export async function OPTIONS() {
-  return new Response(null, { status: 200, headers: corsHeaders});
+  return new Response(null, { status: 200, headers: corsHeaders });
 }
 
 
