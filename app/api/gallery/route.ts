@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// ✅ GET all gallery images
+//  GET all gallery images
 export async function GET() {
   try {
     const gallery = await prisma.gallery.findMany({
@@ -21,7 +21,7 @@ export async function GET() {
   }
 }
 
-// ✅ POST new gallery image
+//  POST new gallery image
 export async function POST(req: NextRequest) {
   try {
     const { imageUrl, title, altText } = await req.json();
