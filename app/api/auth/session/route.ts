@@ -2,6 +2,14 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { cookies } from 'next/headers'
+import { corsHeaders } from '@/lib/corsHeaders';
+
+
+export async function OPTIONS() {
+  return new Response(null, { status: 200, headers: corsHeaders });
+}
+
+
 
 export async function GET() {
   try {
@@ -42,6 +50,7 @@ export async function GET() {
 
   } catch (error) {
     console.error('Session error:', error)
-    return NextResponse.json({ user: null })
+    return NextResponse.json({ user: null }, {status: 500, headers: corsHeaders})
+    
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { verifyPassword } from '@/lib/auth-utils';
 import { createHmac } from 'crypto';
+import { corsHeaders } from '@/lib/corsHeaders';
 
 function generateToken(userId: string | number) {
   const uid = String(userId);
@@ -14,6 +15,13 @@ function generateToken(userId: string | number) {
 }
 
 const prisma = new PrismaClient();
+
+
+
+export async function OPTIONS() {
+  return new Response(null, { status: 200, headers: corsHeaders });
+}
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
-        { status: 401 }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -43,7 +51,7 @@ export async function POST(request: NextRequest) {
       console.error('User has no password hash:', user.id);
       return NextResponse.json(
         { error: 'Invalid credentials' },
-        { status: 401 }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -52,7 +60,7 @@ export async function POST(request: NextRequest) {
     if (!isValidPassword) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
-        { status: 401 }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -78,7 +86,7 @@ export async function POST(request: NextRequest) {
     console.error('Login error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

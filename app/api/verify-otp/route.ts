@@ -1,6 +1,13 @@
 // app/api/verify-otp/route.ts
 import { NextResponse } from "next/server";
 import { otpStore } from "@/lib/otp-store";
+import { corsHeaders } from "@/lib/corsHeaders";
+
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 
 export async function POST(req: Request) {
   try {
@@ -10,7 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ 
         success: false, 
         message: "Email and OTP are required" 
-      }, { status: 400 });
+      }, { status: 400,  headers: corsHeaders });
     }
 
     if (otpStore.isValid(email, otp)) {
@@ -23,7 +30,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ 
         success: false, 
         message: "Invalid or expired OTP" 
-      }, { status: 400 });
+      }, { status: 400,  headers: corsHeaders });
     }
 
   } catch (error) {
@@ -31,6 +38,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ 
       success: false, 
       message: "Verification failed" 
-    }, { status: 500 });
+    }, { status: 500, headers: corsHeaders });
   }
 }

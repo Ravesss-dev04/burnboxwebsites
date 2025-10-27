@@ -43,7 +43,7 @@ const LoginAdmin = () => {
     }
 
     try {
-      const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register'
+      const endpoint = isLoginMode ? 'https://bburnboxsites.vercel.app/api/auth/login' : 'https://bburnboxsites.vercel.app/api/auth/register'
       
       // For registration, validate passwords match
       if (!isLoginMode && password !== confirmPassword) {
@@ -94,7 +94,7 @@ const LoginAdmin = () => {
     }
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
+      const response = await fetch('https://bburnboxsites.vercel.app/api/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

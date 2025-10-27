@@ -1,11 +1,18 @@
+import { corsHeaders } from "@/lib/corsHeaders";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+
+
+
+export async function OPTIONS() {
+  return new Response(null, { status: 200, headers: corsHeaders });
+}
 
 export async function POST(req: Request) {
     try {
         const {name, email, message, imageBase64, productName, productPrice} = await req.json();
         if(!name || !email || !message) {
-            return NextResponse.json({error: "Missing required fields."}, {status: 400})
+            return NextResponse.json({error: "Missing required fields."}, {status: 400,  headers: corsHeaders})
         }
 
         // create transporter
@@ -170,6 +177,7 @@ export async function POST(req: Request) {
 
     } catch (err) {
         console.log("Email send failed:", err);
-        return NextResponse.json({error: "Failed to send inquiry."}, {status: 500})
+        return NextResponse.json({error: "Failed to send inquiry."}, {status: 500, 
+ headers: corsHeaders })
     }
 }

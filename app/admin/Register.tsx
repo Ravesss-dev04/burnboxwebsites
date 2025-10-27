@@ -31,7 +31,7 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch('https://bburnboxsites.vercel.app/register', {
+      const response = await fetch('https://bburnboxsites.vercel.app/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import FormData from "form-data";
 import axios from "axios";
+import { corsHeaders } from "@/lib/corsHeaders";
 
 const SIGHTENGINE_URL = "https://api.sightengine.com/1.0/check.json";
+
+
+export async function OPTIONS() {
+  return new Response(null, { status: 200, headers: corsHeaders });
+}
+
 
 export async function POST(req: Request) {
   try {
@@ -14,14 +21,14 @@ export async function POST(req: Request) {
     if (!user || !secret) {
       return NextResponse.json(
         { error: "Sightengine credentials missing" },
-        { status: 500 }
+        { status: 500,  headers: corsHeaders  }
       );
     }
 
     if (!imageBase64) {
       return NextResponse.json(
         { error: "Missing imageBase64 data" },
-        { status: 400 }
+        { status: 400,  headers: corsHeaders  }
       );
     }
 
@@ -44,7 +51,7 @@ export async function POST(req: Request) {
 
     if (data.error) {
       console.error("Sightengine Error:", data.error);
-      return NextResponse.json({ error: data.error.message }, { status: 400 });
+      return NextResponse.json({ error: data.error.message }, { status: 400,  headers: corsHeaders  });
     }
 
     const nudityScore = data?.nudity?.raw || 0;
@@ -61,7 +68,7 @@ export async function POST(req: Request) {
     ) {
       let reason = "⚠️ Unsafe or inappropriate image detected.";
       if (blurScore > 0.5) reason = "🚫 Image is too blurry. Please upload a clearer photo.";
-      return NextResponse.json({ blocked: true, reason }, { status: 403 });
+      return NextResponse.json({ blocked: true, reason }, { status: 403,  headers: corsHeaders  });
     }
 
 
@@ -71,7 +78,7 @@ export async function POST(req: Request) {
     console.error("Moderation failed:", err?.response?.data || err);
     return NextResponse.json(
       { error: "Failed to moderate image" },
-      { status: 500 }
+      { status: 500,  headers: corsHeaders  }
     );
   }
 }

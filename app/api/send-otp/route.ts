@@ -4,6 +4,15 @@ import nodemailer from "nodemailer";
 import { otpStore } from "@/lib/otp-store";
 import fs from 'fs';
 import path from 'path';
+import { corsHeaders } from "@/lib/corsHeaders";
+
+
+
+
+export async function OPTIONS() {
+  return new Response(null, { status: 200, headers: corsHeaders });
+}
+
 
 export async function POST(req: Request) {
   try {
@@ -138,6 +147,6 @@ export async function POST(req: Request) {
     console.error("OTP send error:", error);
     return NextResponse.json({ 
       error: "Failed to send OTP. Please try again." 
-    }, { status: 500 });
+    }, { status: 500,  headers: corsHeaders });
   }
 }
