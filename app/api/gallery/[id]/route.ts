@@ -21,7 +21,7 @@ export async function DELETE(
     await (prisma as any).gallery.delete({
       where: { id: parseInt(id) } // Use the awaited id
     });
-    return NextResponse.json({ success: true }, {headers: corsHeaders});
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete error:", error);
     return NextResponse.json(
@@ -62,7 +62,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(image, {headers: corsHeaders});
+    return NextResponse.json(image);
   } catch (error) {
     console.error("Get image error:", error);
     return NextResponse.json(

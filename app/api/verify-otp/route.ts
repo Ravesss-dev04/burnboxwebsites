@@ -26,9 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ 
         success: true, 
         message: "OTP verified successfully" 
-      },
-      {headers: corsHeaders}
-    );
+      });
     } else {
       return NextResponse.json({ 
         success: false, 

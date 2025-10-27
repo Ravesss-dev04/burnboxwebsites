@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
-        { status: 400, headers: corsHeaders}
+        { status: 400,  headers: corsHeaders }
       );
     }
 
