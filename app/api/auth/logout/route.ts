@@ -31,7 +31,9 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       message: 'Logged out successfully'
-    })
+    },
+    {headers: corsHeaders}
+  )
 
   } catch (error) {
     console.error('Logout error:', error)

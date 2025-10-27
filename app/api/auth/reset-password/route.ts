@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     if (!token || !newPassword) {
       return NextResponse.json(
         { error: 'Token and new password are required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       )
     }
 
@@ -37,7 +37,9 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: 'Password reset successfully'
-    })
+    },
+    {headers: corsHeaders}
+  )
 
   } catch (error) {
     console.error('Reset password error:', error)

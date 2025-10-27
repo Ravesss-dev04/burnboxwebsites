@@ -17,7 +17,8 @@ export async function GET() {
     const gallery = await prisma.gallery.findMany({
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json(gallery);
+    return NextResponse.json(gallery, {headers: corsHeaders});
+
   } catch (error) {
     console.error("Fetch gallery error:", error);
     return NextResponse.json(
@@ -49,7 +50,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(newImage);
+    return NextResponse.json(newImage, {headers: corsHeaders});
+  
   } catch (error) {
     console.error("Create gallery error:", error);
     return NextResponse.json(

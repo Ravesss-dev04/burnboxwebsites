@@ -6,12 +6,9 @@ import { corsHeaders } from '@/lib/corsHeaders';
 const prisma = new PrismaClient();
 
 
-
-
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
-
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,7 +29,9 @@ export async function POST(request: NextRequest) {
       // Don't reveal whether user exists
       return NextResponse.json({
         message: 'If an account with that email exists, a reset link has been sent'
-      });
+      },
+      {headers: corsHeaders}
+    );
     }
 
     // Generate reset token
@@ -52,7 +51,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'If an account with that email exists, a reset link has been sent'
-    });
+    },
+    {headers: corsHeaders}
+  );
 
   } catch (error) {
     console.error('Forgot password error:', error);

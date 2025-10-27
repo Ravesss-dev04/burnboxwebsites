@@ -19,7 +19,7 @@ export async function GET() {
     const sessionToken = (await cookieStore).get('session_token')?.value
 
     if (!sessionToken) {
-      return NextResponse.json({ user: null })
+      return NextResponse.json({ user: null }, {headers:corsHeaders})
     }
 
     // Validate session
@@ -43,12 +43,14 @@ export async function GET() {
       if (session) {
         await (prisma as any).session.delete({ where: { id: session.id } })
       }
-      return NextResponse.json({ user: null })
+      return NextResponse.json({ user: null }, {headers: corsHeaders})
     }
 
     return NextResponse.json({
       user: session.user
-    })
+    },
+    {headers:corsHeaders}
+  )
 
   } catch (error) {
     console.error('Session error:', error)

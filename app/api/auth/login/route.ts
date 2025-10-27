@@ -17,8 +17,6 @@ function generateToken(userId: string | number) {
 const prisma = new PrismaClient();
 
 
-
-
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
@@ -30,7 +28,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders}
       );
     }
 

@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       
       console.log('Uploaded image URL:', imageUrl); // Debug log
     }
-    return NextResponse.json({ success: true, urls: uploadedUrls });
+    return NextResponse.json({ success: true, urls: uploadedUrls }, {headers: corsHeaders});
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500, headers: corsHeaders });

@@ -73,7 +73,7 @@ export async function POST(req: Request) {
 
 
 
-    return NextResponse.json({ blocked: false, result: data });
+    return NextResponse.json({ blocked: false, result: data },{headers:corsHeaders});
   } catch (err: any) {
     console.error("Moderation failed:", err?.response?.data || err);
     return NextResponse.json(

@@ -139,8 +139,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      message: "OTP sent successfully to your email" 
-    });
+      message: "OTP sent successfully to your email",
+    },
+    {headers: corsHeaders}
+  );
 
   } catch (error) {
     console.error("OTP send error:", error);
