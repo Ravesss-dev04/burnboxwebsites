@@ -10,16 +10,15 @@ import { corsHeaders } from "@/lib/corsHeaders";
 
 
 export async function OPTIONS() {
-  return new Response(null, { status: 200, headers: corsHeaders });
+  return NextResponse.json({}, { headers: corsHeaders });
 }
-
 
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      return NextResponse.json({ error: "Email is required" }, { status: 400, headers: corsHeaders  });
     }
 
     // Generate 6-digit OTP

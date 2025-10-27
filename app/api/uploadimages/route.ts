@@ -8,7 +8,7 @@ const GITHUB_REPO = process.env.GITHUB_REPO!;
 
 
 export async function OPTIONS() {
-  return new Response(null, { status: 200, headers: corsHeaders });
+  return NextResponse.json({}, { headers: corsHeaders });
 }
 
 

@@ -5,9 +5,11 @@ import { cookies } from 'next/headers'
 import { corsHeaders } from '@/lib/corsHeaders';
 
 
+
 export async function OPTIONS() {
-  return new Response(null, { status: 200, headers: corsHeaders });
+  return NextResponse.json({}, { headers: corsHeaders });
 }
+
 
 
 

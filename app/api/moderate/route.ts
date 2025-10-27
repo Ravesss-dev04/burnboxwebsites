@@ -7,7 +7,7 @@ const SIGHTENGINE_URL = "https://api.sightengine.com/1.0/check.json";
 
 
 export async function OPTIONS() {
-  return new Response(null, { status: 200, headers: corsHeaders });
+  return NextResponse.json({}, { headers: corsHeaders });
 }
 
 

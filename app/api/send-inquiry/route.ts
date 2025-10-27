@@ -5,7 +5,7 @@ import nodemailer from "nodemailer";
 
 
 export async function OPTIONS() {
-  return new Response(null, { status: 200, headers: corsHeaders });
+  return NextResponse.json({}, { headers: corsHeaders });
 }
 
 export async function POST(req: Request) {
@@ -173,7 +173,7 @@ export async function POST(req: Request) {
         };
 
         await transporter.sendMail(mailOptions);
-        return NextResponse.json({success: true, message: "Inquiry email sent successfully!"});
+        return NextResponse.json({success: true, message: "Inquiry email sent successfully!"}, { headers: corsHeaders});
 
     } catch (err) {
         console.log("Email send failed:", err);

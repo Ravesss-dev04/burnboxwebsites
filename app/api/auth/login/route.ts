@@ -18,10 +18,10 @@ const prisma = new PrismaClient();
 
 
 
-export async function OPTIONS() {
-  return new Response(null, { status: 200, headers: corsHeaders });
-}
 
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function POST(request: NextRequest) {
   try {

@@ -84,7 +84,7 @@ export default function GalleryManager({darkMode = false}: GalleryManagerProps) 
       if (uploadResult.success) {
         // Save to database
         for (const url of uploadResult.urls) {
-          await fetch('/api/gallery', {
+          await fetch('https://bburnboxsites.vercel.app/api/gallery', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -96,7 +96,6 @@ export default function GalleryManager({darkMode = false}: GalleryManagerProps) 
             }),
           });
         }
-
         // Refresh gallery
         await fetchImages();
         setSelectedFiles([]);
