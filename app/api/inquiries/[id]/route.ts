@@ -6,13 +6,21 @@ const prisma = new PrismaClient();
 // GET single inquiry
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const inquiryId = parseInt(id);
     
+    if (isNaN(inquiryId)) {
+      return NextResponse.json(
+        { error: "Invalid inquiry ID" },
+        { status: 400 }
+      );
+    }
+
     const inquiry = await (prisma as any).inquiry.findUnique({
-      where: { id }
+      where: { id: inquiryId }
     });
 
     if (!inquiry) {
@@ -35,14 +43,22 @@ export async function GET(
 // DELETE inquiry
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const inquiryId = parseInt(id);
     
+    if (isNaN(inquiryId)) {
+      return NextResponse.json(
+        { error: "Invalid inquiry ID" },
+        { status: 400 }
+      );
+    }
+
     // Check if inquiry exists first
     const inquiry = await (prisma as any).inquiry.findUnique({
-      where: { id }
+      where: { id: inquiryId }
     });
 
     if (!inquiry) {
@@ -53,7 +69,7 @@ export async function DELETE(
     }
 
     await (prisma as any).inquiry.delete({
-      where: { id }
+      where: { id: inquiryId }
     });
     
     return NextResponse.json({ 
@@ -72,10 +88,19 @@ export async function DELETE(
 // UPDATE inquiry status
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const inquiryId = parseInt(id);
+    
+    if (isNaN(inquiryId)) {
+      return NextResponse.json(
+        { error: "Invalid inquiry ID" },
+        { status: 400 }
+      );
+    }
+
     const { status } = await req.json();
     
     // Validate status
@@ -89,7 +114,7 @@ export async function PATCH(
 
     // Check if inquiry exists
     const existingInquiry = await (prisma as any).inquiry.findUnique({
-      where: { id }
+      where: { id: inquiryId }
     });
 
     if (!existingInquiry) {
@@ -101,7 +126,7 @@ export async function PATCH(
 
     // Update the inquiry
     const inquiry = await (prisma as any).inquiry.update({
-      where: { id },
+      where: { id: inquiryId },
       data: { status }
     });
     

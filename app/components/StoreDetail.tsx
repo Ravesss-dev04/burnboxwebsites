@@ -62,7 +62,6 @@ const StoreDetail: React.FC<StoreDetailProps> = ({ onDirectionClick }) => {
 
   // function
 
-  
 
   // Enhanced directions function
   const handleGetDirections = () => {
