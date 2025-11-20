@@ -132,6 +132,7 @@ const GalleryPhotos: React.FC = () => {
         <div className="relative w-full max-w-8xl h-[600px] flex items-center justify-between">
           
           {/* Main Center Image - Large and Centered */}
+          
           <div className="flex-1 flex justify-between mr-10 lg:mr-20">
             <div className="relative w-[220px] h-[250px] lg:w-[700px] lg:h-[550px] ">
               <AnimatePresence mode="wait">
@@ -158,6 +159,7 @@ const GalleryPhotos: React.FC = () => {
               </AnimatePresence>
             </div>
           </div>
+
           <div className="flex pr-8">
             <div className="flex flex-row gap-9 lg:gap-9"> {/* FLEX-ROW FOR HORIZONTAL */}
               {nextImages.map((image, index) => (

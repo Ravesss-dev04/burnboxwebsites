@@ -90,14 +90,14 @@ const Maps = () => {
       className='min-h-[100vh] min-w-[100vw] z-0 relative bg-white overflow-hidden'
     >
       {/* Store Details Card */}
-      <div className={`rounded-lg p-4 h-auto absolute top-1/2 -translate-y-1/2 left-1 lg:left-5 z-[999] bg-black/90 backdrop-blur-sm transition-all duration-300 ${
+      <div className={`rounded-lg p-4 h-auto absolute top-1/2 -translate-y-1/2 left-1 lg:left-5 z-[99999] bg-black/90 backdrop-blur-sm transition-all duration-300  md:block ${
         showStreetView && streetViewMode === 'split' ? 'sm:w-[280px] md:w-[320px]' : 'sm:w-[300px] md:w-[350px] lg:w-[400px]'
       }`}>
         <StoreDetail onDirectionClick={handleDirectionClick} />
       </div>
 
       {/* Map Style Controls */}
-      <div className='absolute top-4 right-4 z-[999] flex flex-col gap-2 bg-black/80 backdrop-blur-sm rounded-lg p-2'>
+      <div className='absolute top-4 flex-row right-4 z-[999] flex  gap-2 bg-black/80 backdrop-blur-sm rounded-lg p-2'>
         <button
           onClick={() => handleMapStyleChange('street')}
           className={`p-2 rounded flex items-center gap-2 transition-colors ${
@@ -128,7 +128,7 @@ const Maps = () => {
       </div>
 
       {/* Street View Controls */}
-      <div className='absolute bottom-4 right-4 z-[999] flex flex-col gap-2'>
+      <div className='absolute bottom-4 right-4 z-[999] flex flex-row gap-2'>
         <button
           onClick={handleStreetViewClick}
           className={`p-3 rounded-full flex items-center gap-2 transition-colors ${
@@ -160,7 +160,7 @@ const Maps = () => {
           <FaCompass className="text-lg" />
         </button>
       </div>
-
+      
       {/* Main Content Area - Split between Map and Street View */}
       <div className={`flex h-full w-full transition-all duration-500 ${
         showStreetView 
