@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
       {headers: corsHeaders}
     );
     }
-
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
@@ -48,7 +47,6 @@ export async function POST(request: NextRequest) {
         resetTokenExpiry
       } as any
     });
-
     // TODO: Send email with reset link
     console.log('Reset token:', resetToken); // For development
 
@@ -66,3 +64,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+
+
+

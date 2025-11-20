@@ -24,3 +24,61 @@ model gallery {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
+
+
+model Inquiry {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  email     String   @db.VarChar(255)
+  product   String   @db.VarChar(255)
+  price     String   @db.VarChar(255)
+  message   String   @db.Text
+  imageUrl  String?  @db.Text
+  status    String   @default("New") @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model OTP {
+  id        Int      @id @default(autoincrement())
+  email     String   @db.VarChar(255)
+  code      String   @db.VarChar(6)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([email])
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(255) 
+  price       Float
+  imageUrl    String   @db.Text
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Float
+  image       String   // JSON string of image array
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+
+
+
+
+
+
+
+
+

@@ -1,240 +1,226 @@
-"use client"
+'use client';
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 
-interface Product {
-  unit: string;
-  price: number;
+interface GalleryImage {
+  id: number;
+  imageUrl: string;
+  title: string;
+  altText: string;
+  createdAt: string;
 }
 
-interface Products {
-  [key: string]: Product;
-}
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 100, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.8,
+      ease: [0.25, 0.1, 0.25, 1],
+    },
+  },
+};
 
-const ProductCalculator: React.FC = () => {
-  const [selectedProduct, setSelectedProduct] = useState<string>('')
-  const [inputUnit, setInputUnit] = useState<string>('sqm')
-  const [length, setLength] = useState<string>('')
-  const [width, setWidth] = useState<string>('')
-  const [areaResult, setAreaResult] = useState<string>('0')
-  const [priceResult, setPriceResult] = useState<string>('0.00')
-  const [unitLabel, setUnitLabel] = useState<string>('')
-
-  const products: Products = {
-    "Canvas Print only": { unit: "sqin", price: 3 },
-    "Canvas Print with Wooden Frame": { unit: "sqin", price: 3.5 },
-    "Acrylic Buildup Lighted Double Face": { unit: "sqft", price: 2500 },
-    "Acrylic Buildup Lighted Single Face": { unit: "sqft", price: 2000 },
-    "Acrylic Buildup None-Lighted Double Face": { unit: "sqft", price: 2000 },
-    "Acrylic Buildup None-Lighted Single Face": { unit: "sqft", price: 1500 },
-    "Acrylic Cutout 3mm": { unit: "sqft", price: 600 },
-    "Acrylic Cutout 5mm": { unit: "sqft", price: 900 },
-    "Acrylic LightBox": { unit: "sqft", price: 1500 },
-    "Acrylic Sandwhich 3mm": { unit: "sqft", price: 1300 },
-    "Decal Sticker printed": { unit: "sqft", price: 150 },
-    "Decal Sticker cut-out": { unit: "sqin", price: 4 },
-    "Glass Frosted/Sticker": { unit: "sqft", price: 150 },
-    "Label Sticker": { unit: "sqin", price: 0.9 },
-    "Neon Lights (max. 3 colors)": { unit: "sqft", price: 1000 },
-    "Panaflex Signage Lighted Double Face": { unit: "sqft", price: 800 },
-    "Panaflex Signage None-Lighted Double Face": { unit: "sqft", price: 700 },
-    "Panaflex Signage Lighted One Face": { unit: "sqft", price: 700 },
-    "Panaflex Signage None-Lighted One Face": { unit: "sqft", price: 600 },
-    "Photoprint / Poster": { unit: "sqin", price: 0.75 },
-    "Sticker on Sintra 1.5mm": { unit: "sqin", price: 1.2 },
-    "Sticker on Sintra 3mm": { unit: "sqin", price: 1.5 },
-    "Sticker on Sintra 5mm": { unit: "sqin", price: 2 },
-    "Tarpaulin 10 oz": { unit: "sqft", price: 25 },
-    "Tarpaulin 13 oz": { unit: "sqft", price: 30 },
-    "Tarpaulin 18 oz": { unit: "sqft", price: 35 },
-    "Tarpaulin w/ Wooden Frame": { unit: "sqft", price: 150 },
-    "Tarpaulin w/ Metal Frame": { unit: "sqft", price: 300 },
-    "Vehicle Wrap": { unit: "sqft", price: 180 },
-    "Wall Mural": { unit: "sqft", price: 150 },
-  }
-
-  const conversionFactors = {
-    sqm: 1,
-    sqft: 0.092903,
-    sqin: 0.00064516,
-    sqyd: 0.836127,
-    sqcm: 0.0001,
-    sqmm: 0.000001
-  }
-
-  const unitName = (code: string): string => {
-    const units: { [key: string]: string } = {
-      sqm: "sqm",
-      sqft: "sqft",
-      sqin: "sqin",
-      sqyd: "sqyd",
-      sqcm: "sqcm",
-      sqmm: "sqmm"
+const mainImageTransition: Variants = {
+  enter: { 
+    x: 300, 
+    opacity: 0, 
+    scale: 0.8 
+  },
+  center: { 
+    x: 0, 
+    opacity: 1, 
+    scale: 1,
+    transition: {
+      duration: 1.2,
+      ease: [0.25, 0.1, 0.25, 1]
     }
-    return units[code] || code
-  }
-
-  const updateAndCompute = () => {
-    const product = products[selectedProduct]
-    const lengthNum = parseFloat(length)
-    const widthNum = parseFloat(width)
-
-    if (!product) {
-      resetResults()
-      return
+  },
+  exit: { 
+    x: -300, 
+    opacity: 0, 
+    scale: 0.8,
+    transition: {
+      duration: 1.2,
+      ease: [0.25, 0.1, 0.25, 1]
     }
+  }
+};
 
-    if (!lengthNum || !widthNum) {
-      resetResults()
-      return
+const GalleryPhotos: React.FC = () => {
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const loadImages = async () => {
+    try {
+      const res = await fetch('/api/gallery');
+      if (!res.ok) throw new Error('Failed to fetch gallery images');
+      const data = await res.json();
+      if (Array.isArray(data)) setImages(data);
+      else setError('Invalid data format');
+    } catch (err) {
+      console.error('Error loading gallery images:', err);
+      setError('Failed to load gallery images');
+      setImages([]);
+    } finally {
+      setLoading(false);
     }
-
-    const inputToSqm = lengthNum * widthNum * conversionFactors[inputUnit as keyof typeof conversionFactors]
-    const convertedArea = inputToSqm / conversionFactors[product.unit as keyof typeof conversionFactors]
-    const total = convertedArea * product.price
-
-    setAreaResult(convertedArea.toFixed(2))
-    setPriceResult(total.toFixed(2))
-    setUnitLabel(unitName(product.unit))
-  }
-
-  const resetResults = () => {
-    setAreaResult("0")
-    setPriceResult("0.00")
-    setUnitLabel("")
-  }
+  };
 
   useEffect(() => {
-    updateAndCompute()
-  }, [selectedProduct, inputUnit, length, width])
+    loadImages();
+    const interval = setInterval(loadImages, 300000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const outputUnit = selectedProduct ? unitName(products[selectedProduct]?.unit) : ""
-  const pricePerUnit = selectedProduct ? products[selectedProduct]?.price.toString() : ""
+  // Auto-advance slides with smoother timing
+  useEffect(() => {
+    if (images.length === 0 || isAnimating) return;
+    
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+      
+      // Reset animation flag after transition completes
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 1200);
+    }, 5000); // Change every 5 seconds (slower)
+
+    return () => clearInterval(interval);
+  }, [images.length, isAnimating]);
+
+  if (loading) return <p className="text-center">Loading gallery...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
+  if (images.length === 0) return <p className="text-center">No images found in gallery.</p>;
+
+  const currentImage = images[currentIndex];
+  // Get next 3 images for horizontal preview
+  const nextImages = [
+    images[(currentIndex + 1) % images.length],
+    images[(currentIndex + 2) % images.length],
+    images[(currentIndex + 3) % images.length]
+  ];
 
   return (
-    <div className="min-h-screen flex justify-center items-start bg-[#1a1a1a] text-white font-[Poppins] py-20 px-4">
-      <div className="w-full max-w-lg bg-[#2b2b2b] rounded-lg shadow-lg border-t-8 border-pink-600 p-10">
-        <div className="flex flex-col items-center mb-6">
-          <img 
-            src="https://github.com/ravenprevendido/updatedbbsitesversion4/raw/master/public/bblogo.png" 
-            alt="logo" 
-            className="w-20 mb-2"
-          />
-          <h2 className="text-center text-lg font-semibold text-gray-300 tracking-wide">
-            PRODUCT AREA PRICE CALCULATOR (AUTO)
-          </h2>
-        </div>
+    <AnimatePresence>
+      <motion.section
+        className="relative min-h-50 custom-gallery-bg w-full lg:min-h-screen lg:w-full px-4 py-20 flex flex-col items-center overflow-hidden"
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
+        <img
+          className="absolute opacity-10 items-center ml-350 mt-30"
+          src="/burnboxlogo.png"
+          alt="Background Logo"
+        />
+        
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-center text-pink mb-12">
+          Gallery
+        </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="product" className="block text-sm text-white/80 font-medium mb-1">
-              Product / Service:
-            </label>
-            <select 
-              id="product"
-              value={selectedProduct}
-              onChange={(e) => setSelectedProduct(e.target.value)}
-              className="w-full bg-[#3a3a3a] border border-transparent focus:border-pink-600 rounded-md px-3 py-2 text-sm focus:outline-none"
-            >
-              <option value="">Select Product</option>
-              {Object.keys(products).map((product) => (
-                <option key={product} value={product}>
-                  {product}
-                </option>
+        {/* Main Gallery Container */}
+        <div className="relative w-full max-w-8xl h-[600px] flex items-center justify-between">
+          
+          {/* Main Center Image - Large and Centered */}
+          <div className="flex-1 flex justify-between mr-10 lg:mr-20">
+            <div className="relative w-[200px] h-[250px] lg:w-[700px] lg:h-[550px] ">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentIndex}
+                  variants={mainImageTransition}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="absolute w-full h-full"
+                >
+                  {/* Dark Overlay Container */}
+                  <div className="absolute inset-0 bg-black/40 z-10 rounded-2xl transition-opacity duration-1000 ease-in-out" />
+                  
+                  <div className="w-full h-full rounded-2xl overflow-hidden relative">
+                    <Image
+                      src={currentImage.imageUrl}
+                      alt={currentImage.altText || currentImage.title || 'Gallery image'}
+                      width={700}
+                      height={550}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                      draggable="false"
+                    />
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+          <div className="flex pr-8">
+            <div className="flex flex-row gap-9 lg:gap-9"> {/* FLEX-ROW FOR HORIZONTAL */}
+              {nextImages.map((image, index) => (
+                <motion.div
+                  key={image.id}
+                  className="w-50 h-50 lg:w-100 lg:h-80 rounded-xl overflow-hidden relative" /* HORIZONTAL DIMENSIONS */
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 0.8, x: 0 }}
+                  whileHover={{ scale: 1.05, opacity: 1 }}
+                  transition={{ 
+                    duration: 0.6, 
+                    delay: index * 0.2,
+                    ease: "easeOut"
+                  }}
+                >
+                  {/* Dark Overlay for Preview Images */}
+                  <div className="absolute inset-0 bg-black/30 z-10 rounded-xl transition-opacity duration-500 ease-in-out" />
+                  
+                  <Image
+                    src={image.imageUrl}
+                    alt={image.altText || image.title || 'Gallery image'}
+                    width={112}  
+                    height={160} 
+                    className="w-full h-full object-cover relative z-0"
+                    unoptimized
+                    draggable="false"
+                  />
+                  
+                  {/* Overlay with title */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end z-20">
+                    {(image.title || image.altText) && (
+                      <p className="text-white text-xs font-medium p-2 truncate">
+                        {image.title || image.altText}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
               ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="inputUnit" className="block text-sm font-medium mb-1 text-white/80">
-              Input Unit:
-            </label>
-            <select 
-              id="inputUnit"
-              value={inputUnit}
-              onChange={(e) => setInputUnit(e.target.value)}
-              className="w-full bg-[#3a3a3a] border border-transparent focus:border-pink-600 rounded-md px-3 py-2 text-sm focus:outline-none"
-            >
-              <option value="sqm">Square Meter</option>
-              <option value="sqft">Square Feet</option>
-              <option value="sqin">Square Inch</option>
-              <option value="sqyd">Square Yard</option>
-              <option value="sqcm">Square Centimeter</option>
-              <option value="sqmm">Square Millimeter</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="length" className="block text-sm font-medium mb-1 text-white/80">
-              Length:
-            </label>
-            <input 
-              type="number" 
-              id="length"
-              value={length}
-              onChange={(e) => setLength(e.target.value)}
-              placeholder="Enter length" 
-              className="w-full bg-[#3a3a3a] border border-transparent focus:border-pink-600 rounded-md px-3 py-2 text-sm text-white focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="width" className="block text-sm font-medium mb-1 text-white/80">
-              Width:
-            </label>
-            <input 
-              type="number" 
-              id="width"
-              value={width}
-              onChange={(e) => setWidth(e.target.value)}
-              placeholder="Enter width" 
-              className="w-full bg-[#3a3a3a] border border-transparent focus:border-pink-600 rounded-md px-3 py-2 text-sm text-white focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1 text-white/80">
-              Output Unit (from product):
-            </label>
-            <input 
-              type="text" 
-              value={outputUnit}
-              readOnly 
-              className="w-full bg-[#3a3a3a] rounded-md px-3 py-2 text-sm border border-transparent focus:border-pink-600 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1 text-white/80">
-              Price per Unit:
-            </label>
-            <input 
-              type="text" 
-              value={pricePerUnit}
-              readOnly 
-              className="w-full bg-[#3a3a3a] rounded-md px-3 py-2 text-sm border border-transparent focus:border-pink-600 focus:outline-none"
-            />
+            </div>
           </div>
         </div>
 
-        <div className="mt-8 bg-[#1e1e1e] border-l-4 border-pink-600 rounded-md p-4">
-          <h3 className="text-sm font-medium text-gray-300 mb-3">Converted Area:</h3>
-          <div className="flex justify-between bg-[#3a3a3a] rounded-md px-3 py-2 mb-2">
-            <span>{areaResult}</span> 
-            <span>{unitLabel}</span>
-          </div>
-          <h3 className="text-sm font-medium text-gray-300 mb-3">Total Price:</h3>
-          <div className="flex bg-pink-500 rounded-md px-3 py-2 font-semibold">
-            ₱ <span className="ml-2">{priceResult}</span>
-          </div>
-        </div>
+        {/* Current Image Title */}
+        <AnimatePresence>
+          <motion.div 
+            key={currentIndex}
+            className="mt-8 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.8 }}
+          >
+            <p className="text-3xl text-gray-800 font-bold">
+              {currentImage.title || currentImage.altText}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+      </motion.section>
+    </AnimatePresence>
+  );
+};
 
-        <footer className="text-center text-gray-500 text-xs mt-6">
-          © 2025 <span className="text-pink-500">Burnbox</span> Product calculator (auto)
-        </footer>
-      </div>
-    </div>
-  )
-}
-
-export default ProductCalculator
+export default GalleryPhotos;

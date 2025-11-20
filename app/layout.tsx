@@ -8,6 +8,7 @@ import { TooltipProvider } from "./context/TooltipContext";
 import { HeaderProvider } from "./context/HeaderContext";
 import { Suspense } from "react";
 import HeaderWrapper from "./components/HeaderWrapper";
+import SectionScrollProgress from "./components/ScrollProgressBar";
 
 const outfit = Outfit({
   variable: "--font-geist-sans",
@@ -28,12 +29,14 @@ export default function RootLayout({
       <body className={`${outfit.variable} antialiased h-[100vh] max-w-[100vw]`}>
         <TooltipProvider>
           <HeaderProvider>
+          
             <Suspense fallback={<div></div>}>
               <HeaderWrapper/>
             </Suspense>
             
             {children}
           </HeaderProvider>
+            <SectionScrollProgress/>
         </TooltipProvider>
       </body>
     </html>

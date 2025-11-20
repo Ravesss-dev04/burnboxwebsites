@@ -1,33 +1,34 @@
+
 import { motion } from 'framer-motion';
-import { CalculatorIcon, GalleryThumbnailsIcon, HomeIcon, LogOutIcon, Menu, MoonIcon, PersonStanding, SunIcon, X } from 'lucide-react';
+import { CalculatorIcon, GalleryThumbnailsIcon, HomeIcon, LogOutIcon, Menu, MoonIcon, PersonStanding, Settings, SunIcon, X } from 'lucide-react';
 import Image from 'next/image'
 import React, { JSX, ReactNode, useState, useEffect } from 'react'
-import { BiSolidCustomize } from 'react-icons/bi';
+
 import { FaProductHunt, FaUserCircle } from 'react-icons/fa';
 import { MdOutlineProductionQuantityLimits } from "react-icons/md";
 import { RiMailSendFill } from 'react-icons/ri';
 import DashboardContent from './DashboardContent';
-import Customize from './Customize';
-import CalculatorPage from './Calculator';
+import { IoMdNotifications } from "react-icons/io";
+
 import GalleryManager from './GalleryManager';
 import CalculatorBox from './components/CalculatorBox';
+import AdminServices from './AdminServices';
 
 interface AdminDashboardProps {
   userMail?: string;
   onLogout?: () => void;
   children?: ReactNode;
 }
-
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [activeSection, setActiveSection] = useState("dashboard");
   const [darkMode, setDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   
   const sectionMap: Record<string, React.ReactElement> = {
     dashboard: React.createElement(DashboardContent as any, { userMail, onLogout, darkMode }),
-    customize: <Customize />,
-    calculator: <CalculatorPage  />,
+    services: <AdminServices/>,
     gallery: <GalleryManager darkMode={darkMode} />
   }
 
@@ -77,7 +78,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
         document.documentElement.classList.remove('dark');
       }
     }
-    
+  
     // Save to localStorage with error handling
     try {
       localStorage.setItem('adminDarkMode', JSON.stringify(darkMode));
@@ -95,7 +96,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
   const getAvatarLetter = (email: string) => {
     return email ? email.charAt(0).toUpperCase() : 'A'
   }
-
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
     return (
@@ -107,18 +107,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
       </div>
     );
   }
-
   return (
     <div 
       id="admin-container"
-      className={`relative flex w-full h-full transition-colors duration-300 ${
+      className={`relative flex w-full h-full transition-colors duration-300 overflow-hidden ${
         darkMode 
           ? 'bg-gray-900 text-white' 
           : 'bg-gray-100 text-gray-900'
       }`}
     >
       {/* Top Right Icons - Updated with Dark Mode Toggle */}
-      <div className='absolute flex gap-3 top-0 right-5 mt-2 z-10'>
+      <div className='absolute  mt-2 flex gap-3 top-0 right-5  z-10 '>
+        <div className='relative top-2'>
+      <IoMdNotifications size={20}  />
+        </div>
         <button
           onClick={toggleDarkMode}
           className={`p-2 rounded-full transition-colors duration-200 ${
@@ -133,9 +135,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
           ) : (
             <MoonIcon size={20} />
           )}
+
         </button>
+        
+
         {/* User Avatar */}
-        <div className="flex items-center space-x-2">
+        <div className="relative flex items-center space-x-2">
           {userMail ? (
             <div className={`flex items-center space-x-2 px-3 py-1 rounded-full border transition-colors duration-200 ${
               darkMode 
@@ -153,7 +158,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
             </div>
           ) : (
             <FaUserCircle 
-              onClick={() => setIsOpen(true)} 
+              onClick={() => setIsProfileModalOpen(!isProfileModalOpen)} 
               size={30} 
               className={`hover:text-pink/100 transition-colors duration-200 ${
                 darkMode ? 'text-gray-400' : 'text-gray-600'
@@ -161,8 +166,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
             />
           )}
         </div>
+         {isProfileModalOpen && (
+            <div className='absolute p-2 top-12 bg-gray-900  right-0 w-55 rounded-lg shadow-lg shadow-white/10 z-50'>
+              <div className='p-4 '>
+                <button className='w-full flex items-center gap-3 rounded-md hover:bg-gray-100  text-white p-2  hover:text-black  transition '>
+                  <Settings size={20} />
+                  <span>Settings</span>
+                </button>
+                <button
+                  onClick={onLogout}
+                  className='w-full flex items-center gap-3  rounded-md hover:bg-red-50 text-red-600 p-2 transition'
+                >
+                  <LogOutIcon size={20} className='text-red-600'/>
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          )}
       </div>
-
       {/* Sidebar */}
       <div
         className={`${isOpen ? 'w-64' : 'w-20'} relative transition-all duration-300 flex flex-col z-20 ${
@@ -217,10 +238,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
         <nav className='flex-1 p-4'>
           {[
             { id: "dashboard", icon: <HomeIcon size={20} />, label: "Dashboard" },
-            { id: "product", icon: <MdOutlineProductionQuantityLimits size={20} />, label: "Services" },
+            { id: "services", icon: <MdOutlineProductionQuantityLimits size={20} />, label: "Services" },
             { id: "inquiry", icon: <RiMailSendFill size={20} />, label: "Inquiry" },
-            { id: "customize", icon: <BiSolidCustomize size={25} />, label: "Customize" },
-            { id: "calculator", icon: <CalculatorIcon size={25}/>, label: "Calculator" },
             { id: "gallery", icon: <GalleryThumbnailsIcon size={25}/>, label: "Gallery" }
           ].map(({ id, icon, label }) => (
             <div
@@ -266,7 +285,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, onLogout }) =
       }`}>
         {sectionMap[activeSection]}
       </div>
-    
     </div>
   )
 }

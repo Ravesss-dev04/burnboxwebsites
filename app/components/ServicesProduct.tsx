@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from 'react'
 import Footer from './Footer'
 import Image from 'next/image'
-import { ArrowBigRightDash, ArrowRight, ChevronDown, ChevronDownIcon, User2Icon, XCircleIcon } from 'lucide-react'
+import { ArrowBigRightDash, ArrowLeft, ArrowRight, ChevronDown, ChevronDownIcon, User2Icon, XCircleIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { EnvelopeIcon } from '@heroicons/react/16/solid'
 import FakeInquiryForm from './FakeInquiryForm'
 import { useHeaderContext } from '../context/HeaderContext'
+
+
 
 const ProductImageSlider = ({ images, name }: { images: string[], name: string }) => {
   const filledImages =
@@ -16,7 +18,7 @@ const ProductImageSlider = ({ images, name }: { images: string[], name: string }
       : [
           ...images,
           ...Array.from({ length: 3 - images.length }, (_, i) => 
-            `/placeholder-${i + 1}.jpg`
+            images[0]
           ),
         ];
 
@@ -32,11 +34,10 @@ const ProductImageSlider = ({ images, name }: { images: string[], name: string }
   return (
     <div className="relative w-full md:w-full h-full bg-black/50 rounded-md overflow-hidden">
       {/* main image */}
-      <Image
+      <img
         src={filledImages[currentIndex]}
         alt="product"
-        fill
-        className="object-contain"
+        className="object-contain w-full h-full items-center justify-center"
         draggable="false"
       />
       {/* progress bar / indicator */}
@@ -50,7 +51,6 @@ const ProductImageSlider = ({ images, name }: { images: string[], name: string }
           ></div>
         ))}
       </div>
-
       {/* thumbnail preview below */}
       <div className="absolute bottom-2 left-1/2  -translate-x-1/2 flex gap-6 lg:gap-4 md:gap-4">
         {filledImages.map((img, i) => (
@@ -61,21 +61,20 @@ const ProductImageSlider = ({ images, name }: { images: string[], name: string }
               i === currentIndex ? "bg-pink-500" : "bg-gray-400/50"
             }`}
           >
-            
-            <Image
+            <img
               src={img}
               alt={`thumb-${i}`}
-              fill
-              className="object-contain  lg:object-contain md:object-contain"
+              className="object-contain w-full h-full items-center justify-center lg:object-contain md:object-contain"
               draggable="false"
             />
           </div>
         ))}
       </div>
-
     </div>
   );
 };
+
+
 
 const ServicesProduct = () => {
     const { 
@@ -93,6 +92,8 @@ const ServicesProduct = () => {
       p.name.toLowerCase().includes(searchValue.toLowerCase())
     );
 
+
+
     const [page, setPage] = useState(1);
     const itemsPerPage = 12;
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -107,18 +108,20 @@ const ServicesProduct = () => {
         return [...others].sort(() => 0.5 - Math.random()).slice(0, 6);
     };
     
+
     const [showInquiry, setShowInquiry] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [isOld, setIsOld] = useState(false);
-
     const handleButtonClick = () => {
       setShowModal(true)
     }
-    
+
+
     const handlePopupClick = () => {
       setIsOld(!isOld);
       setShowModal(false);
     }
+
 
     // Close modal when clicking outside
     const handleBackdropClick = (e: React.MouseEvent) => {
@@ -127,11 +130,13 @@ const ServicesProduct = () => {
       }
     };
 
+
     const handleCloseModal = () => {
       setSelectedProduct(null);
       setPage(1)
     }
 
+    
     // Handle product selection with related products
     const handleProductSelect = (item: any) => {
       setSelectedProduct({
@@ -149,12 +154,9 @@ const ServicesProduct = () => {
         });
       }
     }, [selectedProduct]);
-
-
     React.useEffect(() => {
       setPage(1);
     }, [searchValue])
-
 
     return (
     <>
@@ -163,22 +165,31 @@ const ServicesProduct = () => {
           {currentProducts.map((item) => (
             <div 
               key={item.id} 
-              className='flex flex-col bg-white/20 border border-pink/20 rounded-xl overflow-hidden shadow hover:bg-white/50 hover:scale-[1.08] cursor-pointer transition-all duration-300'
+              className='flex flex-col bg-white/20 border border-pink/20 rounded-xl overflow-hidden shadow hover:bg-white/50 hover:scale-[1.05] cursor-pointer  transition-all duration-300 '
               onClick={() => handleProductSelect(item)}
+              style={{}}
             >
-              <div className='relative w-full h-64'>
-                <Image
+              <div className='relative w-full h-64 '>
+                <img
                   src={item.image[0]}
                   alt={item.name}
-                  fill
-                  className='object-contain' 
+                  className=' object-contain items-center justify-center w-full h-full hover:scale-[1.3] transition-transform duration-300' 
+                />
+                <img
+                  src="/splashimg.png" alt='img'
+                  className='absolute w-full h-full top-40 left-0 opacity-0 hover:opacity-60 transition-opacity duration-300'
                 />
               </div>
-              <div className='p-4 flex flex-col gap-1 bg-black/40 mt-auto'>
-                <h3 className='font-medium text-gray-100 text-[20px]'>{item.name}</h3>
-                <div className='flex items-center gap-2 justify-between mt-2 text-pink-300'>
-                  <span className='text-[19px]'>Price: ₱ {item.price}</span>
-                  <button className='text-white/80 bg-pink/30 p-1 lg:p-2 rounded-[5px]'>
+              <div className='p-4 flex flex-col gap-1  bg-black/40 mt-auto z-[50]'>
+                
+                <div className='flex flex-col  items-center gap-2 justify-between mt-2 text-pink-300'>
+                  {/* <div className='text-[19px]  text-nowrap'><span className='text-pink-300 opacity-70'>As low as:</span> 
+                    <p className=''>
+                      Price: ₱ {item.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </p>
+                  </div> */}
+                  <h3 className='font-medium text-pink-200 mb-2 text-[20px]'>{item.name}</h3>
+                  <button className='text-white/90 bg-pink/60 p-2 text-nowrap lg:p-2 rounded-[5px]'>
                     View Now
                   </button>
                 </div>
@@ -217,7 +228,7 @@ const ServicesProduct = () => {
                   <div className='col-span-1 flex flex-col justify-start gap-4 w-[100%] lg:pr-0 max-w-md mx-auto'>
                     <h2 className='text-2xl font-semibold mb-2 text-center md:text-left'>{selectedProduct.name}</h2>
                     <p className='text-gray-200 mt-5'>{selectedProduct.description}</p>
-                    <p className='text-pink/60 text-4xl font-bold mt-3 pb-4'> ₱ {selectedProduct.price}</p>
+                    <p className='text-pink/60 text-4xl font-bold mt-3 pb-4'>{selectedProduct.price === 0 ? " " : ` ₱ ${selectedProduct.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}</p>
                     <div className='flex flex-col gap-2'>
                       <button 
                         onClick={() => setShowInquiry(true)} 
@@ -225,12 +236,24 @@ const ServicesProduct = () => {
                       >
                         Inquire Now
                       </button>
-                      <button className='border border-pink/60 text-pink/60 hover:bg-pink/10 w-full hover:text-white rounded transition py-2'>
+                      <div className='relative c'>
+                      <button className='border border-pink/60 text-pink/60 hover:bg-pink/10 w-full hover:text-white rounded transition py-2  cursor-not-allowed opacity-50'
+                    title='Not allowed'
+                    style={{
+                      cursor: 'not-allowed',
+                      pointerEvents: 'none'
+                    }}>
                         Customize this item
                       </button>
+
+                      <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                        <span className='bg-red-500 w-full opacity-30 text-white py-3 text-center rounded text-xs font-bold'>
+                          not applicable
+                        </span>
+                      </div>
+                      </div>
                     </div>
                   </div>
-
                   {/* Feedback Section */}
                   <div className="col-span-1 flex flex-col justify-between bg-[#1a1a1a] rounded-lg p-4 w-[100%] max-w-md h-full">
                     <div className='flex justify-between items-center mb-2'>
@@ -290,7 +313,6 @@ const ServicesProduct = () => {
                     </div>
                   </div>
                 </div>
-
                 {/* Related Products Section */}
                 <div className="relative lg:absolute bottom-1 left-0 w-full flex flex-col items-center bg-gradient-to-r from-black/40 via-black/80">
                   <motion.button
@@ -319,18 +341,17 @@ const ServicesProduct = () => {
                             onClick={() => handleProductSelect(item)}
                             className="relative w-full lg:w-58 h-50 bg-gray-800 rounded-lg flex-shrink-0 overflow-hidden cursor-pointer group hover:scale-[1.03] transition-all duration-300"
                           >
-                            <Image
+                            <img
                               src={item.image[0]}
                               alt={item.name}
-                              fill
-                              className="object-contain transition-transform duration-300 group-hover:scale-105"
+                              className="object-contain w-full h-full items-center justify-center transition-transform duration-300 group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-center p-2">
                               <h3 className="text-lg font-semibold text-white">
                                 {item.name}
                               </h3>
                               <p className="text-pink-500 text-lg mt-1">
-                                ₱{item.price}
+                               {item.price === 0 ? "" : `₱ ${item.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
                               </p>
                             </div>
                           </div>
@@ -372,9 +393,8 @@ const ServicesProduct = () => {
                 <h2 className='text-[22px] items-center justify-center text-center font-extrabold mt-4 text-pink-500 mb-4'>
                   Inquire Now
                 </h2>
-                
                 <div>
-                  <Image 
+                  <img
                     src={selectedProduct.image[0]}
                     alt={selectedProduct.name}
                     width={300}
@@ -383,14 +403,14 @@ const ServicesProduct = () => {
                   />
                   <div>
                     <h3 className='text-lg font-medium'>{selectedProduct.name}</h3>
-                    <p className='text-sm text-gray-400'>₱ {selectedProduct.price}</p>
+                    <p className='text-sm text-gray-400'>{selectedProduct.price === 0 ? "" : `₱ ${selectedProduct.price.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}`}</p>
                   </div>
                 </div>
-                
+
                 {/* Convert price to string for FakeInquiryForm */}
                 <FakeInquiryForm product={{
                   name: selectedProduct.name,
-                  price: selectedProduct.price.toString()
+                  price: selectedProduct.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
                 }}/>
               </motion.div>
             </motion.div>
@@ -399,13 +419,13 @@ const ServicesProduct = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className='flex items-center justify-between gap-3 mt-8'>
+          <div className='flex items-center justify-between gap-10 mt-8'>
             <button
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
               disabled={page === 1}
               className={`px-4 py-2 gap-1 rounded ${page === 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-pink text-white hover:bg-pink/80'}`}
             >
-              Previous
+              <ArrowLeft size={22}/>
             </button>
             
             {[...Array(totalPages)].map((_, i) => (
@@ -423,7 +443,7 @@ const ServicesProduct = () => {
               disabled={page === totalPages}
               className='text-sm px-3 py-1 rounded bg-gray-800 text-gray-300 hover:bg-gray-700 disabled:opacity-50'
             >
-              Next
+              <ArrowRight size={22}/>
             </button>
           </div>
         )}

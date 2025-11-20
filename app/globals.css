@@ -20,8 +20,11 @@
 
 }
 
+
+
 ::-webkit-scrollbar {
   width: 0px !important;
+  height: 5px !important;
 }
 
 ::-webkit-scrollbar-track {
@@ -72,6 +75,16 @@ body {
 }
 
 
+
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}
+
 @keyframes fadeInUp {
   0% {
     opacity: 0;
@@ -108,6 +121,8 @@ body {
   background-size: cover;
   background-position: center;
 }
+
+
 
 
 

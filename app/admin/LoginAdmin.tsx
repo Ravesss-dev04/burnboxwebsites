@@ -4,6 +4,7 @@ import Image from 'next/image'
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import AdminDashboard from './AdminDashboard'
+import { Eye, EyeOff } from 'lucide-react'
 
 const LoginAdmin = () => {
   const [email, setEmail] = useState('')
@@ -14,6 +15,8 @@ const LoginAdmin = () => {
   const [isLoginMode, setIsLoginMode] = useState(true) // true for login, false for register
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userEmail, setUserEmail] = useState('') // Add this missing state
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter()
 
   // Check if user is already logged in on component mount
@@ -43,7 +46,7 @@ const LoginAdmin = () => {
     }
 
     try {
-      const endpoint = isLoginMode ? 'https://bburnboxsites.vercel.app/api/auth/login' : 'https://bburnboxsites.vercel.app/api/auth/register'
+      const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register'
       
       // For registration, validate passwords match
       if (!isLoginMode && password !== confirmPassword) {
@@ -94,21 +97,19 @@ const LoginAdmin = () => {
     }
 
     try {
-      const response = await fetch('https://bburnboxsites.vercel.app/api/auth/forgot-password', {
+      const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email }),
       })
-
       const data = await response.json()
       alert(data.message)
     } catch (error) {
       alert('Error sending reset email')
     }
   }
-
   // Add this missing function
   const handleLogout = () => {
     localStorage.removeItem('adminUser')
@@ -118,7 +119,6 @@ const LoginAdmin = () => {
     setPassword('')
     router.refresh()
   }
-
   // If user is logged in, show dashboard
   if (isLoggedIn) {
     return (
@@ -127,7 +127,6 @@ const LoginAdmin = () => {
       />
     )
   }
-
   return (
     <div className='flex min-h-screen items-center justify-center'>
       <div className='flex flex-col md:flex-row bg-white shadow-2xl rounded-2xl overflow-hidden w-[60%]'>
@@ -142,7 +141,6 @@ const LoginAdmin = () => {
               className='mr-2'
             />
           </div>
-          
           {/* title */}
           <div className='flex flex-col justify-center items-center h-[80vh] px-10 py-12'>
             <h2 className='text-[25px] font-semibold text-center mb-8'>
@@ -154,7 +152,6 @@ const LoginAdmin = () => {
                 {error}
               </div>
             )}
-            
             {/* form */}
             <form className='space-y-4 w-full' onSubmit={handleAuth}>
               <input 
@@ -165,28 +162,44 @@ const LoginAdmin = () => {
                 className='w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500'
                 required
               />
-              <input 
-                type="password" 
-                placeholder='Password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className='w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500'
-                required
-                minLength={isLoginMode ? 1 : 6}
-              />
-              
+               <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 pr-10"
+                  required
+                  minLength={isLoginMode ? 1 : 6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-pink-500"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
               {/* Confirm Password Field (only for registration) */}
               {!isLoginMode && (
-                <input 
-                  type="password" 
-                  placeholder='Confirm Password'
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className='w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500'
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-pink-500"
+                  >
+                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               )}
-              
               <button 
                 type='submit' 
                 disabled={isLoading}
@@ -198,7 +211,6 @@ const LoginAdmin = () => {
                 }
               </button>
             </form>
-            
             <div className='bg-gray-400 w-full border border-gray-400 opacity-50 mt-10'></div>
             
             {/* extra links */}
@@ -233,9 +245,7 @@ const LoginAdmin = () => {
                 </p>
               )}
             </div>
-
             {/* Demo Credentials Hint */}
-            
           </div>
         </div>
         

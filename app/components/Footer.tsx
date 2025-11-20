@@ -35,7 +35,6 @@ const Footer = () => {
           </div>
 
           
-
           {/* Column 4: Follow Us */}
           <div>
             <h4 className="text-lg font-semibold  text-pink-400">Follow Us</h4>
@@ -59,7 +58,7 @@ const Footer = () => {
 
       {/* Bottom */}
       <div className="border-t border-gray-600 mt-8 pt-4 flex flex-col sm:flex-row justify-between items-center text-sm gap-4">
-        <p>© 2025, Burnbox Printing.</p>
+        <p className="">© 2025, Burnbox Printing.</p>
         <FaPaypal className="bg-blue-600 h-10 w-10 rounded-full" />
       </div>
     </footer>

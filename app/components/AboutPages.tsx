@@ -4,8 +4,6 @@ import MissionVission from './MissionVission'
 
 const AboutPages = () => {
   return (
-
- 
     <section className='min-h-[100vh]  text-white flex flex-col relative items-center  overflow-hidden'>
          <motion.div
           initial={{opacity: 0, y: 30}}
@@ -13,7 +11,7 @@ const AboutPages = () => {
           transition={{duration: 0.8, ease: 'easeOut'}}
           className='relative w-full max-w-10xl flex flex-col items-center '
         >
-         <img
+        <img
         src="/vsvissionabout.png"
         alt="Hand"
         className="absolute right-0 top-0   w-[1000px] opacity-70 pointer-events-none select-none hidden md:block"
@@ -40,8 +38,9 @@ const AboutPages = () => {
    </motion.div>
    <MissionVission/>
     </section>
- 
   )
 }
 
+
 export default AboutPages
+

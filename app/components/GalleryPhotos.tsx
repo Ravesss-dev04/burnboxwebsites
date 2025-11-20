@@ -2,11 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, A11y } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 
 interface GalleryImage {
   id: number;
@@ -16,24 +12,59 @@ interface GalleryImage {
   createdAt: string;
 }
 
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 100, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.8,
+      ease: [0.25, 0.1, 0.25, 1],
+    },
+  },
+};
+
+const mainImageTransition: Variants = {
+  enter: { 
+    x: 300, 
+    opacity: 0, 
+    scale: 0.8 
+  },
+  center: { 
+    x: 0, 
+    opacity: 1, 
+    scale: 1,
+    transition: {
+      duration: 1.2,
+      ease: [0.25, 0.1, 0.25, 1]
+    }
+  },
+  exit: { 
+    x: -300, 
+    opacity: 0, 
+    scale: 0.8,
+    transition: {
+      duration: 1.2,
+      ease: [0.25, 0.1, 0.25, 1]
+    }
+  }
+};
+
 const GalleryPhotos: React.FC = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const loadImages = async () => {
     try {
-      const res = await fetch('https://bburnboxsites.vercel.app/api/gallery');
-      if (!res.ok) {
-        throw new Error('Failed to fetch gallery images');
-      }
+      const res = await fetch('/api/gallery');
+      if (!res.ok) throw new Error('Failed to fetch gallery images');
       const data = await res.json();
-      
-      if (Array.isArray(data)) {
-        setImages(data);
-      } else {
-        setError('Invalid data format');
-      }
+      if (Array.isArray(data)) setImages(data);
+      else setError('Invalid data format');
     } catch (err) {
       console.error('Error loading gallery images:', err);
       setError('Failed to load gallery images');
@@ -45,72 +76,144 @@ const GalleryPhotos: React.FC = () => {
 
   useEffect(() => {
     loadImages();
-    // Optional: Refresh every 5 minutes to get new images
     const interval = setInterval(loadImages, 300000);
     return () => clearInterval(interval);
   }, []);
+
+  // Auto-advance slides with smoother timing
+  useEffect(() => {
+    if (images.length === 0 || isAnimating) return;
+    
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+      
+      // Reset animation flag after transition completes
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 1200);
+    }, 5000); // Change every 5 seconds (slower)
+
+    return () => clearInterval(interval);
+  }, [images.length, isAnimating]);
 
   if (loading) return <p className="text-center">Loading gallery...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
   if (images.length === 0) return <p className="text-center">No images found in gallery.</p>;
 
+  const currentImage = images[currentIndex];
+  // Get next 3 images for horizontal preview
+  const nextImages = [
+    images[(currentIndex + 1) % images.length],
+    images[(currentIndex + 2) % images.length],
+    images[(currentIndex + 3) % images.length]
+  ];
+
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-        exit={{ opacity: 0 }}
-        viewport={{ once: false, amount: 0.4 }}
+      <motion.section
+        className="relative min-h-50 custom-gallery-bg w-full lg:min-h-screen lg:w-full px-4 py-20 flex flex-col items-center overflow-hidden"
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
       >
-        <section id='gallery' className="relative min-h-screen custom-gallery-bg w-full px-4 py-20 flex flex-col items-center overflow-hidden">
-          <img 
-            className='absolute opacity-10 items-center ml-350 mt-30' 
-            src="/burnboxlogo.png" 
-            alt="Background Logo" 
-          />
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-center text-pink mb-12">
-            Gallery
-          </h1>
+        <img
+          className="absolute opacity-10 items-center ml-350 mt-30"
+          src="/burnboxlogo.png"
+          alt="Background Logo"
+        />
+        
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-center text-pink mb-12">
+          Gallery
+        </h1>
 
-          <Swiper
-            modules={[Pagination, A11y]}
-            spaceBetween={20}
-            slidesPerView={5}
-            pagination={{ clickable: true }}
-            className="w-full max-w-[1840px]"
-            breakpoints={{
-              0: { slidesPerView: 1 },
-              480: { slidesPerView: 2 },
-              768: { slidesPerView: 3 },
-              1024: { slidesPerView: 4 },
-              1280: { slidesPerView: 5 },
-            }}
-          >
-            {images.map((image) => (
-              <SwiperSlide key={image.id} className="flex justify-center">
-                <div className="w-[350px] h-[400px] border p-2 rounded shadow bg-white overflow-hidden gap-2">
+        {/* Main Gallery Container */}
+        <div className="relative w-full max-w-8xl h-[600px] flex items-center justify-between">
+          
+          {/* Main Center Image - Large and Centered */}
+          <div className="flex-1 flex justify-between mr-10 lg:mr-20">
+            <div className="relative w-[220px] h-[250px] lg:w-[700px] lg:h-[550px] ">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentIndex}
+                  variants={mainImageTransition}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="absolute w-full h-full"
+                >
+                  <div className="w-full h-full rounded-2xl overflow-hidden ">
+                    <Image
+                      src={currentImage.imageUrl}
+                      alt={currentImage.altText || currentImage.title || 'Gallery image'}
+                      width={700}
+                      height={550}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                      draggable="false"
+                    />
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+          <div className="flex pr-8">
+            <div className="flex flex-row gap-9 lg:gap-9"> {/* FLEX-ROW FOR HORIZONTAL */}
+              {nextImages.map((image, index) => (
+                <motion.div
+                  key={image.id}
+                  className="w-50 h-50 lg:w-100 lg:h-80  rounded-xl overflow-hidden  relative" /* HORIZONTAL DIMENSIONS */
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 0.8, x: 0 }}
+                  whileHover={{ scale: 1.05, opacity: 1 }}
+                  transition={{ 
+                    duration: 0.6, 
+                    delay: index * 0.2,
+                    ease: "easeOut"
+                  }}
+                >
+                  <div className='absolute inset-0 bg-black/30 z-10 rounded-xl transition-opacity duration-500 eas'/>
                   <Image
                     src={image.imageUrl}
                     alt={image.altText || image.title || 'Gallery image'}
-                    width={300}
-                    height={340}
-                    className="w-full h-full object-cover rounded"
+                    width={112}  
+                    height={160} 
+                    className="w-full h-full object-cover"
                     unoptimized
+                    draggable="false"
                   />
-                  {(image.title || image.altText) && (
-                    <div className="mt-2 p-2 text-center">
-                      <p className="text-sm text-gray-700 truncate">
+                  
+                  {/* Overlay with title */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                    {(image.title || image.altText) && (
+                      <p className="text-white text-xs font-medium p-2 truncate">
                         {image.title || image.altText}
                       </p>
-                    </div>
-                  )}
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </section>
-      </motion.div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Current Image Title */}
+        <AnimatePresence>
+          <motion.div 
+            key={currentIndex}
+            className="mt-8 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.8 }}
+          >
+            <p className="text-3xl text-gray-800 font-bold">
+              {currentImage.title || currentImage.altText}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+      </motion.section>
     </AnimatePresence>
   );
 };

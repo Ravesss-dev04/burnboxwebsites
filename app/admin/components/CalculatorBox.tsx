@@ -80,6 +80,7 @@ const CalculatorBox: React.FC = () => {
       return;
     }
 
+    
     const inputToSqm = Number(length) * Number(width) * conversionFactors[inputUnit];
     const converted = inputToSqm / conversionFactors[selected.unit];
     const total = converted * selected.price;
@@ -88,7 +89,9 @@ const CalculatorBox: React.FC = () => {
     setTotalPrice(total);
   };
 
+
   const unitName = (code: string) => code;
+
 
   return (
     <>

@@ -69,20 +69,7 @@ const Header: React.FC = () => {
     }, 300);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchValue(value);
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500)
-  };
-
-  const handleClearSearch = () => {
-    setSearchValue("");
-    setIsSearchActive(false);
-  }
+ 
 
   const [isSearchActive, setIsSearchActive] = useState(false);
   
@@ -260,15 +247,14 @@ const Header: React.FC = () => {
     <div className='h-20 w-full flex items-center justify-between px-5 py-3 text-white font-extralight text-lg z-100 bg-black fixed'>
       {/* Logo */}
       <a href="#home" className='h-20 py-3 px-1'>
-        <Image
+        <img
           height={500}
           width={500} 
-          src={'/burnboxlogo.png'}
+          src={'/burnboxlogo.png.webp'}
           alt='company logo'
           className='h-full object-contain object-left'
         />
       </a>
-      
       {/* Desktop Navigation */}
       <div className='hidden md:flex items-center justify-end flex-1 '>
         {!isSearchActive ? (
@@ -383,7 +369,7 @@ const Header: React.FC = () => {
                   transition={{ duration: 0.3 }}
                   className="absolute mt-3 w-[260px] bg-zinc-900 text-gray-300 rounded-xl shadow-lg border border-gray-700 p-4 flex flex-col items-center gap-3 z-50"
                 >
-                  <Image
+                  <img
                     src="/bblogo.png"
                     alt="Burnbox Logo"
                     width={50}
@@ -417,16 +403,16 @@ const Header: React.FC = () => {
                         className="w-full text-left flex items-center gap-3 p-2 rounded-md hover:bg-zinc-800 transition"
                       >
                         <div className="w-14 h-14 relative flex-shrink-0 rounded overflow-hidden bg-zinc-800">
-                          <Image
+                          <img
                             src={product.image[0]}
                             alt={product.name}
-                            fill
+                         
                             className="object-contain"
                           />
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-semibold text-white">{product.name}</p>
-                          <p className="text-xs text-pink-400">₱ {product.price}</p>
+                          <p className="text-xs text-pink-400">₱ {product.price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits: 2})}</p>
                         </div>
                       </button>
                     ))

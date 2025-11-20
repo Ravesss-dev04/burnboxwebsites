@@ -9,6 +9,7 @@ import GalleryPhotos from "../components/GalleryPhotos";
 import { HeaderProvider } from "../context/HeaderContext";
 import { TooltipProvider } from "../context/TooltipContext";
 import ServicesProduct from "../components/ServicesProduct";
+import SectionScrollProgress from './ScrollProgressBar';
 
 const MainPage = () => {
   const [videoVisible, isVideoVisible] = useState(true);
@@ -17,15 +18,16 @@ const MainPage = () => {
   const [selectedServiceFromHeader, setSelectedServiceFromHeader] = useState<string | null>(null);
   
     
-  useEffect(() => {
-    if (!videoVisible) {
-      setShowEmailPopup(true); 
-    }
-  }, [videoVisible]);
+  // useEffect(() => {
+  //   if (!videoVisible) {
+  //     setShowEmailPopup(true); 
+  //   }
+  // }, [videoVisible]);
   
   return (
     <div className="h-full max-w-full flex flex-col  bg-black relative overflow-x-hidden p-0 m-0">
-       {videoVisible && <IntroductionVideo isVideoVisible={isVideoVisible} />}
+     
+       {/* {videoVisible && <IntroductionVideo isVideoVisible={isVideoVisible} />} */}
       <AnimatePresence mode="wait">
         {showEmailPopup && <EmailPopup setShowEmailPopup={setShowEmailPopup} />}
       </AnimatePresence>
@@ -57,13 +59,14 @@ const MainPage = () => {
           </motion.button>
         )}
       </AnimatePresence>
-      <CardCarousel />
+      <CardCarousel  />
+      
       <div id="why-choose-burnbox">
       <WhyChooseBurnboxPage/>
       </div>
-      <div  className="h-auto w-full bg-white flex flex-col">
+      <section  id='gallery' className="h-auto w-full bg-white flex flex-col">
        <GalleryPhotos/>
-      </div>
+      </section>
       <Maps /> 
      <Footer/>
     </div>

@@ -17,17 +17,19 @@ const WhyChooseBurnboxPage: React.FC<AboutSectionProps> = ({editable = false}) =
     transition={{ duration: 0.5 }}  
     whileInView={{scale: 1}}
     viewport={{once: false, amount: 0.4}}
+    id='why-choose-burnbox'
   >
-    <section  className='bg-gray-100 text-white px-8 py-10 min-h-[55vh]'>
+    <section className='bg-gray-100 text-white px-8 py-10 min-h-full'>
       <div className='max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center mt-12'>
         
-         <div className='w-full'>
+         <div className='w-full '>
           {/* image here */}
           <Image
             src="/aboutusimage.png"
             alt='burnbox Storefront'
             width={1000}
             height={1000}
+            
           />
          </div>
          {/* about descriptuon */}
