@@ -625,7 +625,7 @@ const ServicesProduct = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className='fixed inset-0 bg-black/70 flex items-center justify-center z-50'
+              className='fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-0 sm:p-4'
               onClick={() => setShowInquiry(false)}
             > 
               <motion.div
@@ -633,31 +633,31 @@ const ServicesProduct = () => {
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.8, opacity: 0, y: 30 }}
                 transition={{ duration: 0.4, ease: [0.6, -0.05, 0.01, 0.99] }}
-                className='bg-gradient-to-br from-[#1a1a1a] via-[#151515] to-[#1a1a1a] flex flex-col text-white p-4 sm:p-6 rounded-xl w-full max-h-[90vh] overflow-x-hidden max-w-md relative mt-12 sm:mt-16 shadow-2xl border border-pink-500/20'
+                className='bg-gradient-to-br from-[#1a1a1a] via-[#151515] to-[#1a1a1a] flex flex-col text-white p-4 sm:p-6 rounded-none sm:rounded-xl w-full h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto overflow-x-hidden sm:max-w-md relative shadow-2xl border-0 sm:border border-pink-500/20'
                 onClick={(e) => e.stopPropagation()}
               >
                 <motion.button
                   onClick={() => setShowInquiry(false)}
-                  className='absolute top-3 right-4 sm:right-6 text-gray-400 hover:text-pink transition-colors duration-200 bg-black/30 hover:bg-black/50 p-2 rounded-lg'
+                  className='sticky top-0 sm:absolute sm:top-3 right-0 sm:right-6 text-gray-400 hover:text-pink transition-colors duration-200 bg-black/80 sm:bg-black/30 hover:bg-black/70 sm:hover:bg-black/50 p-3 sm:p-2 rounded-bl-lg sm:rounded-lg z-50 ml-auto mb-2 sm:mb-0'
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <ArrowBigRightDash className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <ArrowBigRightDash className="w-6 h-6 sm:w-5 sm:h-5" />
                 </motion.button>
                 
-                <h2 className='text-[22px] items-center justify-center text-center font-extrabold mt-4 text-pink-500 mb-4'>
+                <h2 className='text-xl sm:text-2xl items-center justify-center text-center font-extrabold mt-2 sm:mt-4 text-pink-500 mb-4 sm:mb-6'>
                   Inquire Now
                 </h2>
-                <div>
+                <div className='flex flex-col sm:flex-row items-center gap-4 mb-4 sm:mb-6'>
                   <img
                     src={selectedProduct.image[0]}
                     alt={selectedProduct.name}
                     width={300}
                     height={60}
-                    className='rounded-md object-contain ml-12 aspect-square max-h-40'
+                    className='rounded-md object-contain w-full sm:w-auto sm:ml-0 aspect-square max-h-32 sm:max-h-40'
                   />
-                  <div>
-                    <h3 className='text-lg font-medium'>{selectedProduct.name}</h3>
+                  <div className='text-center sm:text-left'>
+                    <h3 className='text-base sm:text-lg font-medium'>{selectedProduct.name}</h3>
                     <p className='text-sm text-gray-400'>{selectedProduct.price === 0 ? "" : `₱ ${selectedProduct.price.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}`}</p>
                   </div>
                 </div>
