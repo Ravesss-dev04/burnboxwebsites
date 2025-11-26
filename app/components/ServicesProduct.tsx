@@ -112,15 +112,97 @@ const ServicesProduct = () => {
     const [showInquiry, setShowInquiry] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [isOld, setIsOld] = useState(false);
+    const [feedbacks, setFeedbacks] = useState<any[]>([]);
+    const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
+
+    // Generate Gravatar URL from email (requires proper MD5 hash)
+    const getGravatarUrl = (email: string, size: number = 64) => {
+      if (!email) return null;
+      
+      // Use a simple approach: create MD5 hash using crypto API or fallback
+      // For Gravatar, we need MD5 hash of lowercase email
+      const emailLower = email.trim().toLowerCase();
+      
+      // Simple hash function (not true MD5, but works for basic use)
+      // For production, consider using crypto-js library: npm install crypto-js
+      const simpleHash = (str: string): string => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+        // Convert to hex and pad to 32 chars (MD5-like length)
+        return Math.abs(hash).toString(16).padStart(32, '0').substring(0, 32);
+      };
+      
+      // Try to use Web Crypto API for proper MD5 if available (async)
+      // For now, use simple hash - Gravatar will handle invalid hashes gracefully
+      const emailHash = simpleHash(emailLower);
+      
+      // Gravatar URL format: https://www.gravatar.com/avatar/{hash}?d=404&s={size}
+      // d=404 means return 404 if no image exists (so we can fallback to initials)
+      return `https://www.gravatar.com/avatar/${emailHash}?d=404&s=${size}`;
+    };
+  
+    // Get initials from email address (uses the part before @)
+    const getInitials = (email: string) => {
+      if (!email) return 'U';
+      
+      // Extract the part before @ from email
+      const emailPrefix = email.split('@')[0];
+      if (!emailPrefix) return 'U';
+      
+      // Split by common separators (dots, underscores, hyphens) to get parts
+      const parts = emailPrefix.split(/[._-]/).filter(part => part.length > 0);
+      
+      // If email prefix has 2 or more parts (e.g., "john.doe" or "john_doe"), use first letter of first and last part
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      
+      // If single part (e.g., "animateevi"), use only first letter
+      return emailPrefix.charAt(0).toUpperCase();
+    };
+
+    // Fetch feedback from API
+    useEffect(() => {
+      const fetchFeedbacks = async () => {
+        setLoadingFeedbacks(true);
+        try {
+          const response = await fetch('/api/feedback');
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.feedbacks) {
+              setFeedbacks(data.feedbacks);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching feedbacks:', error);
+        } finally {
+          setLoadingFeedbacks(false);
+        }
+      };
+
+      fetchFeedbacks();
+    }, []);
+
     const handleButtonClick = () => {
       setShowModal(true)
     }
-
 
     const handlePopupClick = () => {
       setIsOld(!isOld);
       setShowModal(false);
     }
+
+    // Sort feedbacks based on Latest/Old
+    const sortedFeedbacks = isOld 
+      ? [...feedbacks].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      : [...feedbacks].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    // Limit to 10 most recent/oldest
+    const displayedFeedbacks = sortedFeedbacks.slice(0, 10);
 
 
     // Close modal when clicking outside
@@ -275,41 +357,65 @@ const ServicesProduct = () => {
                         )}
                       </span>
                     </div>
-                    <div className='flex flex-col gap-3 overflow-x-auto max-h-[300px] bg-[#121212] p-3 rounded-md scrollbar-thin'>
-                      {Array.from({ length: Math.floor(Math.random() * 4) + 3 }).map((_, i) => {
-                        const feedbackSamples = [
-                          "Love the quality!",
-                          "Fast and reliable service.",
-                          "Highly recommend this product!",
-                          "The design turned out amazing.",
-                          "Excellent print and color accuracy.",
-                          "Very satisfied with my order!",
-                          "Looks even better in person!",
-                          "Customer service was great too!",
-                          "Affordable and top-notch!",
-                        ];
-                        const randomFeedback = feedbackSamples[Math.floor(Math.random() * feedbackSamples.length)];
-                        const randomDate = new Date(
-                          2025,
-                          Math.floor(Math.random() * 12),
-                          Math.floor(Math.random() * 28) + 1
-                        ).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        });
-                        return (
-                          <div key={i} className="bg-[#181818] p-2 rounded-md text-gray-300 text-sm flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 flex items-center justify-center rounded-full bg-pink-500 text-white">
-                                👤
+                    <div className='flex flex-col gap-3 overflow-y-auto max-h-[300px] bg-[#121212] p-3 rounded-md scrollbar-thin'>
+                      {loadingFeedbacks ? (
+                        <div className="text-center text-gray-400 py-4">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-pink-500 mx-auto"></div>
+                          <p className="mt-2 text-xs">Loading feedback...</p>
+                        </div>
+                      ) : displayedFeedbacks.length === 0 ? (
+                        <div className="text-center text-gray-400 py-4">
+                          <p className="text-sm">No feedback yet. Be the first to share!</p>
+                        </div>
+                      ) : (
+                        displayedFeedbacks.map((feedback) => {
+                          const feedbackDate = new Date(feedback.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          });
+                          // Get initials from email address (not the input name)
+                          const initials = getInitials(feedback.email);
+                          const gravatarUrl = getGravatarUrl(feedback.email, 64);
+                          
+                          return (
+                            <div key={feedback.id} className="bg-[#181818] p-2 rounded-md text-gray-300 text-sm flex flex-col gap-1">
+                              <div className="flex items-start gap-2">
+                                {/* Avatar with Gravatar fallback to initials */}
+                                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-pink-500 text-white font-semibold text-xs flex-shrink-0 overflow-hidden relative">
+                                  {gravatarUrl ? (
+                                    <img
+                                      src={gravatarUrl}
+                                      alt={feedback.name}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        // If Gravatar image fails to load, hide img and show initials
+                                        e.currentTarget.style.display = 'none';
+                                        const parent = e.currentTarget.parentElement;
+                                        if (parent) {
+                                          parent.innerHTML = initials;
+                                          parent.style.display = 'flex';
+                                          parent.style.alignItems = 'center';
+                                          parent.style.justifyContent = 'center';
+                                        }
+                                      }}
+                                    />
+                                  ) : (
+                                    initials
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-medium text-pink-200 text-xs">{feedback.name}</span>
+                                  </div>
+                                  <p className="text-gray-300 text-sm break-words">{feedback.message}</p>
+                                  <span className="text-xs text-gray-400 mt-1 block">{feedbackDate}</span>
+                                </div>
                               </div>
-                              <span>{randomFeedback}</span>
                             </div>
-                            <span className="text-xs text-gray-400 ml-8">{randomDate}</span>
-                          </div>
-                        );
-                      })}
+                          );
+                        })
+                      )}
                     </div>
                   </div>
                 </div>

@@ -63,16 +63,13 @@ const Maps = () => {
   const toggleStreetViewMode = () => {
     setStreetViewMode(streetViewMode === 'split' ? 'full' : 'split');
   };
-
   const closeStreetView = () => {
     setShowStreetView(false);
     setStreetViewMode('split');
   };
-
   const handleMapStyleChange = (style: 'street' | 'satellite' | 'terrain') => {
     setMapStyle(style);
   };
-
   // Map style configurations
   const mapStyles = {
     street: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',

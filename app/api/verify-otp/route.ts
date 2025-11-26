@@ -4,8 +4,6 @@ import { otpStore } from "@/lib/otp-store";
 import { corsHeaders } from "@/lib/corsHeaders";
 
 
-
-
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }

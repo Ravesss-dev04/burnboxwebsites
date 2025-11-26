@@ -154,7 +154,7 @@ const GalleryPhotos: React.FC = () => {
                       height={550}
                       className="w-full h-full object-cover"
                       unoptimized
-                      draggable="false"
+                      draggable="false".
                     />
                   </div>
                 </motion.div>

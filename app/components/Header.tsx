@@ -406,13 +406,12 @@ const Header: React.FC = () => {
                           <img
                             src={product.image[0]}
                             alt={product.name}
-                         
                             className="object-contain"
                           />
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-semibold text-white">{product.name}</p>
-                          <p className="text-xs text-pink-400">₱ {product.price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits: 2})}</p>
+                          <p className="text-xs text-pink-400"> {product.price === 0 ? "" : `₱ ${product.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}</p>
                         </div>
                       </button>
                     ))
@@ -435,294 +434,412 @@ const Header: React.FC = () => {
 
       {/* Mobile Menu Button */}
       <div className='md:hidden flex items-center'>
-        <button
-          className='text-3xl text-white'
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          className='text-3xl text-white relative z-50'
           onClick={() => {
             setMobileMenuOpen(!isMobileMenuOpen)
             setShowMobileSubmenu(false)
           }}
         >
-          {isMobileMenuOpen ? <RiMenu4Line className='text-pink-500'/> : <HiMenu />}
-        </button>
+          <AnimatePresence mode="wait">
+            {isMobileMenuOpen ? (
+              <motion.div
+                key="close"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <RiMenu4Line className='text-pink-500'/>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="menu"
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -90, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <HiMenu />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.button>
       </div>
 
       {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="absolute top-full left-0 w-full bg-black text-white px-7 space-y-4 transition-[max-height,opacity,transform] duration-300 ease-in-out max-h-screen opacity-100">
-          {['Home', 'About', 'Services', 'Contact'].map((item, index) => {
-            const isAbout = item === 'About';
-            const isServices = item === 'Services';
-            const isHome = item === 'Home';
-            const isContact = item === 'Contact';
-            
-            return (
-              <div
-                key={item}
-                className="w-full animate-fadeInUp"
-                style={{ animationDelay: `${index * 0.1 + 0.2}s` }}
-              >
-                {/* Top-level Menu Item */}
-                <div className="flex items-center gap-2">
-                  <button  
-                    onClick={() => {
-                      if (isAbout) {
-                        if (isMobile) {
-                          router.push('/about');
-                          setMobileMenuOpen(false);
-                        } else {
-                          setShowAboutTooltip(prev => !prev);
-                          setShowServicesTooltip(false);
-                        }
-                      } else if (isServices) {
-                        if (isMobile) {
-                          // UPDATED: Use the new function for mobile services
-                          setShowServicesTooltip(prev => !prev);
-                          setShowAboutTooltip(false);
-                        } else {
-                          setShowServicesTooltip(prev => !prev);
-                          setShowAboutTooltip(false);
-                        }
-                      } else if (isHome) {
-                        router.push('/#home')
-                        setMobileMenuOpen(false)
-                      } else if (isContact) {
-                        router.push('/contact#contact')
-                        setMobileMenuOpen(false)
-                      } 
-                    }}
-                    className="flex items-center gap-2 text-left hover:text-pink transition"
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
+            className="absolute top-full left-0 w-full bg-gradient-to-b from-black via-black to-black/95 backdrop-blur-md text-white px-7 py-6 space-y-4 shadow-2xl border-t border-pink-500/20"
+          >
+            {['Home', 'About', 'Services', 'Contact'].map((item, index) => {
+              const isAbout = item === 'About';
+              const isServices = item === 'Services';
+              const isHome = item === 'Home';
+              const isContact = item === 'Contact';
+              
+              return (
+                <motion.div
+                  key={item}
+                  initial={{ opacity: 0, x: -30, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, x: -30, filter: "blur(10px)" }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: index * 0.1,
+                    ease: [0.6, -0.05, 0.01, 0.99]
+                  }}
+                  className="w-full"
+                >
+                  {/* Top-level Menu Item */}
+                  <motion.div 
+                    className="flex items-center gap-2"
+                    whileHover={{ x: 5 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    {item}
-                  </button>
-                  
-                  {(isAbout || isServices) && (
-                    <button
+                    <motion.button  
                       onClick={() => {
                         if (isAbout) {
-                          setShowAboutTooltip(prev => !prev);
-                          setShowServicesTooltip(false);
-                        } else if (isServices) {
-                          setShowServicesTooltip(prev => !prev);
-                          setShowAboutTooltip(false);
-                        }
-                      }}
-                      className="flex items-center"
-                    >
-                      <HiChevronDown
-                        className={`text-pink-500 transition-transform duration-300 
-                          ${((isAbout && showAboutTooltip) || (isServices && showServicesTooltip)) ? 'rotate-180' : ''}`}
-                        size={18}
-                      />
-                    </button>
-                  )}
-                </div>
-
-                {/* About Submenu */}
-                <AnimatePresence>
-                  {isAbout && showAboutTooltip && (
-                    <motion.div
-                      key="about-tooltip-overlay"
-                      initial={{ opacity: 0, scale: 1, y: 10}}
-                      animate={{opacity: 1, scale: 1, y: 0}}
-                      exit={{opacity: 0, scale: 0.8, transition: { duration: 0.2 }}}
-                      transition={{duration: 0.2, ease: 'easeInOut'}}
-                      onMouseEnter={() => {
-                        if(hideTimeout.current) clearTimeout(hideTimeout.current);
-                      }}
-                      onMouseLeave={() => {
-                        hideTimeout.current = setTimeout(() => {
-                          setShowAboutTooltip(false);
-                        }, 200)
-                      }}
-                    >
-                      <div className="ml-4 mt-2 space-y-2 bg-zinc-900 rounded p-6 w-[280px]">
-                        {aboutList.map((label, idx) => {
-                          const handleAboutNavigation = (label: string) => {
-                            const routeMap: Record<string, string> = {
-                              "About Us": "/about#about-us",
-                              "Mission and Vission": "/about#mission-and-vision",
-                              "Why Choose Burnbox Printing?": "#why-choose-burnbox",
-                            };
-                            const target = routeMap[label];
-                            if (!target) return;
-
-                            if (label === "Why Choose Burnbox Printing?") {
-                              if (pathname === "/") {
-                                const section = document.querySelector(target);
-                                section?.scrollIntoView({ behavior: "smooth" });
-                              } else {
-                                router.push("/#why-choose-burnbox");
-                              }
-                            } else {
-                              router.push(target);
-                            }
+                          if (isMobile) {
+                            router.push('/about');
                             setMobileMenuOpen(false);
+                          } else {
+                            setShowAboutTooltip(prev => !prev);
+                            setShowServicesTooltip(false);
+                          }
+                        } else if (isServices) {
+                          if (isMobile) {
+                            // UPDATED: Use the new function for mobile services
+                            setShowServicesTooltip(prev => !prev);
                             setShowAboutTooltip(false);
-                          };
-                          return (
-                            <button
-                              key={idx}
-                              className="block text-sm text-left hover:text-pink transition"
-                              onClick={() => handleAboutNavigation(label)}
-                            >
-                              {label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Services Submenu - UPDATED */}
-                <AnimatePresence>
-                  {isServices && showServicesTooltip && (
-                    <motion.div
-                      key="services-tooltip-overlay"
-                      initial={{ opacity: 0, scale: 1, y: 10}}
-                      animate={{opacity: 1, scale: 1, y: 0}}
-                      exit={{opacity: 0, scale: 0.8, transition: { duration: 0.2 }}}
-                      transition={{duration: 0.2, ease: 'easeInOut'}}
-                      onMouseEnter={() => {
-                        if(hideTimeout.current) clearTimeout(hideTimeout.current);
+                          } else {
+                            setShowServicesTooltip(prev => !prev);
+                            setShowAboutTooltip(false);
+                          }
+                        } else if (isHome) {
+                          router.push('/#home')
+                          setMobileMenuOpen(false)
+                        } else if (isContact) {
+                          router.push('/contact#contact')
+                          setMobileMenuOpen(false)
+                        } 
                       }}
-                      onMouseLeave={() => {
-                        hideTimeout.current = setTimeout(() => {
-                          setShowServicesTooltip(false);
-                        }, 200)
-                      }}
+                      className="flex items-center gap-2 text-left hover:text-pink transition-colors duration-200 text-lg font-medium"
+                      whileTap={{ scale: 0.95 }}
                     >
-                      <div className="ml-4 mt-2 space-y-2 bg-zinc-900 rounded p-6 w-[280px]">
-                        {servicesList.map((service, idx) => (
-                          <button
-                            key={idx}
-                            className="block text-sm  hover:text-pink transition w-full text-left"
-                            onClick={() => handleMobileServiceClick(service.name)} // UPDATED: Use new function
-                          >
-                            {service.name}
-                          </button>
-                        ))}
-                      </div>
+                      {item}
+                    </motion.button>
+                    
+                    {(isAbout || isServices) && (
+                      <motion.button
+                        onClick={() => {
+                          if (isAbout) {
+                            setShowAboutTooltip(prev => !prev);
+                            setShowServicesTooltip(false);
+                          } else if (isServices) {
+                            setShowServicesTooltip(prev => !prev);
+                            setShowAboutTooltip(false);
+                          }
+                        }}
+                        className="flex items-center"
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <motion.div
+                          animate={{ 
+                            rotate: ((isAbout && showAboutTooltip) || (isServices && showServicesTooltip)) ? 180 : 0 
+                          }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                          <HiChevronDown
+                            className="text-pink-500"
+                            size={18}
+                          />
+                        </motion.div>
+                      </motion.button>
+                    )}
+                  </motion.div>
+
+                  {/* About Submenu */}
+                  <AnimatePresence>
+                    {isAbout && showAboutTooltip && (
+                      <motion.div
+                        key="about-tooltip-overlay"
+                        initial={{ opacity: 0, height: 0, y: -10 }}
+                        animate={{ opacity: 1, height: "auto", y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -10 }}
+                        transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
+                        className="overflow-hidden"
+                      >
+                        <motion.div 
+                          className="ml-4 mt-3 space-y-2 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 rounded-lg p-4 w-[280px] border border-pink-500/20 shadow-xl"
+                          initial={{ scale: 0.95 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          {aboutList.map((label, idx) => {
+                            const handleAboutNavigation = (label: string) => {
+                              const routeMap: Record<string, string> = {
+                                "About Us": "/about#about-us",
+                                "Mission and Vission": "/about#mission-and-vision",
+                                "Why Choose Burnbox Printing?": "#why-choose-burnbox",
+                              };
+                              const target = routeMap[label];
+                              if (!target) return;
+
+                              if (label === "Why Choose Burnbox Printing?") {
+                                if (pathname === "/") {
+                                  const section = document.querySelector(target);
+                                  section?.scrollIntoView({ behavior: "smooth" });
+                                } else {
+                                  router.push("/#why-choose-burnbox");
+                                }
+                              } else {
+                                router.push(target);
+                              }
+                              setMobileMenuOpen(false);
+                              setShowAboutTooltip(false);
+                            };
+                            return (
+                              <motion.button
+                                key={idx}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: idx * 0.05 + 0.15 }}
+                                whileHover={{ x: 5, color: "#ec4899" }}
+                                whileTap={{ scale: 0.95 }}
+                                className="block text-sm text-left hover:text-pink transition-colors duration-200 py-2 px-2 rounded-md hover:bg-pink/10 w-full"
+                                onClick={() => handleAboutNavigation(label)}
+                              >
+                                {label}
+                              </motion.button>
+                            );
+                          })}
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Services Submenu - UPDATED */}
+                  <AnimatePresence>
+                    {isServices && showServicesTooltip && (
+                      <motion.div
+                        key="services-tooltip-overlay"
+                        initial={{ opacity: 0, height: 0, y: -10 }}
+                        animate={{ opacity: 1, height: "auto", y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -10 }}
+                        transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
+                        className="overflow-hidden"
+                      >
+                        <motion.div 
+                          className="ml-4 mt-3 space-y-2 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 rounded-lg p-4 w-[280px] border border-pink-500/20 shadow-xl max-h-[400px] overflow-y-auto"
+                          initial={{ scale: 0.95 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          {servicesList.map((service, idx) => (
+                            <motion.button
+                              key={idx}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: idx * 0.03 + 0.15 }}
+                              whileHover={{ x: 5, color: "#ec4899" }}
+                              whileTap={{ scale: 0.95 }}
+                              className="block text-sm hover:text-pink transition-colors duration-200 w-full text-left py-2 px-2 rounded-md hover:bg-pink/10"
+                              onClick={() => handleMobileServiceClick(service.name)} // UPDATED: Use new function
+                            >
+                              {service.name}
+                            </motion.button>
+                          ))}
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+            {/* Mobile Search and Cart */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.4 }}
+              className='relative flex items-center gap-4 mt-6 py-4 overflow-visible z-[9999]'
+            >
+              {/* Cart Icon */}
+              <motion.div 
+                className='p-2 rounded-full bg-pink cursor-pointer'
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ duration: 0.2 }}
+              >
+                <HiOutlineShoppingCart className='text-xl' />
+              </motion.div>
+            
+              {/* Search Input Field */}
+              <AnimatePresence>
+                {isMobileSearchActive && (
+                  <motion.input
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: 200, opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    type='text'
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    placeholder='Search...'
+                    className='bg-transparent border border-pink-300 text-white px-4 py-2 rounded-md focus:outline-none focus:border-pink-500 placeholder:text-gray-400'
+                    autoFocus
+                  />
+                )}
+              </AnimatePresence>
+
+              <motion.button
+                onClick={() => {
+                  setIsMobileSearchActive(prev => !prev);
+                  setSearchValue('');
+                }}
+                className='relative w-8 h-8'
+                whileTap={{ scale: 0.9 }}
+              >
+                <AnimatePresence mode="wait">
+                  {isMobileSearchActive ? (
+                    <motion.div
+                      key="close"
+                      initial={{ rotate: -90, opacity: 0, scale: 0 }}
+                      animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                      exit={{ rotate: 90, opacity: 0, scale: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <HiX className="w-8 h-8 text-pink-500" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="search"
+                      initial={{ rotate: 90, opacity: 0, scale: 0 }}
+                      animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                      exit={{ rotate: -90, opacity: 0, scale: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <HiOutlineSearch className="w-8 h-8 text-white" />
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
-            );
-          })}
-          {/* Mobile Search and Cart */}
-          <div className='relative flex items-center gap-4 mt-6 py-4 animate-fadeInUp transition-all duration-300 overflow-visible z-[9999]' style={{ animationDelay: '0.7s'}}>
-            {/* Cart Icon */}
-            <div className='p-2 rounded-full bg-pink hover:scale-110 transition'>
-              <HiOutlineShoppingCart className='text-xl' />
-            </div>
-            
-            {/* Search Input Field */}
-            {isMobileSearchActive && (
-              <input
-                type='text'
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                placeholder='Search...'
-                className='min-w-[120px] max-w-[200px] bg-transparent border border-pink-300 text-white px-4 py-2 rounded-md focus:outline-none placeholder:text-gray-400 transition-all duration-300'
-              />
-            )}
+              </motion.button>
 
-            <button
-              onClick={() => {
-                setIsMobileSearchActive(prev => !prev);
-                setSearchValue('');
-              }}
-              className='relative w-8 h-8 transition-all duration-500 ease-in-out transform hover:rotate-90'
-            >
-              <HiOutlineSearch
-                className={`
-                  absolute top-0 left-0 w-8 h-8 text-white transition-all duration-300 ease-in-out 
-                  ${isMobileSearchActive ? 'opacity-0 scale-0 rotate-45' : 'opacity-100 scale-100 rotate-0'}
-                `}
-              />
-              <HiX
-                className={`
-                  absolute top-0 left-0 w-8 h-8 text-pink-500 transition-all duration-300 ease-in-out 
-                  ${isMobileSearchActive ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-0 rotate-45'}
-                `}
-              />
-            </button>
-
-            {/* Mobile Search Results */}
-            {isMobileSearchActive && (
-              <div className="absolute bottom-[-150px] left-12 w-52 bg-zinc-900/95 text-gray-300 rounded-xl shadow-lg border border-gray-700 p-4 flex flex-col items-center gap-3 z-[10000] backdrop-blur-md transition-all duration-300">
-                {searchValue.trim() === '' ? (
-                  <>
-                    <img
-                      src="/bblogo.png"
-                      alt="Burnbox Logo"
-                      className="h-12 object-contain animate-fadeIn"
-                    />
-                    <div className="text-center text-sm animate-fadeIn">
-                      <p className="text-white font-semibold">Looking for something?</p>
-                      <p className="text-xs text-gray-400">
-                        Search Burnbox Printing for posts, photos, and other visible activity.
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {searchValue.length < 2 ? (
-                      <div className="flex flex-col items-center justify-center w-full py-4">
-                        <div className="w-17 h-17 border-2 border-pink-400 border-t-transparent rounded-full animate-spin mb-2"></div>
-                        <p className="text-xs text-gray-400">Searching...</p>
-                      </div>
+              {/* Mobile Search Results */}
+              <AnimatePresence>
+                {isMobileSearchActive && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute bottom-[-150px] left-12 w-52 bg-gradient-to-br from-zinc-900/95 via-zinc-800/95 to-zinc-900/95 text-gray-300 rounded-xl shadow-2xl border border-pink-500/30 p-4 flex flex-col items-center gap-3 z-[10000] backdrop-blur-md"
+                  >
+                    {searchValue.trim() === '' ? (
+                      <>
+                        <motion.img
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.1 }}
+                          src="/bblogo.png"
+                          alt="Burnbox Logo"
+                          className="h-12 object-contain"
+                        />
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="text-center text-sm"
+                        >
+                          <p className="text-white font-semibold">Looking for something?</p>
+                          <p className="text-xs text-gray-400">
+                            Search Burnbox Printing for posts, photos, and other visible activity.
+                          </p>
+                        </motion.div>
+                      </>
                     ) : (
                       <>
-                        <div className="w-full flex flex-col gap-2">
-                          {[
-                            { name: 'Home', id: 'home' },
-                            { name: 'About', id: 'about' },
-                            { name: 'Services', id: 'services' },
-                            { name: 'Contact', id: 'contact' },
-                          ]
-                            .filter((item) =>
-                              item.name.toLowerCase().includes(searchValue.toLowerCase())
-                            )
-                            .map((item, index) => (
-                              <button
-                                key={index}
-                                onClick={() => {
-                                  const section = document.getElementById(item.id);
-                                  if (section) {
-                                    section.scrollIntoView({ behavior: 'smooth' });
-                                  } else {
-                                    window.location.href = `/${item.id.toLowerCase()}`;
-                                  }
-                                  setIsMobileSearchActive(false);
-                                }}
-                                className="w-full sm:w-full px-3 py-13 rounded-md hover:text-white transition-all duration-200 text-sm"
-                              >
-                                {item.name}
-                              </button>
-                            ))}
-                          {[
-                            { name: 'Home', id: 'home' },
-                            { name: 'About', id: 'about' },
-                            { name: 'Services', id: 'services' },
-                            { name: 'Contact', id: 'contact' },
-                          ].filter((item) =>
-                            item.name.toLowerCase().includes(searchValue.toLowerCase())
-                          ).length === 0 && (
-                            <p className="text-center py-13 text-xs text-gray-400">
-                              No results found.
-                            </p>
-                          )}
-                        </div>
+                        {searchValue.length < 2 ? (
+                          <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex flex-col items-center justify-center w-full py-4"
+                          >
+                            <motion.div 
+                              className="w-8 h-8 border-2 border-pink-400 border-t-transparent rounded-full mb-2"
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            />
+                            <p className="text-xs text-gray-400">Searching...</p>
+                          </motion.div>
+                        ) : (
+                          <>
+                            <div className="w-full flex flex-col gap-2">
+                              {[
+                                { name: 'Home', id: 'home' },
+                                { name: 'About', id: 'about' },
+                                { name: 'Services', id: 'services' },
+                                { name: 'Contact', id: 'contact' },
+                              ]
+                                .filter((item) =>
+                                  item.name.toLowerCase().includes(searchValue.toLowerCase())
+                                )
+                                .map((item, index) => (
+                                  <motion.button
+                                    key={index}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    whileHover={{ x: 5, color: "#ec4899" }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                      const section = document.getElementById(item.id);
+                                      if (section) {
+                                        section.scrollIntoView({ behavior: 'smooth' });
+                                      } else {
+                                        window.location.href = `/${item.id.toLowerCase()}`;
+                                      }
+                                      setIsMobileSearchActive(false);
+                                    }}
+                                    className="w-full sm:w-full px-3 py-2 rounded-md hover:bg-pink/10 transition-all duration-200 text-sm text-left"
+                                  >
+                                    {item.name}
+                                  </motion.button>
+                                ))}
+                              {[
+                                { name: 'Home', id: 'home' },
+                                { name: 'About', id: 'about' },
+                                { name: 'Services', id: 'services' },
+                                { name: 'Contact', id: 'contact' },
+                              ].filter((item) =>
+                                item.name.toLowerCase().includes(searchValue.toLowerCase())
+                              ).length === 0 && (
+                                <motion.p 
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  className="text-center py-4 text-xs text-gray-400"
+                                >
+                                  No results found.
+                                </motion.p>
+                              )}
+                            </div>
+                          </>
+                        )}
                       </>
                     )}
-                  </>
+                  </motion.div>
                 )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              </AnimatePresence>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

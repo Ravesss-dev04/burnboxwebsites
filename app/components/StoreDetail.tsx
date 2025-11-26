@@ -42,7 +42,7 @@ const StoreDetail: React.FC<StoreDetailProps> = ({ onDirectionClick }) => {
 
 
       const isWeekday = now.getDay() >= 1 && now.getDay() <= 5; // Monday = 1, Friday = 5
-      const isOpenHours = currentHour >= 10 && currentHour < 22;
+      const isOpenHours = currentHour >= 9 && currentHour < 18;
     
     // Special case: exactly 10:00 PM should be closed
     const isExactly10PM = currentHour === 22 && currentMinutes === 0;
@@ -98,7 +98,7 @@ const StoreDetail: React.FC<StoreDetailProps> = ({ onDirectionClick }) => {
             <FaCalendar className='mt-1 text-pink-500'/>
             <div>
               <p className='flex items-center gap-2'>
-                Mon - Fri, 10:00 am - 10:00 PM
+                Mon - Sunday, 9:00 am - 6:00 PM
                 <span 
                   className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     isOpen 
