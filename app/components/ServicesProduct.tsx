@@ -231,7 +231,16 @@ const ServicesProduct = () => {
 
     const handleCloseModal = () => {
       setSelectedProduct(null);
-      setPage(1)
+      setPage(1);
+      // Ensure products section is visible after closing modal
+      setHasAnimated(true);
+      // Scroll to products section if needed
+      setTimeout(() => {
+        const productsSection = document.getElementById('products-section');
+        if (productsSection) {
+          productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     }
 
     
@@ -288,7 +297,16 @@ const ServicesProduct = () => {
     };
 
     const sectionRef = useRef<HTMLDivElement>(null);
-    const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
+    const isInView = useInView(sectionRef, { once: false, amount: 0.1 });
+    const [hasAnimated, setHasAnimated] = useState(false);
+    
+    // Ensure products are visible after mount (fixes Vercel hydration issue)
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setHasAnimated(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }, []);
 
     return (
     <>
@@ -301,7 +319,7 @@ const ServicesProduct = () => {
           className='grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 w-full max-w-7xl'
           variants={containerVariants}
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          animate={(isInView || hasAnimated) ? "visible" : "hidden"}
         >
           {currentProducts.map((item, index) => (
             <motion.div 
@@ -617,7 +635,6 @@ const ServicesProduct = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Inquiry Form Modal */}
         <AnimatePresence>
           {showInquiry && selectedProduct && (
@@ -633,7 +650,7 @@ const ServicesProduct = () => {
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.8, opacity: 0, y: 30 }}
                 transition={{ duration: 0.4, ease: [0.6, -0.05, 0.01, 0.99] }}
-                className='bg-gradient-to-br from-[#1a1a1a] via-[#151515] to-[#1a1a1a] flex flex-col text-white p-4 sm:p-6 rounded-xl w-full max-h-[70vh] overflow-x-hidden max-w-md relative mt-12 sm:mt-16 shadow-2xl border border-pink-500/20'
+                className='bg-gradient-to-br from-[#1a1a1a] via-[#151515] to-[#1a1a1a] flex flex-col text-white p-4 sm:p-6 rounded-xl w-full max-h-[75vh] overflow-x-hidden max-w-md relative mt-12 sm:mt-16 shadow-2xl border border-pink-500/20'
                 onClick={(e) => e.stopPropagation()}
               >
                 <motion.button
@@ -671,7 +688,6 @@ const ServicesProduct = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Pagination */}
         {totalPages > 1 && (
           <motion.div 
