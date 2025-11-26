@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FaStar, FaCheckCircle, FaSpinner } from 'react-icons/fa';
 
-export default function FeedbackPage() {
+// Separate component that uses useSearchParams
+function FeedbackForm() {
   const searchParams = useSearchParams();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -223,6 +224,33 @@ export default function FeedbackPage() {
         </p>
       </motion.div>
     </div>
+  );
+}
+
+// Loading fallback component
+function FeedbackLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4 py-20">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-2xl shadow-2xl p-6 md:p-10 max-w-2xl w-full"
+      >
+        <div className="text-center">
+          <FaSpinner className="animate-spin text-4xl text-pink-500 mx-auto mb-4" />
+          <p className="text-gray-600">Loading feedback form...</p>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function FeedbackPage() {
+  return (
+    <Suspense fallback={<FeedbackLoading />}>
+      <FeedbackForm />
+    </Suspense>
   );
 }
 
