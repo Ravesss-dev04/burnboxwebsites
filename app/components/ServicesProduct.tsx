@@ -633,7 +633,7 @@ const ServicesProduct = () => {
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.8, opacity: 0, y: 30 }}
                 transition={{ duration: 0.4, ease: [0.6, -0.05, 0.01, 0.99] }}
-                className='bg-gradient-to-br from-[#1a1a1a] via-[#151515] to-[#1a1a1a] flex flex-col text-white p-4 sm:p-6 rounded-xl w-full max-h-[90vh] overflow-x-hidden max-w-md relative mt-12 sm:mt-16 shadow-2xl border border-pink-500/20'
+                className='bg-gradient-to-br from-[#1a1a1a] via-[#151515] to-[#1a1a1a] flex flex-col text-white p-4 sm:p-6 rounded-xl w-full max-h-[70vh] overflow-x-hidden max-w-md relative mt-12 sm:mt-16 shadow-2xl border border-pink-500/20'
                 onClick={(e) => e.stopPropagation()}
               >
                 <motion.button
