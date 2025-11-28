@@ -43,6 +43,9 @@ async function trackVisitorLocation(ipAddress: string, inquiryId: number) {
     let city = null;
     let latitude = null;
     let longitude = null;
+    
+    // Store results from multiple APIs for cross-validation
+    const apiResults: any[] = [];
 
     // For localhost in development, use a test location
     if (isLocalhost && process.env.NODE_ENV === 'development') {
@@ -53,12 +56,22 @@ async function trackVisitorLocation(ipAddress: string, inquiryId: number) {
     } else if (!isLocalhost || process.env.NODE_ENV === 'production') {
       // Try multiple geolocation APIs for better reliability and accuracy
       // Order matters - most accurate/reliable first
+      // We'll try multiple APIs and cross-reference results for accuracy
       const geoApis = [
         {
           name: 'ip-api.com',
-          url: `http://ip-api.com/json/${geoLookupIp}?fields=status,message,country,regionName,city,lat,lon,countryCode,timezone`,
+          url: `http://ip-api.com/json/${geoLookupIp}?fields=status,message,country,regionName,city,lat,lon,countryCode,timezone,isp,org,as`,
           parser: (data: any) => {
             if (data.status === 'fail' || data.message) return null;
+            // Check if this is a cloud provider/datacenter IP
+            const isp = (data.isp || '').toLowerCase();
+            const org = (data.org || '').toLowerCase();
+            const isCloudProvider = isp.includes('amazon') || isp.includes('aws') || 
+                                  isp.includes('google') || isp.includes('microsoft') ||
+                                  isp.includes('azure') || isp.includes('cloud') ||
+                                  org.includes('amazon') || org.includes('aws') ||
+                                  org.includes('google') || org.includes('microsoft');
+            
             const country = data.country || '';
             const region = data.regionName || '';
             
@@ -70,7 +83,9 @@ async function trackVisitorLocation(ipAddress: string, inquiryId: number) {
               latitude: data.lat || null,
               longitude: data.lon || null,
               country: country,
-              region: region
+              region: region,
+              isp: data.isp || null,
+              isCloudProvider: isCloudProvider
             };
           }
         },
@@ -78,7 +93,7 @@ async function trackVisitorLocation(ipAddress: string, inquiryId: number) {
           name: 'ipapi.co',
           url: `https://ipapi.co/${geoLookupIp}/json/`,
           parser: (data: any) => {
-            if (data.error) return null;
+            if (data.error || data.reserved) return null;
             const country = data.country_name || data.country || '';
             const region = data.region || data.region_code || '';
             const state = data.region || '';
@@ -91,15 +106,25 @@ async function trackVisitorLocation(ipAddress: string, inquiryId: number) {
               latitude: data.latitude || null,
               longitude: data.longitude || null,
               country: country,
-              region: state
+              region: state,
+              isp: data.org || null,
+              isCloudProvider: false
             };
           }
         },
         {
           name: 'ip-api.com (https)',
-          url: `https://ip-api.com/json/${geoLookupIp}?fields=status,message,country,regionName,city,lat,lon`,
+          url: `https://ip-api.com/json/${geoLookupIp}?fields=status,message,country,regionName,city,lat,lon,isp,org`,
           parser: (data: any) => {
             if (data.status === 'fail' || data.message) return null;
+            const isp = (data.isp || '').toLowerCase();
+            const org = (data.org || '').toLowerCase();
+            const isCloudProvider = isp.includes('amazon') || isp.includes('aws') || 
+                                  isp.includes('google') || isp.includes('microsoft') ||
+                                  isp.includes('azure') || isp.includes('cloud') ||
+                                  org.includes('amazon') || org.includes('aws') ||
+                                  org.includes('google') || org.includes('microsoft');
+            
             const country = data.country || '';
             const region = data.regionName || '';
             
@@ -111,23 +136,51 @@ async function trackVisitorLocation(ipAddress: string, inquiryId: number) {
               latitude: data.lat || null,
               longitude: data.lon || null,
               country: country,
-              region: region
+              region: region,
+              isp: data.isp || null,
+              isCloudProvider: isCloudProvider
+            };
+          }
+        },
+        {
+          name: 'ipwho.is',
+          url: `http://ipwho.is/${geoLookupIp}`,
+          parser: (data: any) => {
+            if (data.success === false) return null;
+            const country = data.country || '';
+            const region = data.region || data.region_code || '';
+            
+            return {
+              location: country ? 
+                (region ? `${country}, ${region}` : country) : 
+                "Unknown",
+              city: data.city || null,
+              latitude: data.latitude || null,
+              longitude: data.longitude || null,
+              country: country,
+              region: region,
+              isp: data.connection?.isp || null,
+              isCloudProvider: false
             };
           }
         }
       ];
+      
+      // Store results from multiple APIs for cross-validation
+      const apiResults: any[] = [];
 
-      // Try each API until one works
+      // Try each API and collect results for cross-validation
       for (const api of geoApis) {
         try {
           // Create timeout controller
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          const timeoutId = setTimeout(() => controller.abort(), 8000); // Increased timeout
           
           const geoResponse = await fetch(api.url, {
             headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-              'Accept': 'application/json'
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Accept': 'application/json',
+              'Accept-Language': 'en-US,en;q=0.9'
             },
             signal: controller.signal
           });
@@ -136,7 +189,6 @@ async function trackVisitorLocation(ipAddress: string, inquiryId: number) {
           
           if (geoResponse.ok) {
             const geoData = await geoResponse.json();
-            
             const parsed = api.parser(geoData);
             
             // Validate parsed data
@@ -150,25 +202,78 @@ async function trackVisitorLocation(ipAddress: string, inquiryId: number) {
                 if (!isNaN(lat) && !isNaN(lon) && 
                     lat >= -90 && lat <= 90 && 
                     lon >= -180 && lon <= 180) {
-                  location = parsed.location;
-                  city = parsed.city || null;
-                  latitude = lat;
-                  longitude = lon;
-                  console.log(`Successfully got location from ${api.name}:`, { location, city, latitude, longitude });
-                  break; // Success, stop trying other APIs
+                  apiResults.push({
+                    ...parsed,
+                    apiName: api.name,
+                    latitude: lat,
+                    longitude: lon
+                  });
                 }
               } else if (parsed.location && parsed.location !== "Unknown") {
-                // Use location even without coordinates
-                location = parsed.location;
-                city = parsed.city || null;
-                console.log(`Got location from ${api.name} (no coordinates):`, { location, city });
-                break;
+                // Store even without coordinates for cross-validation
+                apiResults.push({
+                  ...parsed,
+                  apiName: api.name
+                });
               }
             }
           }
         } catch (geoError) {
-          console.error(`Error with ${api.name} (${api.url}):`, geoError);
+          // Only log in development
+          if (process.env.NODE_ENV === 'development') {
+            console.error(`Error with ${api.name}:`, geoError);
+          }
           continue; // Try next API
+        }
+      }
+      
+      // Cross-validate results from multiple APIs
+      if (apiResults.length > 0) {
+        // Prefer results that are NOT from cloud providers
+        const nonCloudResults = apiResults.filter(r => !r.isCloudProvider);
+        const resultsToUse = nonCloudResults.length > 0 ? nonCloudResults : apiResults;
+        
+        // Group by country to find consensus
+        const countryCounts: { [key: string]: any[] } = {};
+        resultsToUse.forEach(result => {
+          const country = result.country || 'Unknown';
+          if (!countryCounts[country]) {
+            countryCounts[country] = [];
+          }
+          countryCounts[country].push(result);
+        });
+        
+        // Find the most common country (consensus)
+        let bestResult = null;
+        let maxCount = 0;
+        for (const country in countryCounts) {
+          if (countryCounts[country].length > maxCount && country !== 'Unknown') {
+            maxCount = countryCounts[country].length;
+            bestResult = countryCounts[country][0]; // Use first result from most common country
+          }
+        }
+        
+        // If no consensus, use first non-cloud result, or first result
+        if (!bestResult) {
+          bestResult = resultsToUse[0] || apiResults[0];
+        }
+        
+        if (bestResult) {
+          location = bestResult.location;
+          city = bestResult.city || null;
+          latitude = bestResult.latitude || null;
+          longitude = bestResult.longitude || null;
+          
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Location determined from ${bestResult.apiName}:`, { 
+              location, 
+              city, 
+              latitude, 
+              longitude,
+              isCloudProvider: bestResult.isCloudProvider,
+              consensus: maxCount > 1 ? `${maxCount} APIs agree` : 'single result'
+            });
+          }
         }
       }
       
