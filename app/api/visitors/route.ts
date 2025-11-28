@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 // POST - Track a new visitor (called when inquiry is submitted or page visited)
 export async function POST(req: NextRequest) {
   try {
-    const { ipAddress, inquiryId, trackVisit } = await req.json();
+    const { ipAddress, inquiryId, trackVisit, pagePath } = await req.json();
     
     // Get IP from request if not provided (for page visits)
     // Try multiple headers in order of reliability
@@ -232,20 +232,28 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // If visitor exists and is recent, update it with latest location
+    // If visitor exists and is recent, update it with latest location and status
     if (existingVisitor) {
+      // Always update status to Active when visitor visits (even if just browsing)
       const updated = await (prisma as any).visitor.update({
         where: { id: existingVisitor.id },
         data: {
-          status: "Active",
-          inquiryId: inquiryId || existingVisitor.inquiryId,
+          status: "Active", // Mark as active on any visit
+          inquiryId: inquiryId || existingVisitor.inquiryId, // Only update if inquiryId provided
+          // Update location if we got better data
           location: location !== "Unknown" ? location : existingVisitor.location,
           city: city || existingVisitor.city,
-          latitude: latitude || existingVisitor.latitude,
-          longitude: longitude || existingVisitor.longitude,
+          latitude: latitude !== null ? latitude : existingVisitor.latitude,
+          longitude: longitude !== null ? longitude : existingVisitor.longitude,
           updatedAt: new Date()
         }
       });
+      
+      // Log successful tracking in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Updated existing visitor: ${clientIp} - ${location}, ${city} (Page: ${pagePath || 'N/A'})`);
+      }
+      
       return NextResponse.json(updated);
     }
 
@@ -257,10 +265,15 @@ export async function POST(req: NextRequest) {
         city,
         latitude,
         longitude,
-        status: "Active",
-        inquiryId: inquiryId || null
+        status: "Active", // All visitors are marked as Active
+        inquiryId: inquiryId || null // Only set if this is from an inquiry submission
       }
     });
+
+    // Log successful tracking in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Created new visitor: ${clientIp} - ${location}, ${city} (Page: ${pagePath || 'N/A'})`);
+    }
 
     return NextResponse.json(visitor);
   } catch (error: any) {
