@@ -205,6 +205,8 @@ const Header: React.FC = () => {
     }
   }
 
+
+
   const handleMouseLeaveServices = () => {
     if (!isHoveringTooltip) {
       hideTooltipTimeout.current = setTimeout(() => {
@@ -212,6 +214,8 @@ const Header: React.FC = () => {
       }, 200);
     }
   };
+
+
 
   const handleMouseEnterTooltip = () => {
     if (hideTooltipTimeout.current) {
@@ -268,7 +272,6 @@ const Header: React.FC = () => {
                 Home
               </button>
             </a>
-            
             <span className='relative'
               onMouseEnter={() => setShowAboutTooltip(true)}
               onMouseLeave={handleMouseLeaveLeaveAbout}
@@ -329,7 +332,6 @@ const Header: React.FC = () => {
                 Contact
               </button>
             </a>
-            
             <button
               type="button"
               onClick={() => setIsSearchActive(true)}

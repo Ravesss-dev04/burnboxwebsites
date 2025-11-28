@@ -1,0 +1,274 @@
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+// GET all visitors
+export async function GET(req: NextRequest) {
+  try {
+    const visitors = await (prisma as any).visitor.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100 // Limit to most recent 100 visitors
+    });
+    
+    return NextResponse.json(visitors);
+  } catch (error: any) {
+    console.error("Error fetching visitors:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch visitors" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Track a new visitor (called when inquiry is submitted or page visited)
+export async function POST(req: NextRequest) {
+  try {
+    const { ipAddress, inquiryId, trackVisit } = await req.json();
+    
+    // Get IP from request if not provided (for page visits)
+    // Try multiple headers in order of reliability
+    let clientIp = ipAddress;
+    if (!clientIp) {
+      const forwardedFor = req.headers.get('x-forwarded-for');
+      const realIp = req.headers.get('x-real-ip');
+      const cfConnectingIp = req.headers.get('cf-connecting-ip'); // Cloudflare
+      const xClientIp = req.headers.get('x-client-ip');
+      const trueClientIp = req.headers.get('true-client-ip');
+      
+      // Extract first IP from x-forwarded-for (can contain multiple IPs)
+      const firstForwardedIp = forwardedFor?.split(',')[0]?.trim();
+      
+      clientIp = firstForwardedIp || 
+                 cfConnectingIp || 
+                 realIp || 
+                 xClientIp || 
+                 trueClientIp || 
+                 'unknown';
+    }
+    
+    // Clean up IP address (remove port if present, handle IPv6)
+    if (clientIp && clientIp !== 'unknown') {
+      // Remove port number if present (e.g., "192.168.1.1:8080" -> "192.168.1.1")
+      clientIp = clientIp.split(':')[0];
+      // Remove brackets from IPv6 (e.g., "[::1]" -> "::1")
+      clientIp = clientIp.replace(/^\[|\]$/g, '');
+    }
+    
+    // Skip localhost IPs in production - they are not real visitors
+    const isLocalhost = clientIp === '::1' || 
+                       clientIp === '127.0.0.1' || 
+                       clientIp === 'localhost' || 
+                       clientIp?.startsWith('192.168.') ||
+                       clientIp?.startsWith('10.') ||
+                       clientIp?.startsWith('172.16.') ||
+                       clientIp === 'unknown';
+    
+    if (isLocalhost && process.env.NODE_ENV === 'production') {
+      // In production, skip tracking localhost/internal IPs
+      console.log('Skipping localhost/internal IP tracking in production:', clientIp);
+      return NextResponse.json({ 
+        message: 'Localhost IP skipped in production',
+        skipped: true 
+      });
+    }
+    
+    // For development, use a test IP for geolocation lookup
+    const geoLookupIp = (isLocalhost && process.env.NODE_ENV === 'development') 
+      ? '8.8.8.8' // Use Google DNS for testing in development
+      : clientIp;
+
+    // Check if visitor with this IP already exists (within last 24 hours)
+    const oneDayAgo = new Date();
+    oneDayAgo.setHours(oneDayAgo.getHours() - 24);
+    
+    const existingVisitor = await (prisma as any).visitor.findFirst({
+      where: {
+        ipAddress: clientIp,
+        createdAt: {
+          gte: oneDayAgo
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Get location from IP address with multiple fallback APIs
+    let location = "Unknown";
+    let city = null;
+    let latitude = null;
+    let longitude = null;
+
+    // For localhost in development, use a test location
+    if (isLocalhost && process.env.NODE_ENV === 'development') {
+      location = "United States, California";
+      city = "Mountain View";
+      latitude = 37.4056;
+      longitude = -122.0775;
+    } else if (!isLocalhost || process.env.NODE_ENV === 'production') {
+      // Try multiple geolocation APIs for better reliability and accuracy
+      // Order matters - most accurate/reliable first
+      const geoApis = [
+        {
+          name: 'ip-api.com',
+          url: `http://ip-api.com/json/${geoLookupIp}?fields=status,message,country,regionName,city,lat,lon,countryCode,timezone`,
+          parser: (data: any) => {
+            if (data.status === 'fail' || data.message) return null;
+            const country = data.country || '';
+            const region = data.regionName || '';
+            
+            return {
+              location: country ? 
+                (region ? `${country}, ${region}` : country) : 
+                "Unknown",
+              city: data.city || null,
+              latitude: data.lat || null,
+              longitude: data.lon || null,
+              country: country,
+              region: region
+            };
+          }
+        },
+        {
+          name: 'ipapi.co',
+          url: `https://ipapi.co/${geoLookupIp}/json/`,
+          parser: (data: any) => {
+            if (data.error) return null;
+            const country = data.country_name || data.country || '';
+            const region = data.region || data.region_code || '';
+            const state = data.region || '';
+            
+            return {
+              location: country ? 
+                (state ? `${country}, ${state}` : country) : 
+                "Unknown",
+              city: data.city || null,
+              latitude: data.latitude || null,
+              longitude: data.longitude || null,
+              country: country,
+              region: state
+            };
+          }
+        },
+        {
+          name: 'ip-api.com (https)',
+          url: `https://ip-api.com/json/${geoLookupIp}?fields=status,message,country,regionName,city,lat,lon`,
+          parser: (data: any) => {
+            if (data.status === 'fail' || data.message) return null;
+            const country = data.country || '';
+            const region = data.regionName || '';
+            
+            return {
+              location: country ? 
+                (region ? `${country}, ${region}` : country) : 
+                "Unknown",
+              city: data.city || null,
+              latitude: data.lat || null,
+              longitude: data.lon || null,
+              country: country,
+              region: region
+            };
+          }
+        }
+      ];
+
+      // Try each API until one works
+      for (const api of geoApis) {
+        try {
+          // Create timeout controller
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          
+          const geoResponse = await fetch(api.url, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              'Accept': 'application/json'
+            },
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (geoResponse.ok) {
+            const geoData = await geoResponse.json();
+            
+            const parsed = api.parser(geoData);
+            
+            // Validate parsed data
+            if (parsed && parsed.location && parsed.location !== "Unknown") {
+              // Validate coordinates
+              if (parsed.latitude && parsed.longitude) {
+                const lat = parseFloat(parsed.latitude);
+                const lon = parseFloat(parsed.longitude);
+                
+                // Check if coordinates are valid
+                if (!isNaN(lat) && !isNaN(lon) && 
+                    lat >= -90 && lat <= 90 && 
+                    lon >= -180 && lon <= 180) {
+                  location = parsed.location;
+                  city = parsed.city || null;
+                  latitude = lat;
+                  longitude = lon;
+                  console.log(`Successfully got location from ${api.name}:`, { location, city, latitude, longitude });
+                  break; // Success, stop trying other APIs
+                }
+              } else if (parsed.location && parsed.location !== "Unknown") {
+                // Use location even without coordinates
+                location = parsed.location;
+                city = parsed.city || null;
+                console.log(`Got location from ${api.name} (no coordinates):`, { location, city });
+                break;
+              }
+            }
+          }
+        } catch (geoError) {
+          console.error(`Error with ${api.name} (${api.url}):`, geoError);
+          continue; // Try next API
+        }
+      }
+      
+      // If still unknown, log for debugging
+      if (location === "Unknown") {
+        console.warn(`Could not determine location for IP: ${geoLookupIp}`);
+      }
+    }
+
+    // If visitor exists and is recent, update it with latest location
+    if (existingVisitor) {
+      const updated = await (prisma as any).visitor.update({
+        where: { id: existingVisitor.id },
+        data: {
+          status: "Active",
+          inquiryId: inquiryId || existingVisitor.inquiryId,
+          location: location !== "Unknown" ? location : existingVisitor.location,
+          city: city || existingVisitor.city,
+          latitude: latitude || existingVisitor.latitude,
+          longitude: longitude || existingVisitor.longitude,
+          updatedAt: new Date()
+        }
+      });
+      return NextResponse.json(updated);
+    }
+
+    // Create new visitor record
+    const visitor = await (prisma as any).visitor.create({
+      data: {
+        ipAddress: clientIp,
+        location,
+        city,
+        latitude,
+        longitude,
+        status: "Active",
+        inquiryId: inquiryId || null
+      }
+    });
+
+    return NextResponse.json(visitor);
+  } catch (error: any) {
+    console.error("Error creating visitor:", error);
+    return NextResponse.json(
+      { error: "Failed to track visitor" },
+      { status: 500 }
+    );
+  }
+}
+

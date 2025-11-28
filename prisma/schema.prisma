@@ -82,13 +82,21 @@ model Feedback {
   updatedAt DateTime @updatedAt
 }
 
+model Visitor {
+  id        Int      @id @default(autoincrement())
+  ipAddress String   @db.VarChar(45) // IPv6 can be up to 45 chars
+  location  String   @db.VarChar(255) // Country/Region
+  city      String?  @db.VarChar(255) // City name
+  latitude  Float?   // Latitude coordinate
+  longitude Float?   // Longitude coordinate
+  status    String   @default("Active") @db.VarChar(50)
+  inquiryId Int?     // Link to inquiry if visitor made an inquiry
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-
-
-
-
-
-
-
+  @@index([ipAddress])
+  @@index([status])
+  @@index([createdAt])
+}
 
 

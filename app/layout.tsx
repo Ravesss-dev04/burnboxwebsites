@@ -9,6 +9,7 @@ import { HeaderProvider } from "./context/HeaderContext";
 import { Suspense } from "react";
 import HeaderWrapper from "./components/HeaderWrapper";
 import SectionScrollProgress from "./components/ScrollProgressBar";
+import VisitorTracker from "./components/VisitorTracker";
 
 const outfit = Outfit({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
             </Suspense>
             
             {children}
+            <VisitorTracker />
           </HeaderProvider>
             <SectionScrollProgress/>
         </TooltipProvider>

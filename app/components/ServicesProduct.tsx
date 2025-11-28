@@ -276,7 +276,6 @@ const ServicesProduct = () => {
         },
       },
     };
-
     const cardVariants: Variants = {
       hidden: { 
         opacity: 0, 
@@ -295,7 +294,6 @@ const ServicesProduct = () => {
         },
       },
     };
-
     const sectionRef = useRef<HTMLDivElement>(null);
     const isInView = useInView(sectionRef, { once: false, amount: 0.1 });
     const [hasAnimated, setHasAnimated] = useState(false);

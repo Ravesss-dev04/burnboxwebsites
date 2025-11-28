@@ -23,11 +23,15 @@ interface Inquiry {
 
 
 interface Visitors {
-  ip: string;
+  id: number;
+  ipAddress: string;
   location: string;
+  city?: string | null;
   status: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | null;
+  longitude?: number | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 
@@ -63,14 +67,8 @@ const DashboardContent = ({darkMode = false}: DashboardDarkMod) => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
-  const [visitors] = useState<Visitors[]>([
-    { ip: "203.177.xxx.xxx", location: "Philippines", status: "Active", latitude: 12.8797, longitude: 121.7740 },
-    { ip: "110.92.xxx.xxx", location: "Singapore", status: "Active", latitude: 1.3521, longitude: 103.8198 },
-    { ip: "192.158.xxx.xxx", location: "Japan", status: "Active", latitude: 36.2048, longitude: 138.2529 },
-    { ip: "172.217.xxx.xxx", location: "United States", status: "Active", latitude: 37.0902, longitude: -95.7129 },
-    { ip: "87.240.xxx.xxx", location: "Germany", status: "Active", latitude: 51.1657, longitude: 10.4515 },
-    
-  ]);
+  const [visitors, setVisitors] = useState<Visitors[]>([]);
+  const [visitorsLoading, setVisitorsLoading] = useState(true);
 
   // Calculate product data for chart from actual inquiries
   const productData = inquiries.reduce((acc, inquiry) => {
@@ -103,20 +101,79 @@ const DashboardContent = ({darkMode = false}: DashboardDarkMod) => {
     }
   };
 
+  // Fetch visitors from API
+  const fetchVisitors = async () => {
+    try {
+      const res = await fetch('/api/visitors');
+      if (res.ok) {
+        const data = await res.json();
+        setVisitors(data);
+      }
+    } catch (error) {
+      console.error('Error fetching visitors:', error);
+    } finally {
+      setVisitorsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchInquiries();
+    fetchVisitors();
+    
+    // Poll for new visitors every 10 seconds (real-time updates)
+    const visitorsInterval = setInterval(() => {
+      fetchVisitors();
+    }, 10000);
+    
+    return () => clearInterval(visitorsInterval);
   }, []);
   // simple map component using SVG
  const SimpleWorldMap = () => {
-  const mapPoints = visitors.filter(v => v.latitude && v.longitude);
+  // Filter visitors with valid coordinates and active status
+  const mapPoints = visitors.filter(v => {
+    const hasCoords = v.latitude !== null && v.longitude !== null && 
+                      !isNaN(v.latitude!) && !isNaN(v.longitude!) &&
+                      v.latitude! >= -90 && v.latitude! <= 90 &&
+                      v.longitude! >= -180 && v.longitude! <= 180;
+    return hasCoords && v.status === "Active";
+  });
 
   // pink dot icon for visitors
-  
-  const pinkIcon = L.divIcon({
-    html: `<div style="background:#ec4899;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 5px #ec4899;"></div>`,
-    className: "",
-    iconSize: [12, 12],
-  });
+  let pinkIcon: any = null;
+  if (typeof window !== "undefined" && L) {
+    pinkIcon = L.divIcon({
+      html: `<div style="background:#ec4899;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 5px #ec4899;"></div>`,
+      className: "",
+      iconSize: [12, 12],
+    });
+  }
+
+  if (!L || typeof window === "undefined") {
+    return (
+      <div className={`relative w-full h-64 rounded-lg overflow-hidden z-10 flex items-center justify-center ${darkMode ? "bg-gray-800" : "bg-gray-100"}`}>
+        <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
+          {visitorsLoading ? "Loading map..." : "Initializing map..."}
+        </p>
+      </div>
+    );
+  }
+
+  if (mapPoints.length === 0) {
+    return (
+      <div className={`relative w-full h-64 rounded-lg overflow-hidden z-10 flex items-center justify-center ${darkMode ? "bg-gray-800" : "bg-gray-100"}`}>
+        <div className="text-center">
+          <p className={`text-sm mb-2 ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
+            No visitor locations available
+          </p>
+          <p className={`text-xs ${darkMode ? "text-gray-500" : "text-gray-500"}`}>
+            {visitors.length > 0 
+              ? `${visitors.length} visitor(s) tracked, but no location data yet`
+              : "No visitors tracked yet"}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-64 rounded-lg overflow-hidden z-10">
@@ -136,16 +193,17 @@ const DashboardContent = ({darkMode = false}: DashboardDarkMod) => {
               : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           }
         />
-        {mapPoints.map((v, i) => (
+        {mapPoints.map((v) => (
           <Marker
-            key={i}
+            key={v.id}
             position={[v.latitude!, v.longitude!]}
             icon={pinkIcon}
           >
             <Popup>
               <strong>{v.location}</strong>
+              {v.city && <><br />City: {v.city}</>}
               <br />
-              IP: {v.ip}
+              IP: {v.ipAddress}
               <br />
               Status: {v.status}
             </Popup>
@@ -166,7 +224,7 @@ const DashboardContent = ({darkMode = false}: DashboardDarkMod) => {
               darkMode ? "text-gray-200" : "text-gray-700"
             }`}
           >
-            Active Visitors
+            Active Visitors ({mapPoints.length})
           </span>
         </div>
       </div>
@@ -206,7 +264,7 @@ const EnhancedMapCard = () => {
       >
         <span>Total locations tracked:</span>
         <span className="font-semibold text-pink-500">
-          {visitors.filter(v => v.latitude && v.longitude).length}
+          {visitors.filter(v => v.latitude && v.longitude && v.status === "Active").length}
         </span>
       </div>
     </div>
@@ -279,7 +337,9 @@ const EnhancedMapCard = () => {
        <div className={`shadow-md rounded-xl p-6 flex justify-between ${darkMode ? "bg-gray-900 shadow-white/10" : "bg-white"}`}>
             <div>
                <h3 className={`text-2xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}>Active Visitors</h3>
-               <p className={`text-3xl font-bold ${darkMode ? " text-pink-500" : "text-gray-900"}`}>{visitors.length}</p>
+               <p className={`text-3xl font-bold ${darkMode ? " text-pink-500" : "text-gray-900"}`}>
+                 {visitorsLoading ? "..." : visitors.filter(v => v.status === "Active").length}
+               </p>
             </div>
             <Users size={35} className={`${darkMode ? "text-pink-400": "text-gray-900"}`}/>
          </div>  
@@ -437,37 +497,54 @@ const EnhancedMapCard = () => {
         {/* Visitors tracking table */}
         <div className={`shadow-md rounded-2xl p-5 ${darkMode ? "bg-gray-900 shadow-white/10 text-white " : "bg-white text text-black"}`}>
           <h3 className='text-[20px] font-bold mb-4'>Who's Connected</h3>
-          <div className='overflow-x-auto'>
-            <table className='w-full text-left border-collapse'>
-              <thead>
-                <tr className='text-pink-400 border-b border-gray-700'>
-                  <th className='pb-2 px-4'>IP Address</th>
-                  <th className='pb-2 px-4'>Location</th>  
-                  <th className='pb-2 px-4'>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visitors.map((v, i) => (
-                  <tr
-                    key={i}
-                    className='border-b border-gray-700 hover:bg-gray-800/50'
-                  >
-                    <td className='py-3 px-4'>{v.ip}</td>
-                    <td className='py-3 px-4'>{v.location}</td>
-                    <td className='py-3 px-4'>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        v.status === 'Active' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {v.status}
-                      </span>
-                    </td>
+          {visitorsLoading ? (
+            <div className="text-center py-8">
+              <p className={darkMode ? "text-gray-400" : "text-gray-600"}>Loading visitors...</p>
+            </div>
+          ) : visitors.length === 0 ? (
+            <div className="text-center py-8">
+              <p className={darkMode ? "text-gray-400" : "text-gray-600"}>No visitors tracked yet</p>
+            </div>
+          ) : (
+            <div className='overflow-x-auto'>
+              <table className='w-full text-left border-collapse'>
+                <thead>
+                  <tr className='text-pink-400 border-b border-gray-700'>
+                    <th className='pb-2 px-4'>IP Address</th>
+                    <th className='pb-2 px-4'>Location</th>
+                    <th className='pb-2 px-4'>City</th>
+                    <th className='pb-2 px-4'>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {visitors.slice(0, 10).map((v) => (
+                    <tr
+                      key={v.id}
+                      className='border-b border-gray-700 hover:bg-gray-800/50'
+                    >
+                      <td className='py-3 px-4 text-sm'>{v.ipAddress}</td>
+                      <td className='py-3 px-4'>{v.location}</td>
+                      <td className='py-3 px-4'>{v.city || "N/A"}</td>
+                      <td className='py-3 px-4'>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          v.status === 'Active' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
+                        }`}>
+                          {v.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {visitors.length > 10 && (
+                <p className={`text-xs mt-2 text-center ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
+                  Showing 10 of {visitors.length} visitors
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
