@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { verifyPassword } from '@/lib/auth-utils';
 import { createHmac } from 'crypto';
-
+import { corsHeaders } from '@/lib/corsHeaders';
 
 function generateToken(userId: string | number) {
   const uid = String(userId);
@@ -18,6 +18,11 @@ const prisma = new PrismaClient();
 
 
 
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
@@ -25,7 +30,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
-    
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -37,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
-        { status: 401}
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -46,7 +51,7 @@ export async function POST(request: NextRequest) {
       console.error('User has no password hash:', user.id);
       return NextResponse.json(
         { error: 'Invalid credentials' },
-        { status: 401}
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -55,7 +60,7 @@ export async function POST(request: NextRequest) {
     if (!isValidPassword) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
-        { status: 401}
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -66,7 +71,7 @@ export async function POST(request: NextRequest) {
       message: 'Login successful',
       user: { id: user.id, email: user.email }
     },
-  
+    { headers: corsHeaders}
   );
 
     // Set cookie
@@ -83,7 +88,7 @@ export async function POST(request: NextRequest) {
     console.error('Login error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import nodemailer from "nodemailer";
-
+import { corsHeaders } from "@/lib/corsHeaders";
 import { prisma } from "@/lib/db";
 
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +16,7 @@ export async function POST(req: Request) {
     if (!name || !email || !message) {
       return NextResponse.json(
         { error: "Name, email, and message are required." }, 
-        { status: 400}
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -22,7 +25,7 @@ export async function POST(req: Request) {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "Invalid email format." }, 
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -30,7 +33,7 @@ export async function POST(req: Request) {
     if (rating && (rating < 1 || rating > 5)) {
       return NextResponse.json(
         { error: "Rating must be between 1 and 5." }, 
-        { status: 400, }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -38,7 +41,7 @@ export async function POST(req: Request) {
     if (message.length > 2000) {
       return NextResponse.json(
         { error: "Message is too long. Maximum 2000 characters." }, 
-        { status: 400}
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -59,13 +62,13 @@ export async function POST(req: Request) {
       success: true, 
       message: "Thank you for your feedback!",
       feedback 
-    },);
+    }, { headers: corsHeaders });
 
   } catch (error: any) {
     console.error("Error in feedback submission:", error);
     return NextResponse.json(
       { error: "Failed to submit feedback" },
-      { status: 500}
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -82,13 +85,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ 
       success: true, 
       feedbacks 
-    },);
+    }, { headers: corsHeaders });
 
   } catch (error: any) {
     console.error("Error fetching feedback:", error);
     return NextResponse.json(
       { error: "Failed to fetch feedback" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

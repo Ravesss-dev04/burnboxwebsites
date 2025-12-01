@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-
+import { corsHeaders } from "@/lib/corsHeaders";
 
 const prisma = new PrismaClient();
 
 
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 // GET all visitors
 export async function GET(req: NextRequest) {
@@ -19,7 +22,7 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching visitors:", error);
     return NextResponse.json(
       { error: "Failed to fetch visitors" },
-   
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -382,7 +385,7 @@ export async function POST(req: NextRequest) {
     console.error("Error creating visitor:", error);
     return NextResponse.json(
       { error: "Failed to track visitor" },
-  
+      { status: 500, headers: corsHeaders }
     );
   }
 }

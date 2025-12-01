@@ -4,16 +4,18 @@ import nodemailer from "nodemailer";
 import { otpStore } from "@/lib/otp-store";
 import fs from 'fs';
 import path from 'path';
+import { corsHeaders } from "@/lib/corsHeaders";
 
 
-
-
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
     if (!email) {
-      return NextResponse.json({ error: "Email is required" });
+      return NextResponse.json({ error: "Email is required" }, { status: 400, headers: corsHeaders  });
     }
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -131,13 +133,13 @@ export async function POST(req: Request) {
       success: true, 
       message: "OTP sent successfully to your email" 
     },
-  
+    { headers: corsHeaders}
   );
 
   } catch (error) {
     console.error("OTP send error:", error);
     return NextResponse.json({ 
       error: "Failed to send OTP. Please try again." 
-    }, { status: 500 });
+    }, { status: 500,  headers: corsHeaders });
   }
 }

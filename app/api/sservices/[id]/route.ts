@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { corsHeaders } from "@/lib/corsHeaders";
 
 const prisma = new PrismaClient();
+
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 
 // UPDATE service
 export async function PUT(
@@ -26,7 +33,7 @@ export async function PUT(
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to update service" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

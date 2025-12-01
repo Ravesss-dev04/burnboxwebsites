@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
+import { corsHeaders } from '@/lib/corsHeaders';
 
 const prisma = new PrismaClient();
 
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 
 export async function POST(request: NextRequest) {
@@ -13,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!email) {
       return NextResponse.json(
         { error: 'Email is required' },
-        { status: 40 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -26,7 +31,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         message: 'If an account with that email exists, a reset link has been sent'
       },
-     
+      {headers: corsHeaders}
     );
     }
     // Generate reset token
@@ -46,14 +51,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: 'If an account with that email exists, a reset link has been sent'
     },
- 
+    {headers: corsHeaders}
   );
 
   } catch (error) {
     console.error('Forgot password error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500}
+      { status: 500, headers: corsHeaders }
     );
   }
 }
