@@ -7,8 +7,6 @@ import path from 'path';
 import { corsHeaders } from "@/lib/corsHeaders";
 
 
-
-
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
@@ -16,19 +14,13 @@ export async function OPTIONS() {
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
-
     if (!email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400, headers: corsHeaders  });
     }
-
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
     // Store OTP with 10-minute expiration
     otpStore.set(email, otp, 10 * 60 * 1000);
-
-
-
     // Create email transporter
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,

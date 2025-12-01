@@ -40,6 +40,8 @@ const mainImageTransition: Variants = {
       ease: [0.25, 0.1, 0.25, 1]
     }
   },
+
+  
   exit: { 
     x: -300, 
     opacity: 0, 
@@ -73,7 +75,6 @@ const GalleryPhotos: React.FC = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     loadImages();
     const interval = setInterval(loadImages, 300000);

@@ -126,7 +126,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     setIsBlock(false);
     setBlockReason("");
   };
-
+  
   // OTP Input Handlers
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d?$/.test(value)) return; // Only allow numbers
@@ -134,6 +134,8 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+
+
 
     // Auto-focus next input
     if (value && index < 5) {
@@ -231,7 +233,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       setLoading(false);
     }
   };
-
   // Close OTP popup
   const closeOtpPopup = () => {
     setShowOtpPopup(false);
@@ -303,6 +304,8 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       setIsSubmitting(false);
     }
   };
+
+
 
   return (
     <form onSubmit={handleSubmit} className="relative flex flex-col gap-3 mt-10">

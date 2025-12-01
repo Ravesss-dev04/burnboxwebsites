@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { corsHeaders } from "@/lib/corsHeaders";
 
 const prisma = new PrismaClient();
+
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 // GET all visitors
 export async function GET(req: NextRequest) {
@@ -16,7 +22,7 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching visitors:", error);
     return NextResponse.json(
       { error: "Failed to fetch visitors" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -25,7 +31,6 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { ipAddress, inquiryId, trackVisit, pagePath } = await req.json();
-    
     // Get IP from request if not provided (for page visits)
     // Try multiple headers in order of reliability
     let clientIp = ipAddress;
@@ -35,7 +40,6 @@ export async function POST(req: NextRequest) {
       const cfConnectingIp = req.headers.get('cf-connecting-ip'); // Cloudflare
       const xClientIp = req.headers.get('x-client-ip');
       const trueClientIp = req.headers.get('true-client-ip');
-      
       // Extract first IP from x-forwarded-for (can contain multiple IPs)
       const firstForwardedIp = forwardedFor?.split(',')[0]?.trim();
       
@@ -46,7 +50,6 @@ export async function POST(req: NextRequest) {
                  trueClientIp || 
                  'unknown';
     }
-    
     // Clean up IP address (remove port if present, handle IPv6)
     if (clientIp && clientIp !== 'unknown') {
       // Remove port number if present (e.g., "192.168.1.1:8080" -> "192.168.1.1")
@@ -54,7 +57,6 @@ export async function POST(req: NextRequest) {
       // Remove brackets from IPv6 (e.g., "[::1]" -> "::1")
       clientIp = clientIp.replace(/^\[|\]$/g, '');
     }
-    
     // Skip localhost IPs in production - they are not real visitors
     const isLocalhost = clientIp === '::1' || 
                        clientIp === '127.0.0.1' || 
@@ -97,7 +99,6 @@ export async function POST(req: NextRequest) {
     let city = null;
     let latitude = null;
     let longitude = null;
-
     // For localhost in development, use a test location
     if (isLocalhost && process.env.NODE_ENV === 'development') {
       location = "United States, California";
@@ -193,6 +194,8 @@ export async function POST(req: NextRequest) {
             };
           }
         },
+
+
         {
           name: 'ipwho.is',
           url: `http://ipwho.is/${geoLookupIp}`,
@@ -382,8 +385,7 @@ export async function POST(req: NextRequest) {
     console.error("Error creating visitor:", error);
     return NextResponse.json(
       { error: "Failed to track visitor" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
-

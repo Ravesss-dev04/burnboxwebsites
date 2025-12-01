@@ -62,7 +62,6 @@ const AboutPages = () => {
             }}
           />
         </motion.div>
-
         {/* Text content card */}
         <motion.div
           ref={textRef}
