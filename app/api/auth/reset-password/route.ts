@@ -2,12 +2,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { hashPassword } from '@/lib/auth-utils'
-import { corsHeaders } from '@/lib/corsHeaders';
 
 
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
+
 
 
 export async function POST(req: Request) {
@@ -17,7 +14,7 @@ export async function POST(req: Request) {
     if (!token || !newPassword) {
       return NextResponse.json(
         { error: 'Token and new password are required' },
-        { status: 400,  headers: corsHeaders }
+        { status: 400}
       )
     }
 
@@ -38,14 +35,14 @@ export async function POST(req: Request) {
       success: true,
       message: 'Password reset successfully'
     },
-    { headers: corsHeaders}
+    
   )
 
   } catch (error) {
     console.error('Reset password error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500, headers: corsHeaders }
+      { status: 500}
     )
   }
 }

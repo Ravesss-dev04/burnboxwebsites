@@ -17,10 +17,7 @@ export async function GET () {
     }
 }
 
-
-
 // POST NEW SERVICE
-
 
 export async function POST(req: NextRequest) {
   try {

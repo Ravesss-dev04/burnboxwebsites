@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { hashPassword } from '@/lib/auth-utils';
-import { corsHeaders } from '@/lib/corsHeaders';
+
 
 const prisma = new PrismaClient();
 
-
-
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
 
 
 export async function POST(request: NextRequest) {
@@ -19,7 +14,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
-        { status: 400,  headers: corsHeaders }
+        { status: 400 }
       );
     }
 
@@ -31,7 +26,7 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: 'User already exists' },
-        { status: 409, headers: corsHeaders }
+        { status: 409}
       );
     }
 
@@ -48,13 +43,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: 'User created successfully',
       user: { id: user.id, email: user.email }
-    }, { status: 201, headers: corsHeaders });
+    }, { status: 201});
 
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500, headers: corsHeaders }
+      { status: 500}
     );
   }
 }

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import nodemailer from "nodemailer";
-import { corsHeaders } from "@/lib/corsHeaders";
+
 
 const prisma = new PrismaClient();
 
@@ -332,7 +332,7 @@ async function trackVisitorLocation(ipAddress: string, inquiryId: number) {
 }
 
 export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
+  return NextResponse.json({});
 }
 
 export async function POST(req: NextRequest) {
@@ -342,7 +342,7 @@ export async function POST(req: NextRequest) {
     if (!name || !email || !message) {
       return NextResponse.json(
         { error: "Missing required fields." }, 
-        { status: 400, headers: corsHeaders }
+        { status: 400 }
       );
     }
 
@@ -436,13 +436,13 @@ export async function POST(req: NextRequest) {
       success: true, 
       message: "Inquiry submitted successfully!",
       inquiry 
-    }, { headers: corsHeaders });
+    },);
 
   } catch (error: any) {
     console.error("Error in send-inquiry:", error);
     return NextResponse.json(
       { error: "Failed to submit inquiry" },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     );
   }
 }

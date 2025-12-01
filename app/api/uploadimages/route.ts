@@ -1,15 +1,10 @@
-import { corsHeaders } from "@/lib/corsHeaders";
+
 import { NextRequest, NextResponse } from "next/server";
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN!;
 const GITHUB_USERNAME = process.env.GITHUB_USERNAME!;
 const GITHUB_REPO = process.env.GITHUB_REPO!;
 
-
-
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
 
 
 export async function POST(req: NextRequest) {
@@ -46,9 +41,9 @@ export async function POST(req: NextRequest) {
       
       console.log('Uploaded image URL:', imageUrl); // Debug log
     }
-    return NextResponse.json({ success: true, urls: uploadedUrls },{ headers: corsHeaders});
+    return NextResponse.json({ success: true, urls: uploadedUrls });
   } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ success: false, message: error.message }, { status: 500, headers: corsHeaders });
+    return NextResponse.json({ success: false, message: error.message });
   }
 }

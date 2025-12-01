@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { corsHeaders } from "@/lib/corsHeaders";
+
 
 const prisma = new PrismaClient();
 
 // DELETE gallery image
 
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
+
 
 
 export async function DELETE(
@@ -21,12 +19,12 @@ export async function DELETE(
     await (prisma as any).gallery.delete({
       where: { id: parseInt(id) } // Use the awaited id
     });
-    return NextResponse.json({ success: true }, {headers: corsHeaders });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete error:", error);
     return NextResponse.json(
       { error: "Failed to delete image" },
-      { status: 500, headers: corsHeaders  }
+      { status: 500 }
     );
   } finally {
     await prisma.$disconnect();
@@ -48,7 +46,7 @@ export async function GET(
     if (isNaN(imageId)) {
       return NextResponse.json(
         { error: "Invalid image ID" },
-        { status: 400, headers: corsHeaders  }
+       
       );
     }
     
@@ -58,16 +56,16 @@ export async function GET(
     if (!image) {
       return NextResponse.json(
         { error: "Image not found" },
-        { status: 404, headers: corsHeaders  }
+     
       );
     }
 
-    return NextResponse.json(image, {headers: corsHeaders });
+    return NextResponse.json(image);
   } catch (error) {
     console.error("Get image error:", error);
     return NextResponse.json(
       { error: "Failed to fetch image" },
-      { status: 500, headers: corsHeaders  }
+      { status: 500 }
     );
   } finally {
     await prisma.$disconnect();
