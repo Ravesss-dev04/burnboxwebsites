@@ -16,7 +16,7 @@ export async function GET () {
         const services  = await prisma.service.findMany({
             orderBy: {createdAt: 'desc'}
         })
-        return NextResponse.json(services);
+        return NextResponse.json(services, { headers: corsHeaders });
     } catch (error) {
         return NextResponse.json(
             {error: "Failed to fetch services"},
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       }
     });
     
-    return NextResponse.json(newService);
+    return NextResponse.json(newService, { headers: corsHeaders });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to create service" },

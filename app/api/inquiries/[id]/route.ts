@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { corsHeaders } from "@/lib/corsHeaders";
 
 const prisma = new PrismaClient();
+
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 
 // GET single inquiry
 export async function GET(
@@ -15,7 +22,7 @@ export async function GET(
     if (isNaN(inquiryId)) {
       return NextResponse.json(
         { error: "Invalid inquiry ID" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -26,16 +33,16 @@ export async function GET(
     if (!inquiry) {
       return NextResponse.json(
         { error: "Inquiry not found" },
-        { status: 404 }
+        { status: 404, headers: corsHeaders }
       );
     }
 
-    return NextResponse.json(inquiry);
+    return NextResponse.json(inquiry, { headers: corsHeaders });
   } catch (error: any) {
     console.error("Error fetching inquiry:", error);
     return NextResponse.json(
       { error: "Failed to fetch inquiry" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -67,11 +74,9 @@ export async function DELETE(
         { status: 404 }
       );
     }
-
     await (prisma as any).inquiry.delete({
       where: { id: inquiryId }
     });
-    
     return NextResponse.json({ 
       success: true,
       message: "Inquiry deleted successfully" 
@@ -84,7 +89,6 @@ export async function DELETE(
     );
   }
 }
-
 // UPDATE inquiry status
 export async function PATCH(
   req: NextRequest,
@@ -108,7 +112,7 @@ export async function PATCH(
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
         { error: "Invalid status" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -120,7 +124,7 @@ export async function PATCH(
     if (!existingInquiry) {
       return NextResponse.json(
         { error: "Inquiry not found" },
-        { status: 404 }
+        { status: 404, headers: corsHeaders }
       );
     }
 
@@ -133,12 +137,12 @@ export async function PATCH(
     return NextResponse.json({ 
       success: true,
       inquiry 
-    });
+    }, { headers: corsHeaders });
   } catch (error: any) {
     console.error("Error updating inquiry:", error);
     return NextResponse.json(
       { error: "Failed to update inquiry" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { corsHeaders } from "@/lib/corsHeaders";
 
 const prisma = new PrismaClient();
+
+
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 // GET all inquiries
 export async function GET(req: NextRequest) {
@@ -10,12 +17,12 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' }
     });
     
-    return NextResponse.json(inquiries);
+    return NextResponse.json(inquiries, { headers: corsHeaders });
   } catch (error: any) {
     console.error("Error fetching inquiries:", error);
     return NextResponse.json(
       { error: "Failed to fetch inquiries" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -45,7 +52,7 @@ export async function POST(req: NextRequest) {
     console.error("Error creating inquiry:", error);
     return NextResponse.json(
       { error: "Failed to create inquiry" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

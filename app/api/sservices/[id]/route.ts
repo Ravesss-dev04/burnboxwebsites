@@ -13,7 +13,7 @@ export async function OPTIONS() {
 // UPDATE service
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> } // Add Promise here
+  { params }: { params: Promise<{ id: string } > }, // Add Promise here
 ) {
   try {
     const { name, price, imageUrl, description } = await req.json();
@@ -29,7 +29,7 @@ export async function PUT(
       }
     });
     
-    return NextResponse.json(updatedService);
+    return NextResponse.json(updatedService, { headers: corsHeaders });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to update service" },

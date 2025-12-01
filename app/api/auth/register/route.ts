@@ -6,10 +6,10 @@ import { corsHeaders } from '@/lib/corsHeaders';
 const prisma = new PrismaClient();
 
 
-
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
+
 
 
 export async function POST(request: NextRequest) {

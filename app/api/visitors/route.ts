@@ -359,7 +359,7 @@ export async function POST(req: NextRequest) {
         console.log(`Updated existing visitor: ${clientIp} - ${location}, ${city} (Page: ${pagePath || 'N/A'})`);
       }
       
-      return NextResponse.json(updated);
+      return NextResponse.json(updated, { headers: corsHeaders });
     }
 
     // Create new visitor record
