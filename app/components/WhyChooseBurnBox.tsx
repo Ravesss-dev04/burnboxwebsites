@@ -1,65 +1,156 @@
-import { motion } from 'framer-motion'
-import Image from 'next/image'
-import React, { useState } from 'react'
-import EditableText from '../admin/components/EditableText'
+"use client";
+
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import EditableText from "../admin/components/EditableText";
+import { Printer, Gem, PenTool, ShieldCheck, Clock, CheckCircle2 } from "lucide-react";
 
 interface AboutSectionProps {
-  editable?: boolean
+  editable?: boolean;
 }
 
-const WhyChooseBurnboxPage: React.FC<AboutSectionProps> = ({editable = false}) => {
-  const [title, setTitle] = useState("Why Choose burnbox Printing?")
+const features = [
+  {
+    icon: <Printer className="w-6 h-6" />,
+    title: "One-Stop Printing Partner",
+    description: "From ID laces to large-format murals, we handle all your printing needs under one roof.",
+  },
+  {
+    icon: <Gem className="w-6 h-6" />,
+    title: "Quality Meets Affordability",
+    description: "Premium materials and crisp printing at competitive prices that fit your budget.",
+  },
+  {
+    icon: <PenTool className="w-6 h-6" />,
+    title: "Tailored Solutions",
+    description: "Custom designs and personalized service to bring your unique vision to life.",
+  },
+  {
+    icon: <ShieldCheck className="w-6 h-6" />,
+    title: "Proven Trust",
+    description: "Trusted by top brands and institutions for reliability and excellence.",
+  },
+  {
+    icon: <Clock className="w-6 h-6" />,
+    title: "Hassle-Free Service",
+    description: "Seamless ordering, fast turnaround, and dedicated support every step of the way.",
+  },
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+};
+
+const WhyChooseBurnBox: React.FC<AboutSectionProps> = ({ editable = false }) => {
+  const [title, setTitle] = useState("Why Choose BurnBox?");
+
   return (
-   <motion.div
-    initial={{ scale: 0.8, opacity: 0 }}
-    animate={{ scale: 0.8, opacity: 1 }}
-    exit={{ scale: 0.8, opacity: 0 }}
-    transition={{ duration: 0.5 }}  
-    whileInView={{scale: 1}}
-    viewport={{once: false, amount: 0.4}}
-    id='why-choose-burnbox'
-  >
-    <section className='bg-gray-100 text-white px-8 py-10 min-h-full'>
-      <div className='max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center mt-12'>
-        
-         <div className='w-full '>
-          {/* image here */}
-          <Image
-            src="/aboutusimage.png"
-            alt='burnbox Storefront'
-            width={1000}
-            height={1000}
-            
-          />
-         </div>
-         {/* about descriptuon */}
-    
-         <div className='text-black space-y-8 text-sm md:text-base leading-relaxed'>
-          <h1 className='text-3xl text-center text-pink-500 font-bold'><EditableText text={title} onChange={setTitle} editable={editable}/></h1>
-          <p  className='text-black' > One-Stop Printing Partner - From business cards to massive billboards, we cover it all.
-          </p>
-          <p >
-           Quality Meets - State-of-thee-art machines and skilled artists deliver premium output everytime.
-          </p>
+    <section className="relative py-24 bg-[#0a0a0a] overflow-hidden text-white" id="why-choose-burnbox">
+      {/* Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-pink-600/10 rounded-full blur-[120px]" />
+      </div>
 
-          <p>
-           Tailored Solutions - We don't just print; we design and strategize to fit your exact brand goals.
-          </p>
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          
+          {/* Left Column: Image */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="relative group"
+          >
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-gray-900/50 backdrop-blur-sm">
+              <Image
 
-          <p>
-              Proven Trust - Proudly serving SMEs, big brands, and government clients with repeat partnerships since 2015
-          </p>
-          <p>
-            hassle-Free Service-Fast turnaround, expert installation, and after-sales support
-          </p>
-         </div>
-       
-    </div>
- 
+                src="/aboutusimage.png"
+                alt="Why Choose BurnBox"
+
+                width={800}
+                height={800}
+                className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+              />
+              
+              {/* Floating Badge */}
+              <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="absolute bottom-4 left-6 bg-black/80 backdrop-blur-md border border-white/10 p-4 rounded-xl shadow-lg max-w-[200px]"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <CheckCircle2 className="text-green-400 w-5 h-5" />
+                  <span className="font-bold text-sm">100% Satisfaction</span>
+                </div>
+                <p className="text-xs text-gray-400">Guaranteed quality on every print order.</p>
+              </motion.div>
+            </div>
+          </motion.div>
+          {/* Right Column: Content */}
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
+                <EditableText
+                  text={title}
+                  onChange={setTitle}
+                  editable={editable}
+                  className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400"
+                />
+              </h2>
+              <p className="text-lg text-gray-400 max-w-lg">
+                We combine cutting-edge technology with creative passion to deliver printing solutions that make your brand stand out.
+              </p>
+            </div>
+
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              className="space-y-6"
+            >
+              {features.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  variants={itemVariants}
+                  className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors duration-300 border border-transparent hover:border-white/5"
+                >
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                    {feature.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-1">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+      </div>
     </section>
-</motion.div>
-  )
-}
+  );
+};
 
-export default WhyChooseBurnboxPage
+export default WhyChooseBurnBox;
 

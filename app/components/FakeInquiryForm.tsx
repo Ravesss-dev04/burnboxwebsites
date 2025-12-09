@@ -276,7 +276,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       // Re-check moderation
       await checkModeration(images[0]);
       if (isBlock) return;
-
       // Send inquiry
       const res = await fetch("/api/send-inquiry", {
         method: "POST",

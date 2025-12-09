@@ -58,20 +58,31 @@ const MissionVission = () => {
   };
 
   return (
-    <section 
+    <motion.section 
       id='mission-and-vision' 
-      className='relative bg-gradient-to-b from-[#1a1a1a] via-[#2d2d2d] to-[#1a1a1a] z-[1] mt-10 md:mt-20 w-full min-h-[100vh] overflow-hidden flex flex-col items-center pb-10 py-16 gap-8 md:gap-12 px-4 md:px-8'
-      style={{
-        backgroundImage: "url('/missionbg.png')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.8 }}
+      className='relative bg-[#050505] z-[1] mt-10 md:mt-20 w-full min-h-[100vh] overflow-hidden flex flex-col items-center pb-10 py-16 gap-8 md:gap-12 px-4 md:px-8'
     >
-      {/* Decorative background elements */}
+      {/* Dark background with grid pattern matching MainPage */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
+      
+      {/* Background image overlay */}
+      <div 
+        className='absolute inset-0 opacity-10 pointer-events-none'
+        style={{
+          backgroundImage: "url('/missionbg.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+      {/* Subtle decorative background elements */}
       <div className='absolute inset-0 overflow-hidden pointer-events-none'>
-        <div className='absolute top-20 left-10 w-72 h-72 bg-pink-500/10 rounded-full blur-3xl'></div>
-        <div className='absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl'></div>
+        <div className='absolute top-20 left-10 w-64 h-64 bg-pink-500/5 rounded-full blur-[100px]'></div>
+        <div className='absolute bottom-20 right-10 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px]'></div>
       </div>
 
       {/* Mission section */}
@@ -84,10 +95,11 @@ const MissionVission = () => {
       >
         <motion.div
           variants={itemVariants}
-          className='flex flex-col md:flex-row justify-between items-center bg-gradient-to-br from-[#2a2a2a] via-[#1f1f1f] to-[#2a2a2a] rounded-3xl p-6 md:p-10 lg:p-12 shadow-2xl border border-gray-800/50 hover:border-pink-500/30 transition-all duration-500 overflow-hidden'
+          whileHover={{ scale: 1.01, transition: { duration: 0.3 } }}
+          className='flex flex-col md:flex-row justify-between items-center bg-black/40 backdrop-blur-md rounded-3xl p-6 md:p-10 lg:p-12 shadow-[0_0_30px_rgba(236,72,153,0.1)] border border-white/10 hover:border-pink-500/30 transition-all duration-500 overflow-hidden group'
         >
-          {/* Glow effect */}
-          <div className='absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-pink-500/0 opacity-0 hover:opacity-100 transition-opacity duration-500'></div>
+          {/* Subtle glow effect */}
+          <div className='absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500'></div>
           
           {/* Text content */}
           <motion.div
@@ -140,14 +152,16 @@ const MissionVission = () => {
             className='relative md:w-1/2 mt-8 md:mt-0 flex justify-center md:justify-end'
           >
             <motion.div
-              whileHover={{ scale: 1.05, rotate: 2 }}
-              transition={{ duration: 0.3 }}
+              whileHover={{ scale: 1.05, rotate: 2, y: -3 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className='relative'
             >
+              {/* Subtle glow behind image */}
+              <div className='absolute inset-0 bg-gradient-to-br from-pink-500/10 to-pink-600/5 blur-xl rounded-full scale-105'></div>
               <img
                 src="/mission.png"
                 alt="Mission"
-                className='w-64 md:w-80 lg:w-96 object-contain drop-shadow-2xl'
+                className='relative w-64 md:w-80 lg:w-96 object-contain drop-shadow-2xl'
               />
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -170,10 +184,11 @@ const MissionVission = () => {
       >
         <motion.div
           variants={itemVariants}
-          className='flex flex-col md:flex-row-reverse justify-between items-center bg-gradient-to-bl from-[#1f1f1f] via-[#2a2a2a] to-[#1f1f1f] rounded-3xl p-6 md:p-10 lg:p-12 shadow-2xl border border-gray-800/50 hover:border-purple-500/30 transition-all duration-500 overflow-hidden'
+          whileHover={{ scale: 1.01, transition: { duration: 0.3 } }}
+          className='flex flex-col md:flex-row-reverse justify-between items-center bg-black/40 backdrop-blur-md rounded-3xl p-6 md:p-10 lg:p-12 shadow-[0_0_30px_rgba(168,85,247,0.1)] border border-white/10 hover:border-purple-500/30 transition-all duration-500 overflow-hidden group'
         >
-          {/* Glow effect */}
-          <div className='absolute inset-0 bg-gradient-to-l from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 hover:opacity-100 transition-opacity duration-500'></div>
+          {/* Subtle glow effect */}
+          <div className='absolute inset-0 bg-gradient-to-l from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500'></div>
 
           {/* Text content */}
           <motion.div
@@ -226,14 +241,16 @@ const MissionVission = () => {
             className='relative md:w-1/2 mt-8 md:mt-0 flex justify-center md:justify-start'
           >
             <motion.div
-              whileHover={{ scale: 1.05, rotate: -2 }}
-              transition={{ duration: 0.3 }}
+              whileHover={{ scale: 1.05, rotate: -2, y: -3 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className='relative'
             >
+              {/* Subtle glow behind image */}
+              <div className='absolute inset-0 bg-gradient-to-bl from-purple-500/10 to-purple-600/5 blur-xl rounded-full scale-105'></div>
               <img
                 src="/visionimg.png"
                 alt="Vision"
-                className='w-64 md:w-80 lg:w-96 object-contain drop-shadow-2xl'
+                className='relative w-64 md:w-80 lg:w-96 object-contain drop-shadow-2xl'
               />
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -245,7 +262,7 @@ const MissionVission = () => {
           </motion.div>
         </motion.div>
       </motion.div>
-    </section>
+    </motion.section>
   )
 }
 

@@ -47,14 +47,12 @@ const LoginAdmin = () => {
 
     try {
       const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register'
-      
       // For registration, validate passwords match
       if (!isLoginMode && password !== confirmPassword) {
         setError('Passwords do not match')
         setIsLoading(false)
         return
       }
-
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -97,7 +95,7 @@ const LoginAdmin = () => {
     }
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
+      const response = await fetch('/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
