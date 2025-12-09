@@ -1,77 +1,113 @@
-import React from 'react'
-import { Suspense, useEffect, useState } from "react";
-import { CardCarousel,IntroductionVideo, EmailPopup, Maps} from "../components";
+import React, { useState } from 'react';
+import { CardCarousel, EmailPopup, Maps } from "../components";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Footer from "../components/Footer";
 import WhyChooseBurnboxPage from "../components/WhyChooseBurnBox";
 import GalleryPhotos from "../components/GalleryPhotos";
-import { HeaderProvider } from "../context/HeaderContext";
-import { TooltipProvider } from "../context/TooltipContext";
-import ServicesProduct from "../components/ServicesProduct";
 import SectionScrollProgress from './ScrollProgressBar';
+import WelcomeScreen from './WelcomeScreen';
+import ScrollReveal, { ScrollScale } from './ScrollReveal';
 
 const MainPage = () => {
-  const [videoVisible, isVideoVisible] = useState(true);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-  const [selectedServiceFromHeader, setSelectedServiceFromHeader] = useState<string | null>(null);
+  const [showWelcome, setShowWelcome] = useState(true);
   
-    
-  // useEffect(() => {
-  //   if (!videoVisible) {
-  //     setShowEmailPopup(true); 
-  //   }
-  // }, [videoVisible]);
+  const handleWelcomeComplete = () => {
+    setShowWelcome(false);
+    // Smooth scroll to top after welcome screen
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   
   return (
-    <div className="h-full max-w-full flex flex-col  bg-black relative overflow-x-hidden p-0 m-0">
-     
-       {/* {videoVisible && <IntroductionVideo isVideoVisible={isVideoVisible} />} */}
-      <AnimatePresence mode="wait">
-        {showEmailPopup && <EmailPopup setShowEmailPopup={setShowEmailPopup} />}
-      </AnimatePresence>
-      <AnimatePresence mode="wait">
-        {!showEmailPopup && (
-          <motion.button 
-            type="button" 
-            className='p-3 rounded-full shadow-md bg-white fixed top-5/6 right-5 z-70'
-            animate={{ x: [10, -10] }}
-            transition={{
-              duration: 0.3,
-              type: 'spring',
-              stiffness: 200,
-              damping: 20,
-              repeat: Infinity,
-              repeatType: 'mirror',
-              repeatDelay: 1.5
-            }}
-            onClick={() => setShowEmailPopup(true)}
-          >
-
-            <Image
-              height={500}
-              width={500}
-              alt='gmail icon'
-              src={'/gmail.png'}
-              className='h-7 w-7 object-center object-contain'
-            />
-          </motion.button>
-        )}
-      </AnimatePresence>
-      <CardCarousel  />
+    <div className="min-h-screen w-full bg-[#050505] relative overflow-x-hidden text-white selection:bg-pink-500/30">
       
-      <div id="why-choose-burnbox">
-      <WhyChooseBurnboxPage/>
+      {/* Global Background Effects - Matches the "Levitating Aura" theme */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
+        
+        {/* Ambient Pink Glows */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-500/10 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse delay-1000"></div>
       </div>
-      <section  id='gallery' className="h-auto w-full bg-white flex flex-col">
-       <GalleryPhotos/>
-      </section>
-      <Maps /> 
-     <Footer/>
+
+      {/* Content Wrapper with z-index to sit above background */}
+      <div className="relative z-10 flex flex-col gap-12 sm:gap-20">
+        
+        {/* Welcome Screen - Shows first */}
+        {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
+        
+        {/* Scroll Progress Bar */}
+        <SectionScrollProgress />
+        
+        {/* Email Popup */}
+        <AnimatePresence mode="wait">
+          {showEmailPopup && <EmailPopup setShowEmailPopup={setShowEmailPopup} />}
+        </AnimatePresence>
+        
+        {/* Email Button */}
+        <AnimatePresence mode="wait">
+          {!showEmailPopup && !showWelcome && (
+            <motion.button 
+              type="button" 
+              className='fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.3)] bg-white/10 backdrop-blur-md border border-white/20 hover:bg-pink-500 hover:border-pink-500 transition-colors duration-300 group'
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setShowEmailPopup(true)}
+            >
+              <Image
+                height={500}
+                width={500}
+                alt='gmail icon'
+                src={'/gmail.png'}
+                className='h-6 w-6 object-contain opacity-80 group-hover:opacity-100'
+              />
+            </motion.button>
+          )}
+        </AnimatePresence>
+        
+        {/* Main Content with Enhanced Scroll Animations */}
+        
+        {/* Hero Carousel - Zoom entrance */}
+        <ScrollReveal direction="zoom" delay={0.1} duration={1.2}>
+          <CardCarousel />
+        </ScrollReveal>
+        
+        {/* Why Choose - Blur & Slide Up */}
+        <ScrollReveal direction="blur" delay={0.2} distance={80} duration={1}>
+          <div id="why-choose-burnbox" className="relative">
+            {/* Section specific glow */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-pink-500/5 to-transparent pointer-events-none" />
+            <WhyChooseBurnboxPage/>
+          </div>
+        </ScrollReveal>
+        
+        {/* Gallery - Scroll Scale Effect */}
+        <ScrollScale scaleRange={[0.95, 1]}>
+          <section id='gallery' className="w-full flex flex-col relative">
+             {/* Remove bg-white to keep dark theme */}
+            <GalleryPhotos/>
+          </section>
+        </ScrollScale>
+        
+        {/* Maps - Slide Up with 3D Flip */}
+        <ScrollReveal direction="flipUp" delay={0.1} duration={0.8}>
+          <div className="relative border-t border-white/5 bg-black/40 backdrop-blur-sm">
+             <Maps />
+          </div>
+        </ScrollReveal>
+        
+        {/* Footer */}
+        <ScrollReveal direction="up" delay={0.1}>
+          <Footer/>
+        </ScrollReveal>
+      </div>
     </div>
   )
 }
-
 
 export default MainPage

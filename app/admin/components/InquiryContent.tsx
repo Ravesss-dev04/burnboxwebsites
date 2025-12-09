@@ -21,7 +21,7 @@ export default function InquiryContent() {
 
   const fetchInquiries = async () => {
     try {
-      const res = await fetch('/api/inquiries');
+      const res = await fetch('https://burnboxmediaadvertising.vercel.app/api/inquiries');
       const data = await res.json();
       setInquiries(data);
     } catch (error) {
@@ -39,7 +39,7 @@ export default function InquiryContent() {
     if (!confirm('Are you sure you want to delete this inquiry?')) return;
 
     try {
-      const res = await fetch(`/api/inquiries/${id}`, {
+      const res = await fetch(`https://burnboxmediaadvertising.vercel.app/api/inquiries/${id}`, {
         method: 'DELETE',
       });
 
@@ -57,7 +57,7 @@ export default function InquiryContent() {
 
   const updateStatus = async (id: number, status: string) => {
     try {
-      const res = await fetch(`/api/inquiries/${id}`, {
+      const res = await fetch(`https://burnboxmediaadvertising.vercel.app/api/inquiries/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

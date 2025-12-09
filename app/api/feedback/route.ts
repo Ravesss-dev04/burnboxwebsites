@@ -4,6 +4,7 @@ import nodemailer from "nodemailer";
 import { corsHeaders } from "@/lib/corsHeaders";
 import { prisma } from "@/lib/db";
 
+
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
@@ -11,15 +12,13 @@ export async function OPTIONS() {
 export async function POST(req: Request) {
   try {
     const { name, email, message, rating } = await req.json();
-    
     // Validation
     if (!name || !email || !message) {
       return NextResponse.json(
         { error: "Name, email, and message are required." }, 
         { status: 400, headers: corsHeaders }
       );
-    }
-
+    }    
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -118,9 +117,7 @@ async function sendFeedbackNotification({
         pass: process.env.EMAIL_PASS,
       },
     });
-
     const ratingStars = rating ? '⭐'.repeat(rating) + '☆'.repeat(5 - rating) : 'Not provided';
-
     const htmlBody = `
       <!DOCTYPE html>
       <html>
@@ -202,7 +199,6 @@ async function sendFeedbackNotification({
       </body>
       </html>
     `;
-
     const mailOptions = {
       from: `"Burnbox Printing" <${process.env.EMAIL_USER}>`,
       to: process.env.BUSINESS_EMAIL,
@@ -218,4 +214,3 @@ async function sendFeedbackNotification({
     // Don't throw error - feedback was already saved
   }
 }
-

@@ -115,9 +115,8 @@ const GalleryPhotos: React.FC = () => {
       <motion.section
         className="relative min-h-50 custom-gallery-bg w-full lg:min-h-screen lg:w-full px-4 py-20 flex flex-col items-center overflow-hidden"
         variants={fadeInUp}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
+        initial="visible"
+        animate="visible"
       >
         <img
           className="absolute opacity-10 items-center ml-350 mt-30"

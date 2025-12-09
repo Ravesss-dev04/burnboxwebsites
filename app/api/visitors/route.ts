@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
       take: 100 // Limit to most recent 100 visitors
     });
     
-    return NextResponse.json(visitors);
+    return NextResponse.json(visitors, { headers: corsHeaders });
   } catch (error: any) {
     console.error("Error fetching visitors:", error);
     return NextResponse.json(
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ 
         message: 'Localhost IP skipped in production',
         skipped: true 
-      });
+      }, { headers: corsHeaders });
     }
     
     // For development, use a test IP for geolocation lookup

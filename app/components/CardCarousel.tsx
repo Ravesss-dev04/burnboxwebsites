@@ -101,7 +101,7 @@ export default function CardCarousel() {
   return (
     <section
       id="home"
-      className="relative flex flex-col items-center justify-center min-h-[95vh] w-full overflow-hidden"
+      className="relative flex flex-col items-center justify-center min-h-screen w-full overflow-hidden"
     >
 
       <div className="

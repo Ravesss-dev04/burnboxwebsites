@@ -61,7 +61,6 @@ if (typeof window !== "undefined") {
 }
 
 
-
 const DashboardContent = ({darkMode = false}: DashboardDarkMod) => {
  
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);

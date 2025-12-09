@@ -84,7 +84,7 @@ const Maps = () => {
     <section 
       id='maps' 
       ref={sectionRef}
-      className='min-h-[100vh] min-w-[100vw] z-0 relative bg-white overflow-hidden'
+      className='min-h-screen w-full z-0 relative bg-white overflow-hidden'
     >
       {/* Store Details Card */}
       <div className={`rounded-lg p-4 h-auto absolute top-1/2 -translate-y-1/2 left-1 lg:left-5 z-[99999] bg-black/90 backdrop-blur-sm transition-all duration-300  md:block ${
@@ -159,7 +159,7 @@ const Maps = () => {
       </div>
       
       {/* Main Content Area - Split between Map and Street View */}
-      <div className={`flex h-full w-full transition-all duration-500 ${
+      <div className={`flex h-screen w-full transition-all duration-500 ${
         showStreetView 
           ? streetViewMode === 'split' 
             ? 'flex-col md:flex-row' 

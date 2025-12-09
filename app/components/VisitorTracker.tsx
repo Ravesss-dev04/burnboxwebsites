@@ -3,24 +3,18 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
-/**
- * Client-side component to track all page visits
- * This runs on every page load and route change to track visitors
- */
+
 export default function VisitorTracker() {
   const pathname = usePathname();
-
   useEffect(() => {
-    // Track visitor on page load and route changes
     const trackVisit = async () => {
       try {
         // Get current page path for better tracking
         const currentPath = pathname || window.location.pathname;
-        
         // Call the API to track this visitor
         const response = await fetch('/api/visitors', {
           method: 'POST',
-          headers: {
+          headers: {  
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -28,7 +22,6 @@ export default function VisitorTracker() {
             pagePath: currentPath // Track which page was visited
           }),
         });
-
         if (response.ok) {
           const data = await response.json();
           // Only log in development to avoid cluttering production logs
@@ -42,21 +35,16 @@ export default function VisitorTracker() {
           }
         }
       } catch (error) {
-        // Silently fail - don't interrupt user experience
-        // Only log errors in development
+    
         if (process.env.NODE_ENV === 'development') {
           console.error('Error tracking visitor:', error);
         }
       }
     };
-
     // Small delay to ensure page is fully loaded and IP detection works
     const timeout = setTimeout(trackVisit, 500);
-    
     return () => clearTimeout(timeout);
   }, [pathname]); // Re-run when pathname changes (route navigation)
-
   return null; // This component doesn't render anything
 }
-
 
