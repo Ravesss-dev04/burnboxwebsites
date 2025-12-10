@@ -63,10 +63,8 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
             laplacian.push(val);
           }
         }
-
         const mean = laplacian.reduce((a, b) => a + b, 0) / laplacian.length;
         const variance = laplacian.reduce((a, b) => a + (b - mean) ** 2, 0) / laplacian.length;
-
         resolve(variance < 450); // threshold
       };
       img.onerror = () => resolve(false);
@@ -177,6 +175,7 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
   }, [showOtpPopup]);
 
   // Send OTP
+
   const sendOtp = async () => {
     if (!formEmail) {
       setMessage("Email is required.");
@@ -304,8 +303,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
     }
   };
 
-
-
   return (
     <form onSubmit={handleSubmit} className="relative flex flex-col gap-3 mt-10">
       {/* Loading */}
@@ -381,7 +378,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
                   <X size={20} />
                 </button>
               </div>
-
               {/* Check your email text */}
               <div className="text-center mb-6">
                 <p className="text-white text-[20px]  font-medium mb-2">
@@ -435,7 +431,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
                   </button>
                 </p>
               </div>
-              
               {/* Error/Success Message */}
               {otpMessage && (
                 <div className={`mt-4 p-2 rounded text-center text-sm ${
@@ -450,7 +445,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Rest of your form remains the same */}
       {/* Name */}
       <div className="relative">
@@ -465,7 +459,6 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
           required
         />
       </div>
-      
       {/* Email */}
       <div className="relative">
         <MailIcon className="text-pink absolute left-3 top-2.5" size={18} />

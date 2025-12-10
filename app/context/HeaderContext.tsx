@@ -34,7 +34,6 @@ export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-
   // Fetch products from database on component mount
   useEffect(() => {
     const fetchProducts = async () => {
@@ -49,7 +48,6 @@ export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
             setLoading(false);
             return;
           }
-          
           // Transform the database services to match your Product type
           const transformedProducts: Product[] = services.map((service: any) => ({
             id: service.id,
@@ -96,7 +94,6 @@ export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
     "Flyer Design": "Flyer Design",
     "Other services": "Graphic Design",
   };
-
   // Computed filtered products
   const filteredProducts = useMemo(() => {
     const q = searchValue.trim().toLowerCase();

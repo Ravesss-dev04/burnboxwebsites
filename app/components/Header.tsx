@@ -34,12 +34,11 @@ const Header: React.FC = () => {
     // Prevent URL changes - just use context to open modal
     setSelectedServiceFromHeader(serviceName);
     selectProductByName(serviceName);
-    
     // If not on services page, navigate there first
     if (pathname !== "/services") {
       router.push("/services");
     }
-    
+
     // Scroll to products section
     setTimeout(() => {
       const productsSection = document.getElementById("products-section");
@@ -48,7 +47,6 @@ const Header: React.FC = () => {
       }
     }, 100);
   };
-
   // Handle mobile service click - NEW FUNCTION
   const handleMobileServiceClick = (serviceName: string) => {
     selectProductByName(serviceName);
@@ -68,9 +66,6 @@ const Header: React.FC = () => {
       }
     }, 300);
   };
-
- 
-
   const [isSearchActive, setIsSearchActive] = useState(false);
   
   const handleNavClick = (sectionId: string) => {
@@ -239,14 +234,12 @@ const Header: React.FC = () => {
     setIsHoveringTooltip(true);
     setShowAboutTooltip(true);
   };
-
   const handleMouseLeaveTooltipAbout = () => {
     setIsHoveringTooltip(false);
     hideTooltipTimeout.current = setTimeout(() => {
       setShowAboutTooltip(false);
     }, 200); 
   };
-
   return (
     <div className='h-20 w-full flex items-center justify-between px-5 py-3 text-white font-extralight text-lg z-100 bg-black fixed'>
       {/* Logo */}
@@ -294,7 +287,6 @@ const Header: React.FC = () => {
                 </div>
               )}
             </span>
-            
             <span 
               className='relative'
               onMouseEnter={() => setShowServicesTooltip(true)}
@@ -322,7 +314,6 @@ const Header: React.FC = () => {
                 </div>
               )}
             </span>
-            
             <a href="/contact">
               <button
                 onClick={() => handleNavClick("contact")}
@@ -566,7 +557,6 @@ const Header: React.FC = () => {
                       </motion.button>
                     )}
                   </motion.div>
-
                   {/* About Submenu */}
                   <AnimatePresence>
                     {isAbout && showAboutTooltip && (
@@ -593,7 +583,6 @@ const Header: React.FC = () => {
                               };
                               const target = routeMap[label];
                               if (!target) return;
-
                               if (label === "Why Choose Burnbox Printing?") {
                                 if (pathname === "/") {
                                   const section = document.querySelector(target);
@@ -681,7 +670,6 @@ const Header: React.FC = () => {
               >
                 <HiOutlineShoppingCart className='text-xl' />
               </motion.div>
-            
               {/* Search Input Field */}
               <AnimatePresence>
                 {isMobileSearchActive && (

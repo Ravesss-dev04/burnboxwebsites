@@ -311,10 +311,37 @@ const ServicesProduct = () => {
       <div 
         id="products-section" 
         ref={sectionRef}
-        className='custom-gallery-bg w-full min-h-screen flex flex-col items-center py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8'
+        className='relative w-full min-h-screen flex flex-col items-center py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-[#030303] overflow-hidden'
       >
+        {/* Professional Background */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+          {/* Subtle Grid Pattern */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:32px_32px]" />
+          
+          {/* Radial Gradient Overlay for depth */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_200px,#1a1a1a,transparent)] opacity-40" />
+          
+          {/* Animated Ambient Glows */}
+          <motion.div 
+            animate={{ 
+              opacity: [0.15, 0.25, 0.15],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px] -translate-y-1/2"
+          />
+          <motion.div 
+            animate={{ 
+              opacity: [0.1, 0.2, 0.1],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-pink-900/10 rounded-full blur-[120px] translate-y-1/2"
+          />
+        </div>
+
         <motion.div 
-          className='grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 w-full max-w-7xl'
+          className='relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full max-w-7xl'
           variants={containerVariants}
           initial="hidden"
           animate={(isInView || hasAnimated) ? "visible" : "hidden"}
@@ -323,51 +350,45 @@ const ServicesProduct = () => {
             <motion.div 
               key={item.id}
               variants={cardVariants}
-              whileHover={{ 
-                y: -8,
-                scale: 1.03,
-                transition: { duration: 0.3 }
-              }}
-              whileTap={{ 
-                scale: 0.97,
-                transition: { duration: 0.2 }
-              }}
-              className='flex flex-col bg-gradient-to-br from-white/20 via-white/15 to-white/10 backdrop-blur-sm border border-pink/30 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-pink-500/20 cursor-pointer transition-all duration-300 group'
+              className='group relative bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden cursor-pointer'
               onClick={() => handleProductSelect(item)}
+              whileHover={{ y: -5 }}
             >
-              <div className='relative w-full h-48 sm:h-56 md:h-64 overflow-hidden'>
-                <motion.img
-                  src={item.image[0]}
-                  alt={item.name}
-                  className='object-contain items-center justify-center w-full h-full'
-                  whileHover={{ scale: 1.15 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  draggable="false"
-                />
-                {/* Gradient overlay on hover */}
-                <motion.div
-                  className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'
-                  initial={false}
-                />
-                {/* Shine effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: "200%", transition: { duration: 0.6 } }}
-                />
-              </div>
-              <div className='p-3 sm:p-4 flex flex-col gap-2 bg-gradient-to-b from-black/60 via-black/50 to-black/60 backdrop-blur-sm'>
-                <div className='flex flex-col items-center gap-2 justify-between mt-2'>
-                  <h3 className='font-semibold text-pink-200 mb-1 text-base sm:text-lg md:text-xl text-center group-hover:text-pink-100 transition-colors duration-300'>
+              {/* Animated Border Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Card Content */}
+              <div className="relative h-full flex flex-col bg-[#0a0a0a]/90 backdrop-blur-xl m-[1px] rounded-2xl overflow-hidden">
+                {/* Image Container */}
+                <div className='relative w-full h-64 overflow-hidden bg-[#111] p-6 flex items-center justify-center'>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-pink-900/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <motion.img
+                    src={item.image[0]}
+                    alt={item.name}
+                    className='object-contain w-full h-full relative z-10 drop-shadow-xl'
+                    whileHover={{ scale: 1.1, rotate: 2 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    draggable="false"
+                  />
+                </div>
+
+                {/* Text Content */}
+                <div className='p-5 flex flex-col gap-3 border-t border-white/5'>
+                  <h3 className='font-bold text-gray-200 text-lg truncate group-hover:text-pink-400 transition-colors duration-300'>
                     {item.name}
                   </h3>
-                  <motion.button 
-                    className='text-white/95 bg-gradient-to-r from-pink/70 to-pink/80 hover:from-pink/80 hover:to-pink/90 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-medium text-sm sm:text-base shadow-md hover:shadow-lg hover:shadow-pink-500/30 transition-all duration-300 w-full sm:w-auto'
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    View Now
-                  </motion.button>
+                  
+                  <div className='flex items-center justify-between mt-auto'>
+                    <span className='text-sm text-gray-500 font-medium group-hover:text-gray-300 transition-colors'>
+                      View Details
+                    </span>
+                    <motion.div 
+                      className='w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-pink-500 transition-all duration-300'
+                      whileHover={{ scale: 1.1 }}
+                    >
+                      <ArrowRight className='w-4 h-4 text-gray-400 group-hover:text-white' />
+                    </motion.div>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -689,7 +710,7 @@ const ServicesProduct = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <motion.div 
-            className='flex items-center justify-center gap-2 sm:gap-4 md:gap-6 mt-8 sm:mt-10 flex-wrap'
+            className='relative z-10 flex items-center justify-center gap-2 sm:gap-4 md:gap-6 mt-12 sm:mt-16 flex-wrap'
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -697,28 +718,30 @@ const ServicesProduct = () => {
             <motion.button
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
               disabled={page === 1}
-              className={`px-3 sm:px-4 py-2 gap-1 rounded-lg flex items-center ${page === 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-pink/80 to-pink text-white hover:from-pink hover:to-pink/90 shadow-lg'}`}
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 ${
+                page === 1 
+                  ? 'bg-white/5 text-gray-600 cursor-not-allowed' 
+                  : 'bg-[#0a0a0a] border border-pink-500/30 text-pink-500 hover:bg-pink-500 hover:text-white shadow-lg hover:shadow-pink-500/20'
+              }`}
               whileHover={page !== 1 ? { scale: 1.05, x: -3 } : {}}
               whileTap={page !== 1 ? { scale: 0.95 } : {}}
             >
-              <ArrowLeft size={18} className="sm:w-5 sm:h-5"/>
+              <ArrowLeft size={18} />
+              <span className="hidden sm:inline font-medium">Previous</span>
             </motion.button>
             
-            <div className="flex gap-1 sm:gap-2">
+            <div className="flex gap-2 bg-[#0a0a0a] p-1 rounded-lg border border-white/5">
               {[...Array(totalPages)].map((_, i) => (
                 <motion.button
                   key={i}
                   onClick={() => setPage(i + 1)}
-                  className={`px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-md flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                     page === i + 1 
-                      ? 'bg-gradient-to-r from-pink to-pink/80 text-white shadow-lg shadow-pink-500/30' 
-                      : 'bg-white/20 text-pink hover:bg-white/30 hover:scale-105'
+                      ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/30' 
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
-                  whileHover={{ scale: 1.1, y: -2 }}
+                  whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.05 }}
                 >
                   {i + 1}
                 </motion.button>
@@ -728,11 +751,16 @@ const ServicesProduct = () => {
             <motion.button
               onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}   
               disabled={page === totalPages}
-              className={`px-3 sm:px-4 py-2 rounded-lg flex items-center bg-gray-800 text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg`}
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 ${
+                page === totalPages 
+                  ? 'bg-white/5 text-gray-600 cursor-not-allowed' 
+                  : 'bg-[#0a0a0a] border border-pink-500/30 text-pink-500 hover:bg-pink-500 hover:text-white shadow-lg hover:shadow-pink-500/20'
+              }`}
               whileHover={page !== totalPages ? { scale: 1.05, x: 3 } : {}}
               whileTap={page !== totalPages ? { scale: 0.95 } : {}}
             >
-              <ArrowRight size={18} className="sm:w-5 sm:h-5"/>
+              <span className="hidden sm:inline font-medium">Next</span>
+              <ArrowRight size={18} />
             </motion.button>
           </motion.div>
         )}

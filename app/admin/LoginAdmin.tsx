@@ -95,7 +95,7 @@ const LoginAdmin = () => {
     }
 
     try {
-      const response = await fetch('/auth/forgot-password', {
+      const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,6 +108,7 @@ const LoginAdmin = () => {
       alert('Error sending reset email')
     }
   }
+
   // Add this missing function
   const handleLogout = () => {
     localStorage.removeItem('adminUser')
@@ -117,7 +118,8 @@ const LoginAdmin = () => {
     setPassword('')
     router.refresh()
   }
-  // If user is logged in, show dashboard
+  // If user is logged in, show 
+  //
   if (isLoggedIn) {
     return (
       <AdminDashboard 

@@ -64,7 +64,6 @@ export default function InquiryContent() {
         },
         body: JSON.stringify({ status }),
       });
-
       if (res.ok) {
         setInquiries(inquiries.map(inq => 
           inq.id === id ? { ...inq, status } : inq

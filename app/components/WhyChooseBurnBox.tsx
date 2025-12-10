@@ -19,22 +19,22 @@ const features = [
   {
     icon: <Gem className="w-6 h-6" />,
     title: "Quality Meets Affordability",
-    description: "Premium materials and crisp printing at competitive prices that fit your budget.",
+    description: "State of the arts machines and skilled artists deliver premium output everytime.",
   },
   {
     icon: <PenTool className="w-6 h-6" />,
     title: "Tailored Solutions",
-    description: "Custom designs and personalized service to bring your unique vision to life.",
+    description: "We don't just print, we design strategize to fit your exact brand goals.",
   },
   {
     icon: <ShieldCheck className="w-6 h-6" />,
     title: "Proven Trust",
-    description: "Trusted by top brands and institutions for reliability and excellence.",
+    description: "Proudly serving SMEs, big brands, and government clients with repeat partnership since 2015.",
   },
   {
     icon: <Clock className="w-6 h-6" />,
     title: "Hassle-Free Service",
-    description: "Seamless ordering, fast turnaround, and dedicated support every step of the way.",
+    description: "fast turnaround, expert installation, and after  sales-support.",
   },
 ];
 
@@ -63,10 +63,8 @@ const WhyChooseBurnBox: React.FC<AboutSectionProps> = ({ editable = false }) => 
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-pink-600/10 rounded-full blur-[120px]" />
       </div>
-
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          
           {/* Left Column: Image */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -76,24 +74,25 @@ const WhyChooseBurnBox: React.FC<AboutSectionProps> = ({ editable = false }) => 
             className="relative group"
           >
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-gray-900/50 backdrop-blur-sm">
-              <Image
 
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-gray-900/50 backdrop-blur-sm">
+
+              <Image
                 src="/aboutusimage.png"
                 alt="Why Choose BurnBox"
-
                 width={800}
                 height={800}
-                className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+                className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-106"
               />
-              
+
               {/* Floating Badge */}
               <motion.div 
                 initial={{ y: 20, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="absolute bottom-4 left-6 bg-black/80 backdrop-blur-md border border-white/10 p-4 rounded-xl shadow-lg max-w-[200px]"
+                className="absolute bottom-6 left-6 bg-black/80 backdrop-blur-md border border-white/10 p-4 rounded-xl shadow-lg max-w-[200px]"
               >
+
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle2 className="text-green-400 w-5 h-5" />
                   <span className="font-bold text-sm">100% Satisfaction</span>
@@ -117,7 +116,6 @@ const WhyChooseBurnBox: React.FC<AboutSectionProps> = ({ editable = false }) => 
                 We combine cutting-edge technology with creative passion to deliver printing solutions that make your brand stand out.
               </p>
             </div>
-
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -129,9 +127,9 @@ const WhyChooseBurnBox: React.FC<AboutSectionProps> = ({ editable = false }) => 
                 <motion.div
                   key={index}
                   variants={itemVariants}
-                  className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors duration-300 border border-transparent hover:border-white/5"
+                  className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors duration-300 border border-transparent hover:border-white/15"
                 >
-                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/20 flex items-center justify-center text-purple-400/90 border border-purple-500/15">
                     {feature.icon}
                   </div>
                   <div>

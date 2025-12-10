@@ -44,7 +44,6 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
       clearTimeout(t4);
     };
   }, [controls, onComplete]);
-
   if (!isVisible) return null;
 
   const cubeStyle = {
@@ -80,7 +79,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
           transition={{ delay: 0.3 }}
         >
           <h2 className="text-4xl md:text-5xl font-black text-white">
-            <span className="text-pink-500">BURN</span>BOX
+            <span className="text-pink-500">BURN</span>BOX PRINTING
           </h2>
           <p className="text-neutral-400 text-sm mt-2 tracking-widest uppercase">
             {phase === "shuffling" ? "Loading..." : phase === "solving" ? "Assembling..." : "Welcome"}
@@ -90,6 +89,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
     </AnimatePresence>
   );
 };
+
+
 
 interface FaceProps {
   rot: string;
@@ -108,7 +109,7 @@ const CubeFace: React.FC<FaceProps> = ({ rot, tr, phase, tick, idx }) => {
 
   return (
     <div className="absolute inset-0" style={style}>
-      <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1 p-1 bg-neutral-900/60 rounded-lg">
+      <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1 p-1 bg-neutral-900/10 rounded-lg">
         {[0,1,2,3,4,5,6,7,8].map(i => (
           <Cell key={i} cellIdx={i} phase={phase} tick={tick} faceIdx={idx} />
         ))}

@@ -145,7 +145,6 @@ const MissionVission = () => {
               everything we do.
             </motion.p>
           </motion.div>
-
           {/* Image */}
           <motion.div
             variants={imageVariants}
