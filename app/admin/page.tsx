@@ -1,14 +1,18 @@
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import LoginAdmin from './LoginAdmin'
 
 
 
 
+export const dynamic = 'force-dynamic'
+
 const AdminPage = () => {
   return (
    <div className='w-full h-full bg-gray-400'>
-    <LoginAdmin/>
+     <Suspense fallback={<div className="text-white p-4">Loading admin…</div>}>
+       <LoginAdmin/>
+     </Suspense>
    </div>
   )
 }
