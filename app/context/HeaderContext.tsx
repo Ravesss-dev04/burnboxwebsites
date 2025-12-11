@@ -41,7 +41,6 @@ export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
         const response = await fetch('/api/sservices');
         if (response.ok) {
           const services = await response.json();
-          
           // Check if services is an array
           if (!Array.isArray(services)) {
             console.error('Invalid response format - expected array, got:', typeof services);

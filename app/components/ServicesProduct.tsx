@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import Footer from './Footer'
 import Image from 'next/image'
-import { ArrowBigRightDash, ArrowLeft, ArrowRight, ChevronDown, ChevronDownIcon, User2Icon, XCircleIcon } from 'lucide-react'
+import { ArrowBigRightDash, ArrowLeft, ArrowRight, ChevronDown, ChevronDownIcon, User2Icon, XCircleIcon, Loader2 } from 'lucide-react'
 import { AnimatePresence, motion, useInView, Variants } from 'framer-motion'
 import { EnvelopeIcon } from '@heroicons/react/16/solid'
 import FakeInquiryForm from './FakeInquiryForm'

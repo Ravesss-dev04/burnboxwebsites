@@ -2,24 +2,38 @@
 
 import Image from 'next/image'
 import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import AdminDashboard from './AdminDashboard'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check, Loader2, KeyRound, ShieldCheck } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+type AuthView = 'login' | 'forgot' | 'reset';
 
 const LoginAdmin = () => {
+  const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [isLoginMode, setIsLoginMode] = useState(true) // true for login, false for register
+  const [successMessage, setSuccessMessage] = useState('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [userEmail, setUserEmail] = useState('') // Add this missing state
+  const [userEmail, setUserEmail] = useState('')
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   const router = useRouter()
+  const searchParams = useSearchParams()
 
-  // Check if user is already logged in on component mount
+  // Check for reset token in URL
+  useEffect(() => {
+    const token = searchParams.get('token')
+    if (token) {
+      setView('reset')
+    }
+  }, [searchParams])
+
+  // Check if user is already logged in
   useEffect(() => {
     const savedUser = localStorage.getItem('adminUser')
     if (savedUser) {
@@ -29,87 +43,78 @@ const LoginAdmin = () => {
     }
   }, [])
 
-  // Handle both login and registration
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
+    setSuccessMessage('')
 
-    // For demo purposes - hardcoded admin login
-    if (isLoginMode && email === 'admin@example.com' && password === 'admin123') {
+    // Demo Admin Login
+    if (view === 'login' && email === 'admin@example.com' && password === 'admin123') {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       const userData = { email: 'admin@example.com' }
       localStorage.setItem('adminUser', JSON.stringify(userData))
       setIsLoggedIn(true)
-      setUserEmail('admin@example.com') // Set the user email
+      setUserEmail('admin@example.com')
       setIsLoading(false)
       return
     }
 
     try {
-      const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register'
-      // For registration, validate passwords match
-      if (!isLoginMode && password !== confirmPassword) {
-        setError('Passwords do not match')
-        setIsLoading(false)
-        return
+      let endpoint = '';
+      let body = {};
+
+      switch (view) {
+        case 'login':
+          endpoint = '/api/auth/login';
+          body = { email, password };
+          break;
+        case 'forgot':
+          endpoint = '/api/auth/forgot-password';
+          body = { email };
+          break;
+        case 'reset':
+          if (password !== confirmPassword) {
+            throw new Error('Passwords do not match');
+          }
+          endpoint = '/api/auth/reset-password';
+          body = { token: searchParams.get('token'), password };
+          break;
       }
+
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        if (isLoginMode) {
-          // Login successful - save user data
-          const userData = { email: email }
+        if (view === 'login') {
+          const role = data?.user?.role || 'STAFF'
+          const userData = { email: email, role }
           localStorage.setItem('adminUser', JSON.stringify(userData))
           setIsLoggedIn(true)
-          setUserEmail(email) // Set the user email
+          setUserEmail(email)
           router.refresh()
-        } else {
-          // Registration successful - switch to login mode
-          alert('Account created successfully! Please login.')
-          setIsLoginMode(true)
-          setPassword('')
-          setConfirmPassword('')
+        } else if (view === 'forgot') {
+          setSuccessMessage('Reset link sent to your email.')
+        } else if (view === 'reset') {
+          setSuccessMessage('Password reset successfully! Please login.')
+          setTimeout(() => setView('login'), 2000);
         }
       } else {
-        setError(data.error || `${isLoginMode ? 'Login' : 'Registration'} failed`)
+        setError(data.error || 'Operation failed')
       }
-    } catch (error) {
-      setError(`An error occurred during ${isLoginMode ? 'login' : 'registration'}`)
+    } catch (error: any) {
+      setError(error.message || 'An error occurred')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleForgotPassword = async () => {
-    if (!email) {
-      alert('Please enter your email address first')
-      return
-    }
-
-    try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      })
-      const data = await response.json()
-      alert(data.message)
-    } catch (error) {
-      alert('Error sending reset email')
-    }
-  }
-
-  // Add this missing function
   const handleLogout = () => {
     localStorage.removeItem('adminUser')
     setIsLoggedIn(false)
@@ -118,165 +123,228 @@ const LoginAdmin = () => {
     setPassword('')
     router.refresh()
   }
-  // If user is logged in, show 
-  //
+
+  const savedRole = typeof window !== 'undefined' ? (JSON.parse(localStorage.getItem('adminUser') || '{}')?.role || 'STAFF') : 'STAFF'
   if (isLoggedIn) {
-    return (
-      <AdminDashboard 
-        onLogout={handleLogout} 
-      />
-    )
+    return <AdminDashboard onLogout={handleLogout} userMail={userEmail} userRole={savedRole} />
   }
+
   return (
-    <div className='flex min-h-screen items-center justify-center'>
-      <div className='flex flex-col md:flex-row bg-white shadow-2xl rounded-2xl overflow-hidden w-[60%]'>
-        <div className='w-full md:w-1/2 px-15 relative bg-[#D9D9D9]'>
-          {/* logo */}
-          <div className='absolute top-5 left-6'>
-            <Image
-              src="/bblogo.png"
-              alt='logo'
-              width={35}
-              height={35}
-              className='mr-2'
-            />
-          </div>
-          {/* title */}
-          <div className='flex flex-col justify-center items-center h-[80vh] px-10 py-12'>
-            <h2 className='text-[25px] font-semibold text-center mb-8'>
-              {isLoginMode ? 'Login to Account' : 'Create Admin Account'}
-            </h2>
-            
-            {error && (
-              <div className='w-full bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-4'>
-                {error}
-              </div>
-            )}
-            {/* form */}
-            <form className='space-y-4 w-full' onSubmit={handleAuth}>
-              <input 
-                type="email" 
-                placeholder='Email'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className='w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500'
-                required
-              />
-               <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 pr-10"
-                  required
-                  minLength={isLoginMode ? 1 : 6}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-pink-500"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-              {/* Confirm Password Field (only for registration) */}
-              {!isLoginMode && (
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full border border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 pr-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-pink-500"
-                  >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              )}
-              <button 
-                type='submit' 
-                disabled={isLoading}
-                className='bg-[#F43C6D] w-full text-white font-medium py-2 rounded-md hover:bg-pink-600 transition disabled:opacity-50'
-              >
-                {isLoading 
-                  ? (isLoginMode ? 'Logging in...' : 'Creating Account...')
-                  : (isLoginMode ? 'Login' : 'Create Account')
-                }
-              </button>
-            </form>
-            <div className='bg-gray-400 w-full border border-gray-400 opacity-50 mt-10'></div>
-            
-            {/* extra links */}
-            <div className='mt-10 w-full text-[15px] font-medium text-gray-700 text-center'>
-              {isLoginMode ? (
-                <>
-                  <button 
-                    onClick={handleForgotPassword}
-                    className='text-blue-500 hover:text-blue-700 block mb-2'
-                  >
-                    Forgot Password?
-                  </button>
-                  <p>
-                    Don't have an Admin Account Yet?
-                    <button 
-                      onClick={() => setIsLoginMode(false)}
-                      className='text-blue-500 font-bold hover:text-blue-700'
-                    >
-                      Register Here
-                    </button>
-                  </p>
-                </>
-              ) : (
-                <p>
-                  Already have an account?
-                  <button 
-                    onClick={() => setIsLoginMode(true)}
-                    className='text-blue-500 font-bold hover:text-blue-700 ml-1'
-                  >
-                    Login Here
-                  </button>
-                </p>
-              )}
+    <div className='flex min-h-screen items-center justify-center bg-[#030303] p-4'>
+      {/* Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-600/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px]" />
+      </div>
+
+      <div className='flex flex-col md:flex-row bg-[#0a0a0a] border border-white/5 shadow-2xl rounded-3xl overflow-hidden w-full max-w-5xl min-h-[600px] relative z-10'>
+        
+        {/* Left Side - Form */}
+        <div className='w-full md:w-1/2 p-8 sm:p-12 relative flex flex-col justify-center'>
+          {/* Logo */}
+
+          <div className='absolute top-8 left-8 flex items-center gap-2'>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500/10 to-purple-600 flex items-center justify-center shadow-lg shadow-pink-500/20">
+              <Image src="/bblogo.png" alt="logo" width={20} height={20} className="w-5 h-5" />
             </div>
-            {/* Demo Credentials Hint */}
+            <span className="font-bold text-lg tracking-wide text-white">BURNBOX</span>
+          </div>
+
+          <div className='max-w-sm w-full mx-auto mt-10'>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={view}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="mb-8">
+                  <h2 className='text-3xl font-bold text-white mb-2'>
+                    {view === 'login' && 'Welcome Back'}
+                    {view === 'forgot' && 'Forgot Password?'}
+                    {view === 'reset' && 'Reset Password'}
+                  </h2>
+                  <p className='text-gray-400'>
+                    {view === 'login' && 'Enter your credentials to access the dashboard.'}
+                    {view === 'forgot' && 'Enter your email to receive a reset link.'}
+                    {view === 'reset' && 'Create a new password for your account.'}
+                  </p>
+                </div>
+
+                {error && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className='bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2'
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    {error}
+                  </motion.div>
+                )}
+
+                {successMessage && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className='bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2'
+                  >
+                    <Check size={16} />
+                    {successMessage}
+                  </motion.div>
+                )}
+
+                <form className='space-y-5' onSubmit={handleAuth}>
+                  {/* Email Field - Common for all except reset (unless we want to confirm email) */}
+                  {view !== 'reset' && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-gray-400 ml-1">Email Address</label>
+                      <div className="relative group">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-pink-500 transition-colors" size={18} />
+                        <input 
+                          type="email" 
+                          placeholder='name@example.com'
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className='w-full bg-[#111] border border-white/10 text-white px-10 py-3 rounded-xl focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/50 transition-all placeholder-gray-600'
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Password Fields */}
+                  {(view === 'login' || view === 'reset') && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-gray-400 ml-1">
+                        {view === 'reset' ? 'New Password' : 'Password'}
+                      </label>
+                      <div className="relative group">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-pink-500 transition-colors" size={18} />
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className='w-full bg-[#111] border border-white/10 text-white px-10 py-3 rounded-xl focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/50 transition-all placeholder-gray-600'
+                          required
+                          minLength={view === 'login' ? 1 : 6}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Confirm Password */}
+                  {(view === 'reset') && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-gray-400 ml-1">Confirm Password</label>
+                      <div className="relative group">
+                        <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-pink-500 transition-colors" size={18} />
+                        <input
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className='w-full bg-[#111] border border-white/10 text-white px-10 py-3 rounded-xl focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/50 transition-all placeholder-gray-600'
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                        >
+                          {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Forgot Password Link */}
+                  {view === 'login' && (
+                    <div className="flex justify-end">
+                      <button 
+                        type="button"
+                        onClick={() => setView('forgot')}
+                        className='text-sm text-gray-400 hover:text-pink-400 transition-colors'
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <button 
+                    type='submit' 
+                    disabled={isLoading}
+                    className='w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-semibold py-3.5 rounded-xl hover:from-pink-500 hover:to-purple-500 transition-all shadow-lg shadow-pink-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group'
+                  >
+                    {isLoading ? (
+                      <Loader2 className="animate-spin" size={20} />
+                    ) : (
+                      <>
+                        {view === 'login' && 'Sign In'}
+                        {view === 'forgot' && 'Send Reset Link'}
+                        {view === 'reset' && 'Reset Password'}
+                        {!isLoading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Navigation Links */}
+                <div className='mt-8 text-center'>
+                  {(view === 'forgot' || view === 'reset') && (
+                    <button 
+                      onClick={() => setView('login')}
+                      className='text-gray-400 text-sm hover:text-white transition-colors flex items-center justify-center gap-2 mx-auto'
+                    >
+                      Back to Login
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
         
-        {/* image section */}
-        <div className='hidden md:flex w-full md:w-1/2 bg-black text-white relative items-center justify-center'>
-          <div className='absolute inset-0 opacity-100'>
-            <Image
-              src="/bbimage2.png"
-              alt='bbimage'
-              fill
-              className='object-cover'
-            />
-          </div>
-          <div className='relative w-full h-full flex flex-col justify-start pt-8 px-8 items-center'>
-            <h1 className='text-2xl font-light mb-4'>
-              {isLoginMode ? 'Welcome Admin Login Here!' : 'Create Admin Account'}
-            </h1>
-            <p className='text-lg mb-6 text-center'>
-              {isLoginMode 
-                ? 'Sign in to access your dashboard' 
-                : 'Register for administrative access'
-              }
-            </p>
-            <Image
-              src="/bbimage.png"
-              alt='logo'
-              width={400}
-              height={400}
-              className='object-contain mt-auto text-right'
-              priority
-            />
+        {/* Right Side - Image/Branding */}
+        <div className='hidden md:flex w-1/2 bg-[#050505] relative items-center justify-center overflow-hidden'>
+          {/* Decorative Gradients */}
+          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-pink-600/20 to-purple-900/20 z-0" />
+          <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-20 z-0" />
+          
+          <div className='relative z-10 w-full h-full flex flex-col items-center justify-center p-12'>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="relative w-full max-w-md aspect-square"
+            >
+               {/* Glowing Orb behind image */}
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-500/20 rounded-full blur-[60px]" />
+               
+               <Image
+                src="/bbimage.png"
+                alt='Admin Character'
+                fill
+                className='object-contain drop-shadow-2xl'
+                priority
+              />
+            </motion.div>
+            
+            <div className="text-center mt-8">
+              <h3 className="text-2xl font-bold text-white mb-2">Admin Portal</h3>
+              <p className="text-gray-400 max-w-xs mx-auto">
+                Manage your services, gallery, and inquiries in one place.
+              </p>
+            </div>
           </div>
         </div>
       </div>

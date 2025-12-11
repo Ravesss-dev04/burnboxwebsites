@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Upload, X, Trash2, Image as ImageIcon, Search, Loader2 } from 'lucide-react';
 
 interface GalleryImage {
   id: number;
@@ -19,8 +21,8 @@ export default function GalleryManager({darkMode = false}: GalleryManagerProps) 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch gallery images
   const fetchImages = async () => {
@@ -99,14 +101,8 @@ export default function GalleryManager({darkMode = false}: GalleryManagerProps) 
         // Refresh gallery
         await fetchImages();
         setSelectedFiles([]);
-        
-        // Clear file input
-        const fileInput = document.getElementById('file-input') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
-        
-        // Show success popup
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+        setShowUploadModal(false);
+        alert('Images uploaded successfully!');
         
       } else {
         throw new Error(uploadResult.message);
@@ -130,7 +126,6 @@ export default function GalleryManager({darkMode = false}: GalleryManagerProps) 
 
       if (response.ok) {
         setImages(images.filter(img => img.id !== id));
-        alert('Image deleted successfully!');
       } else {
         throw new Error('Failed to delete image');
       }
@@ -140,261 +135,217 @@ export default function GalleryManager({darkMode = false}: GalleryManagerProps) 
     }
   };
 
-  // Setup horizontal scroll with mouse/touch
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    let isDown = false;
-    let startX: number;
-    let scrollLeft: number;
-
-    const handleMouseDown = (e: MouseEvent) => {
-      isDown = true;
-      scrollContainer.classList.add("active");
-      startX = e.pageX - scrollContainer.offsetLeft;
-      scrollLeft = scrollContainer.scrollLeft;
-    };
-
-    const handleMouseLeave = () => {
-      isDown = false;
-      scrollContainer.classList.remove("active");
-    };
-
-    const handleMouseUp = () => {
-      isDown = false;
-      scrollContainer.classList.remove("active");
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - scrollContainer.offsetLeft;
-      const walk = (x - startX) * 1.2;
-      scrollContainer.scrollLeft = scrollLeft - walk;
-    };
-
-    // Mobile touch support
-    const handleTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      startX = touch.pageX - scrollContainer.offsetLeft;
-      scrollLeft = scrollContainer.scrollLeft;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!e.touches.length) return;
-      const touch = e.touches[0];
-      const x = touch.pageX - scrollContainer.offsetLeft;
-      const walk = (x - startX) * 1.2;
-      scrollContainer.scrollLeft = scrollLeft - walk;
-    };
-
-    // Add event listeners
-    scrollContainer.addEventListener('mousedown', handleMouseDown);
-    scrollContainer.addEventListener('mouseleave', handleMouseLeave);
-    scrollContainer.addEventListener('mouseup', handleMouseUp);
-    scrollContainer.addEventListener('mousemove', handleMouseMove);
-    scrollContainer.addEventListener('touchstart', handleTouchStart);
-    scrollContainer.addEventListener('touchmove', handleTouchMove);
-
-    // Cleanup
-    return () => {
-      scrollContainer.removeEventListener('mousedown', handleMouseDown);
-      scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
-      scrollContainer.removeEventListener('mouseup', handleMouseUp);
-      scrollContainer.removeEventListener('mousemove', handleMouseMove);
-      scrollContainer.removeEventListener('touchstart', handleTouchStart);
-      scrollContainer.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, [images]);
+  const filteredImages = images.filter(img => 
+    img.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    img.altText?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (loading) {
     return (
-      <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${darkMode ?  'bg-gray-700' : ""}`}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading gallery...</p>
-        </div>
+      <div className='flex flex-col items-center justify-center h-full text-white'>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mb-4"></div>
+        <p className="text-gray-400">Loading Gallery...</p>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} p-4 md:p-6 transition-colors duration-300`}>
-      {/* Success Popup */}
-      {showSuccess && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-in slide-in-from-top duration-500">
-          <div className="flex items-center space-x-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            <span>Images uploaded successfully!</span>
-          </div>
+    <div className='flex flex-col h-full'>
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 uppercase tracking-wide">
+            Gallery Management
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">Manage your gallery images and portfolio</p>
         </div>
-      )}
-      <div className={`max-w-7xl  mx-auto ${darkMode ? "bg-gray-900" : "bg-white"}`}>
-        {/* Header */}
-        <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 ${darkMode ? "bg-gray-900 shadow-white" : ""}`}>
-          <div>
-            <h1 className={`text-3xl font-bold text-gray-900 ${darkMode ? 'text-white' : 'text-gray-700'}`}>Gallery Management</h1>
-            <p className="text-gray-600 mt-2">Manage your gallery images</p>
-          </div>
-          {/* Upload Button */}
-          <div className="mt-4 sm:mt-0">
-            <label htmlFor="file-input" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg cursor-pointer transition-colors inline-flex items-center space-x-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span>Add Images</span>
-            </label>
-            <input
-              id="file-input"
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
+        
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
+            <input 
+              type="text" 
+              placeholder="Search images..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:border-pink-500/50 focus:outline-none transition-colors"
             />
           </div>
+          <button 
+            onClick={() => setShowUploadModal(true)}
+            className='flex items-center gap-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-pink-500 hover:to-purple-500 transition-all shadow-lg shadow-pink-500/20'
+          >
+            <Plus size={18} /> <span className='text-sm font-semibold whitespace-nowrap'>Add Images</span>
+          </button>
         </div>
-        {/* Upload Section */}
-        {selectedFiles.length > 0 && (
-          <div className={` bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 }`}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Ready to Upload ({selectedFiles.length} files)
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedFiles.map((file, index) => (
-                    <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                      {file.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="flex space-x-3 mt-4 sm:mt-0">
-                <button
-                  onClick={() => setSelectedFiles([])}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUpload}
-                  disabled={uploading}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-                >
-                  {uploading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Uploading...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>Upload Now</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        
+      </div>
 
-        {/* Gallery Section */}
-        <div className={`rounded-xl shadow-sm border border-gray-200 p-6 ${darkMode ? "bg-gray-900 border-none shadow-white" : ""}`}>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className={`text-xl font-semibold text-gray-900 ${darkMode ? "text-white" : ""}`}>
-              Current Gallery <span className="text-blue-600">({images.length})</span>
-            </h2>
+      {/* Gallery Grid */}
+      <div className='flex-1 bg-[#0a0a0a]/50 backdrop-blur-sm border border-white/5 rounded-2xl p-6 overflow-y-auto'>
+        <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-white">Current Gallery <span className="text-pink-500">({filteredImages.length})</span></h3>
+        </div>
+
+        {filteredImages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+            <ImageIcon size={48} className="mb-4 opacity-20" />
+            <p>No images found</p>
           </div>
-          {images.length === 0 ? (
-            <div className="text-center py-12">
-              <svg className="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <p className="text-gray-500 text-lg">No images in gallery yet</p>
-              <p className="text-gray-400 mt-2">Upload some images to get started</p>
-            </div>
-          ) : (
-            <div
-              ref={scrollContainerRef}
-              className="flex overflow-x-auto space-x-6 pb-6 cursor-grab active:cursor-grabbing select-none scrollbar-hide"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {images.map((image) => (
-                <div
+        ) : (
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
+            <AnimatePresence>
+              {filteredImages.map((image) => (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
                   key={image.id}
-                  className="flex-none w-72 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  className='group relative bg-[#111] border border-white/5 rounded-xl overflow-hidden hover:border-pink-500/30 transition-all duration-300 shadow-lg hover:shadow-pink-500/10'
                 >
-                  <div className="relative group">
-                    <img
-                      src={image.imageUrl}
-                      alt={image.altText || image.title}
-                      className="w-full h-48 object-cover"
-                      draggable="false"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = `data:image/svg+xml;base64,${btoa(`
-                          <svg width="288" height="192" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="100%" height="100%" fill="#f3f4f6"/>
-                            <text x="50%" y="50%" font-family="Arial" font-size="14" fill="#9ca3af" text-anchor="middle" dy=".3em">Image not found</text>
-                          </svg>
-                        `)}`;
-                      }}
+                  {/* Image Container */}
+                  <div className="aspect-video relative bg-[#050505] overflow-hidden">
+                    <img 
+                      src={image.imageUrl} 
+                      alt={image.altText || 'Gallery Image'}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     
-                    {/* Delete Button - Top Right */}
-                    <button
-                      onClick={() => handleDelete(image.id)}
-                      className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
-                      title="Delete image"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+                    {/* Overlay Actions */}
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <button 
+                        onClick={() => handleDelete(image.id)}
+                        className='p-2 bg-white/10 hover:bg-red-500 text-white rounded-lg transition-colors backdrop-blur-md'
+                        title="Delete"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
-                  
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1 min-w-0">
-                        {image.title && (
-                          <p className="font-medium text-gray-900 truncate">{image.title}</p>
-                        )}
+
+                  {/* Content */}
+                  <div className="p-4 bg-[#151515] border-t border-white/5">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">
+                            {new Date(image.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            })}
+                        </span>
+                      
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
+
+      {/* Upload Modal */}
+      <AnimatePresence>
+        {showUploadModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-[#111] border border-white/10 p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl relative overflow-hidden"
+            >
+              {/* Modal Background Glow */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+              
+              <div className="relative z-10">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Add Images</h3>
+                    <p className="text-sm text-gray-400 mt-1">Upload new photos to your gallery</p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                        setShowUploadModal(false);
+                        setSelectedFiles([]);
+                    }}
+                    className="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Select Images
+                    </label>
+                    <div className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center hover:border-pink-500/30 hover:bg-white/5 transition-all group cursor-pointer relative">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <div className="flex flex-col items-center justify-center pointer-events-none">
+                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                          <Upload size={20} className="text-gray-400 group-hover:text-pink-400" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
+                          Click to upload images
+                        </span>
                         <p className="text-xs text-gray-500 mt-1">
-                          {new Date(image.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
+                          PNG, JPG up to 5MB
                         </p>
                       </div>
                     </div>
-                    
-                    {image.altText && (
-                      <p className="text-sm text-gray-600 truncate" title={image.altText}>
-                        {image.altText}
-                      </p>
-                    )}
+                  </div>
+
+                  {selectedFiles.length > 0 && (
+                    <div className="bg-white/5 rounded-lg p-4 max-h-40 overflow-y-auto custom-scrollbar">
+                        <h4 className="text-sm font-medium text-gray-300 mb-2">Selected Files ({selectedFiles.length})</h4>
+                        <div className="space-y-2">
+                            {selectedFiles.map((file, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-xs text-gray-400 bg-black/20 p-2 rounded">
+                                    <span className="truncate max-w-[200px]">{file.name}</span>
+                                    <span className="text-gray-600">{(file.size / 1024).toFixed(1)} KB</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-4 border-t border-white/5 mt-2">
+                    <button
+                      onClick={() => {
+                        setShowUploadModal(false);
+                        setSelectedFiles([]);
+                      }}
+                      className="flex-1 bg-white/5 text-gray-300 py-2.5 rounded-lg hover:bg-white/10 hover:text-white transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUpload}
+                      disabled={uploading || selectedFiles.length === 0}
+                      className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2.5 rounded-lg hover:from-pink-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-pink-500/20 font-medium"
+                    >
+                      {uploading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Uploading...
+                        </span>
+                      ) : (
+                        `Upload ${selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}`
+                      )}
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Custom scrollbar hide styles */}
-        <style jsx>{`
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-          }
-        `}</style>
-      </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

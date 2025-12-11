@@ -1,12 +1,33 @@
-"use client"
+"use client";
 
-import { BarChart as BarChartIcon, Mail, Users, Trash2, Eye, Image as ImageIcon, MapPin } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import React, { useState, useEffect } from 'react'
-import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import {
+  BarChart as BarChartIcon,
+  Mail,
+  Users,
+  Trash2,
+  Eye,
+  Image as ImageIcon,
+  MapPin,
+  ArrowUpRight,
+  Activity,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import React, { useState, useEffect } from "react";
+import {
+  BarChart,
+  Bar,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Cell,
+} from "recharts";
+import { motion } from "framer-motion";
+import Globe3D from "./components/Globe3D";
 
 interface DashboardDarkMod {
-   darkMode?: boolean
+  darkMode?: boolean;
 }
 
 interface Inquiry {
@@ -21,7 +42,6 @@ interface Inquiry {
   createdAt: string;
 }
 
-
 interface Visitors {
   id: number;
   ipAddress: string;
@@ -34,35 +54,7 @@ interface Visitors {
   updatedAt: string;
 }
 
-
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false }
-);
-const Popup = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Popup),
-  { ssr: false }
-);
-
-let L: any;
-if (typeof window !== "undefined") {
-  // dynamically import leaflet only in browser
-  import("leaflet").then((leaflet) => {
-    L = leaflet.default;
-  });
-}
-
-
-const DashboardContent = ({darkMode = false}: DashboardDarkMod) => {
- 
+const DashboardContent = ({ darkMode = false }: DashboardDarkMod) => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
@@ -71,7 +63,7 @@ const DashboardContent = ({darkMode = false}: DashboardDarkMod) => {
 
   // Calculate product data for chart from actual inquiries
   const productData = inquiries.reduce((acc, inquiry) => {
-    const existing = acc.find(item => item.name === inquiry.product);
+    const existing = acc.find((item) => item.name === inquiry.product);
     if (existing) {
       existing.inquiries++;
     } else {
@@ -81,20 +73,21 @@ const DashboardContent = ({darkMode = false}: DashboardDarkMod) => {
   }, [] as { name: string; inquiries: number }[]);
 
   // Calculate top product
-  const topProduct = productData.length > 0 
-    ? productData.reduce((prev, current) => 
-        (prev.inquiries > current.inquiries) ? prev : current
-      ).name 
-    : 'No inquiries';
+  const topProduct =
+    productData.length > 0
+      ? productData.reduce((prev, current) =>
+          prev.inquiries > current.inquiries ? prev : current
+        ).name
+      : "No inquiries";
 
   // Fetch inquiries from API
   const fetchInquiries = async () => {
     try {
-      const res = await fetch('/api/inquiries');
+      const res = await fetch("/api/inquiries");
       const data = await res.json();
       setInquiries(data);
     } catch (error) {
-      console.error('Error fetching inquiries:', error);
+      console.error("Error fetching inquiries:", error);
     } finally {
       setLoading(false);
     }
@@ -103,13 +96,13 @@ const DashboardContent = ({darkMode = false}: DashboardDarkMod) => {
   // Fetch visitors from API
   const fetchVisitors = async () => {
     try {
-      const res = await fetch('/api/visitors');
+      const res = await fetch("/api/visitors");
       if (res.ok) {
         const data = await res.json();
         setVisitors(data);
       }
     } catch (error) {
-      console.error('Error fetching visitors:', error);
+      console.error("Error fetching visitors:", error);
     } finally {
       setVisitorsLoading(false);
     }
@@ -118,179 +111,67 @@ const DashboardContent = ({darkMode = false}: DashboardDarkMod) => {
   useEffect(() => {
     fetchInquiries();
     fetchVisitors();
-    
+
     // Poll for new visitors every 10 seconds (real-time updates)
     const visitorsInterval = setInterval(() => {
       fetchVisitors();
     }, 10000);
-    
+
     return () => clearInterval(visitorsInterval);
   }, []);
-  // simple map component using SVG
- const SimpleWorldMap = () => {
-  // Filter visitors with valid coordinates and active status
-  const mapPoints = visitors.filter(v => {
-    const hasCoords = v.latitude !== null && v.longitude !== null && 
-                      !isNaN(v.latitude!) && !isNaN(v.longitude!) &&
-                      v.latitude! >= -90 && v.latitude! <= 90 &&
-                      v.longitude! >= -180 && v.longitude! <= 180;
-    return hasCoords && v.status === "Active";
-  });
-
-  // pink dot icon for visitors
-  let pinkIcon: any = null;
-  if (typeof window !== "undefined" && L) {
-    pinkIcon = L.divIcon({
-      html: `<div style="background:#ec4899;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 5px #ec4899;"></div>`,
-      className: "",
-      iconSize: [12, 12],
-    });
-  }
-
-  if (!L || typeof window === "undefined") {
-    return (
-      <div className={`relative w-full h-64 rounded-lg overflow-hidden z-10 flex items-center justify-center ${darkMode ? "bg-gray-800" : "bg-gray-100"}`}>
-        <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
-          {visitorsLoading ? "Loading map..." : "Initializing map..."}
-        </p>
-      </div>
+  const EnhancedMapCard = () => {
+    const activeVisitors = visitors.filter(
+      (v) => v.latitude && v.longitude && v.status === "Active"
     );
-  }
 
-  if (mapPoints.length === 0) {
     return (
-      <div className={`relative w-full h-64 rounded-lg overflow-hidden z-10 flex items-center justify-center ${darkMode ? "bg-gray-800" : "bg-gray-100"}`}>
-        <div className="text-center">
-          <p className={`text-sm mb-2 ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
-            No visitor locations available
-          </p>
-          <p className={`text-xs ${darkMode ? "text-gray-500" : "text-gray-500"}`}>
-            {visitors.length > 0 
-              ? `${visitors.length} visitor(s) tracked, but no location data yet`
-              : "No visitors tracked yet"}
-          </p>
+      <div className="bg-[#111] border border-white/5 rounded-xl p-6 shadow-lg hover:border-pink-500/20 transition-all duration-300 overflow-hidden relative">
+        <div className="flex items-center justify-between mb-6 relative z-10">
+          <div>
+            <h3 className="text-xl font-bold text-white">Visitor Locations</h3>
+            <p className="text-sm text-gray-400 mt-1">
+              Real-time geographic distribution
+            </p>
+          </div>
+          <div className="p-2 bg-pink-500/10 rounded-lg">
+            <MapPin size={20} className="text-pink-500" />
+          </div>
         </div>
-      </div>
-    );
-  }
 
-  return (
-    <div className="relative w-full h-64 rounded-lg overflow-hidden z-10">
-      <MapContainer
-        center={[20, 0]}
-        zoom={2}
-        style={{ height: "100%", width: "100%" }}
-        scrollWheelZoom={false}
-        attributionControl={false}
-        className={darkMode ? "bg-gray-900" : "bg-gray-100"}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-          url={
-            darkMode
-              ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-              : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          }
-        />
-        {mapPoints.map((v) => (
-          <Marker
-            key={v.id}
-            position={[v.latitude!, v.longitude!]}
-            icon={pinkIcon}
-          >
-            <Popup>
-              <strong>{v.location}</strong>
-              {v.city && <><br />City: {v.city}</>}
-              <br />
-              IP: {v.ipAddress}
-              <br />
-              Status: {v.status}
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+        <div className="w-full h-[400px] flex items-center justify-center relative z-0">
+          <Globe3D visitors={visitors} />
+        </div>
 
-      {/* Legend */}
-      <div
-        className={`absolute top-2 right-2 p-2 rounded-lg ${
-          darkMode ? "bg-gray-800/80" : "bg-white/80"
-        }`}
-      >
-        <div className="relative flex items-center space-x-2 z-9999999">
-          <div className="w-3 h-3 bg-pink-500 rounded-full animate-pulse"></div>
-          <span
-            className={`text-xs font-medium${
-              darkMode ? "text-gray-200" : "text-gray-700"
-            }`}
-          >
-            Active Visitors ({mapPoints.length})
+        <div className="flex justify-between items-center pt-4 border-t border-white/5 relative z-10 bg-[#111]/80 backdrop-blur-sm">
+          <span className="text-sm text-gray-400">Total locations tracked</span>
+          <span className="font-bold text-pink-500 bg-pink-500/10 px-3 py-1 rounded-full text-sm">
+            {activeVisitors.length}
           </span>
         </div>
       </div>
-    </div>
-  );
-};
-
-const EnhancedMapCard = () => {
-  return (
-    <div
-      className={`shadow-md rounded-2xl p-5 ${
-        darkMode ? "bg-gray-900 shadow-white/10" : "bg-white"
-      }`}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h3
-          className={`text-[20px] font-bold ${
-            darkMode ? "text-white" : "text-gray-900"
-          }`}
-        >
-          Visitor Locations
-        </h3>
-        <MapPin
-          size={20}
-          className={darkMode ? "text-pink-400" : "text-pink-500"}
-        />
-      </div>
-
-      <div className="mb-4">
-        <SimpleWorldMap />
-      </div>
-
-      <div
-        className={`text-sm ${
-          darkMode ? "text-gray-300" : "text-gray-600"
-        } flex justify-between items-center`}
-      >
-        <span>Total locations tracked:</span>
-        <span className="font-semibold text-pink-500">
-          {visitors.filter(v => v.latitude && v.longitude && v.status === "Active").length}
-        </span>
-      </div>
-    </div>
-  );
-};
-
+    );
+  };
 
   // Delete inquiry
   const deleteInquiry = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this inquiry?')) return;
+    if (!confirm("Are you sure you want to delete this inquiry?")) return;
 
     try {
       const res = await fetch(`/api/inquiries/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (res.ok) {
-        setInquiries(inquiries.filter(inq => inq.id !== id));
+        setInquiries(inquiries.filter((inq) => inq.id !== id));
         if (selectedInquiry?.id === id) {
           setSelectedInquiry(null);
         }
       } else {
-        throw new Error('Failed to delete inquiry');
+        throw new Error("Failed to delete inquiry");
       }
     } catch (error) {
-      console.error('Error deleting inquiry:', error);
-      alert('Failed to delete inquiry');
+      console.error("Error deleting inquiry:", error);
+      alert("Failed to delete inquiry");
     }
   };
 
@@ -298,238 +179,370 @@ const EnhancedMapCard = () => {
   const updateStatus = async (id: number, status: string) => {
     try {
       const res = await fetch(`/api/inquiries/${id}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ status }),
       });
 
       if (res.ok) {
-        setInquiries(inquiries.map(inq => 
-          inq.id === id ? { ...inq, status } : inq
-        ));
+        setInquiries(
+          inquiries.map((inq) => (inq.id === id ? { ...inq, status } : inq))
+        );
         if (selectedInquiry?.id === id) {
           setSelectedInquiry({ ...selectedInquiry, status });
         }
       }
     } catch (error) {
-      console.error('Error updating status:', error);
+      console.error("Error updating status:", error);
     }
   };
+
   if (loading) {
-    return <div className="p-6">Loading dashboard...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mb-4"></div>
+        <p className="text-gray-400">Loading Dashboard...</p>
+      </div>
+    );
   }
+
   return (
     <div className="relative w-full h-full overflow-x-hidden">
-      <h2 className={`text-2xl font-semibold mb-4 ${darkMode ? "text-white" : "text-gray-800"}`}>Dashboard</h2>
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6 pb-15'>
-        {/* cards */}
-       
-        <div className={`shadow-md rounded-xl p-6 flex items-center justify-between ${darkMode ? "bg-gray-900 shadow-white/10" : "bg-white"}`}>
-         <div>
-           <h3 className='text-2xl font-semibold text-gray-white'>Total Inquiries</h3> 
-           <p className={`text-3xl font-bold ${darkMode ? "text-pink" : "text-black"}`}>{inquiries.length}</p>
-           </div>
-           <Mail size={35} className={`${darkMode ? "text-pink" : "text-black"}`}/>
-        </div>
-       <div className={`shadow-md rounded-xl p-6 flex justify-between ${darkMode ? "bg-gray-900 shadow-white/10" : "bg-white"}`}>
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 uppercase tracking-wide">
+          Dashboard Overview
+        </h2>
+        <p className="text-gray-400 text-sm mt-1">
+          Welcome back to your admin control panel
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Total Inquiries Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-[#111] border border-white/5 rounded-xl p-6 shadow-lg hover:border-pink-500/30 transition-all duration-300 group relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:bg-pink-500/10 transition-colors" />
+          <div className="flex justify-between items-start relative z-10">
             <div>
-               <h3 className={`text-2xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}>Active Visitors</h3>
-               <p className={`text-3xl font-bold ${darkMode ? " text-pink-500" : "text-gray-900"}`}>
-                 {visitorsLoading ? "..." : visitors.filter(v => v.status === "Active").length}
-               </p>
+              <p className="text-gray-400 text-sm font-medium mb-1">
+                Total Inquiries
+              </p>
+              <h3 className="text-3xl font-bold text-white group-hover:text-pink-400 transition-colors">
+                {inquiries.length}
+              </h3>
             </div>
-            <Users size={35} className={`${darkMode ? "text-pink-400": "text-gray-900"}`}/>
-         </div>  
-      <div className={` shadow-md rounded-xl p-6 flex items-center justify-between ${darkMode ? "bg-gray-900 shadow-white/10" : "bg-white"}`}>
-
-         <div>
-            <h3 className={`text-2xl font-semibold ${darkMode ? "text-white " : "text-gray-900"}`}>Top Products</h3>
-            <p className={`text-xl font-bold ${darkMode ? " text-pink-500" : "text-gray-900"}`}>{topProduct}</p>
-         </div>
-         <BarChartIcon size={32} className={`${darkMode ? "text-pink-400" : "text-gray-900"}`}/>
-      </div>
-   </div>
-
-   {/* Middle Section: Inquiries + chart */}
-   <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
-      {/* Recent Inquiries Table */}
-      <div className={`shadow-md rounded-2xl p-5 ${darkMode ? "bg-gray-900 shadow-white/10" : "bg-white"}`}>
-         <h3 className={`text-[25px] font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>Recent Inquiries</h3>
-         
-         {inquiries.length === 0 ? (
-            <p className={`text-center py-8 ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
-               No inquiries yet
-            </p>
-         ) : (
-            <div className="overflow-x-auto">
-               <table className="w-full ">
-                  <thead className={`${darkMode ? "bg-gray-700" : "bg-gray-700"}`}>
-                     <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                        <th className={`text-left py-3 px-4 font-semibold ${darkMode ? "text-gray-300" : "text-white"}`}>Name</th>
-                        <th className={`text-left py-3 px-4 font-semibold ${darkMode ? "text-gray-300" : "text-white"}`}>Email</th>
-                        <th className={`text-left py-3 px-4 font-semibold ${darkMode ? "text-gray-300" : "text-white"}`}>Product</th>
-                        <th className={`text-left py-3 px-4 font-semibold ${darkMode ? "text-gray-300" : "text-white"}`}>Price</th>
-                        <th className={`text-left py-3 px-4 font-semibold ${darkMode ? "text-gray-300" : "text-white"}`}>Message</th>
-                        <th className={`text-left py-3 px-4 font-semibold ${darkMode ? "text-gray-300" : "text-white"}`}>Image</th>
-                        <th className={`text-left py-3 px-4 font-semibold ${darkMode ? "text-gray-300" : "text-white"}`}>Action</th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     {inquiries.slice(0, 5).map((inquiry) => (
-                        <tr key={inquiry.id} className={`border-b ${darkMode ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-gray-50"}`}>
-                           <td className="py-3 px-4">
-                              <div>
-                                 <p className={`font-medium ${darkMode ? "text-white" : "text-gray-900"}`}>{inquiry.name}</p>
-                                 <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
-                                    {new Date(inquiry.createdAt).toLocaleDateString()}
-                                 </p>
-                              </div>
-                           </td>
-                           <td className="py-3 px-4">
-                              <p className={`${darkMode ? "text-gray-300" : "text-gray-700"}`}>{inquiry.email}</p>
-                           </td>
-                           <td className="py-3 px-4">
-                              <p className={`${darkMode ? "text-gray-300" : "text-gray-700"}`}>{inquiry.product}</p>
-                           </td>
-                           <td className="py-3 px-4">
-                              <p className={`font-medium ${darkMode ? "text-green-400" : "text-green-600"}`}>{inquiry.price}</p>
-                           </td>
-                           <td className="py-3 px-4 max-w-xs">
-                              <p className={`text-sm truncate ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                                 {inquiry.message}
-                              </p>
-                           </td>
-                           <td className="py-3 px-4">
-                              {inquiry.imageUrl ? (
-                                 <div className="flex items-center justify-center">
-                                    <img 
-                                       src={inquiry.imageUrl} 
-                                       alt="Sample layout" 
-                                       className="w-12 h-12 object-cover rounded border"
-                                    />
-                                 </div>
-                              ) : (
-                                 <span className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>No Image</span>
-                              )}
-                           </td>
-                           <td className="py-3 px-4">
-                              <div className="flex space-x-2">
-                                 <button
-                                    onClick={() => setSelectedInquiry(inquiry)}
-                                    className={`p-2 rounded ${
-                                       darkMode 
-                                         ? "text-blue-400 hover:text-blue-300 hover:bg-gray-700" 
-                                         : "text-blue-600 hover:text-blue-800 hover:bg-gray-100"
-                                    }`}
-                                    title="View Details"
-                                 >
-                                    <Eye size={16} />
-                                 </button>
-                                 <button
-                                    onClick={() => deleteInquiry(inquiry.id)}
-                                    className={`p-2 rounded ${
-                                       darkMode 
-                                         ? "text-red-400 hover:text-red-300 hover:bg-gray-700" 
-                                         : "text-red-600 hover:text-red-800 hover:bg-gray-100"
-                                    }`}
-                                    title="Delete"
-                                 >
-                                    <Trash2 size={16} />
-                                 </button>
-                              </div>
-                           </td>
-                        </tr>
-                     ))}
-                  </tbody>
-               </table>
+            <div className="p-3 bg-pink-500/10 rounded-xl text-pink-500 group-hover:scale-110 transition-transform">
+              <Mail size={24} />
             </div>
-         )}
+          </div>
+          <div className="mt-4 flex items-center text-xs text-gray-500">
+            <span className="text-green-400 flex items-center gap-1 bg-green-400/10 px-2 py-0.5 rounded mr-2">
+              <ArrowUpRight size={12} /> +12%
+            </span>
+            <span>vs last month</span>
+          </div>
+        </motion.div>
+
+        {/* Active Visitors Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-[#111] border border-white/5 rounded-xl p-6 shadow-lg hover:border-purple-500/30 transition-all duration-300 group relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:bg-purple-500/10 transition-colors" />
+          <div className="flex justify-between items-start relative z-10">
+            <div>
+              <p className="text-gray-400 text-sm font-medium mb-1">
+                Active Visitors
+              </p>
+              <h3 className="text-3xl font-bold text-white group-hover:text-purple-400 transition-colors">
+                {visitorsLoading
+                  ? "..."
+                  : visitors.filter((v) => v.status === "Active").length}
+              </h3>
+            </div>
+            <div className="p-3 bg-purple-500/10 rounded-xl text-purple-500 group-hover:scale-110 transition-transform">
+              <Users size={24} />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-xs text-gray-500">
+            <span className="text-purple-400 flex items-center gap-1 bg-purple-400/10 px-2 py-0.5 rounded mr-2">
+              <Activity size={12} /> Live
+            </span>
+            <span>Real-time tracking</span>
+          </div>
+        </motion.div>
+
+        {/* Top Products Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-[#111] border border-white/5 rounded-xl p-6 shadow-lg hover:border-blue-500/30 transition-all duration-300 group relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:bg-blue-500/10 transition-colors" />
+          <div className="flex justify-between items-start relative z-10">
+            <div>
+              <p className="text-gray-400 text-sm font-medium mb-1">
+                Top Product
+              </p>
+              <h3
+                className="text-xl font-bold text-white truncate max-w-[180px] group-hover:text-blue-400 transition-colors"
+                title={topProduct}
+              >
+                {topProduct}
+              </h3>
+            </div>
+            <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500 group-hover:scale-110 transition-transform">
+              <BarChartIcon size={24} />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-xs text-gray-500">
+            <span className="text-blue-400 flex items-center gap-1 bg-blue-400/10 px-2 py-0.5 rounded mr-2">
+              <ArrowUpRight size={12} /> High Demand
+            </span>
+            <span>Most inquired item</span>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Product Interest Chart - Now using real data */}
-      <div className={`shadow-md p-5 rounded-2xl ${darkMode ? "bg-gray-900 shadow-white/10" : "bg-white "}`}>
-            <h3 className='text-[25px] font-bold mb-4'>Product Interest</h3>
-            {productData.length > 0 ? (
-               <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={productData}>
-                     <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#374151" : "#e5e7eb"} />
-                     <XAxis 
-                        dataKey="name" 
-                        stroke={darkMode ? '#f472b6' : '#ec4899'} 
-                        fontSize={12}
-                        angle={-45}
-                        textAnchor="end"
-                        height={80}
-                     />
-                     <YAxis stroke={darkMode ? '#f472b6' : '#ec4899'} fontSize={12} />
-                     <Tooltip 
-                        contentStyle={darkMode ? 
-                           { backgroundColor: '#1f2937', borderColor: '#374151', color: 'white' } : 
-                           { backgroundColor: 'white', borderColor: '#e5e7eb' }
-                        }
-                     />
-                     <Bar 
-                        dataKey="inquiries" 
-                        fill={darkMode ? "#ec4899" : "#f472b6"} 
-                        radius={[10, 10, 0, 0]} 
-                        name="Inquiries"
-                     />
-                  </BarChart>
-               </ResponsiveContainer>
-            ) : (
-               <div className="h-64 flex items-center justify-center">
-                  <p className={`text-center ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
-                     No product data available yet
-                  </p>
-               </div>
-            )}
-      </div>
-   </div>
-   {/* visitors tracking table */}
-            
-           <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
-        {/* Map Card */}
-        <EnhancedMapCard />
-
-        {/* Visitors tracking table */}
-        <div className={`shadow-md rounded-2xl p-5 ${darkMode ? "bg-gray-900 shadow-white/10 text-white " : "bg-white text text-black"}`}>
-          <h3 className='text-[20px] font-bold mb-4'>Who's Connected</h3>
-          {visitorsLoading ? (
-            <div className="text-center py-8">
-              <p className={darkMode ? "text-gray-400" : "text-gray-600"}>Loading visitors...</p>
+      {/* Middle Section: Inquiries + chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Recent Inquiries Table */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-[#111] border border-white/5 rounded-xl p-6 shadow-lg flex flex-col"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-white">Recent Inquiries</h3>
+              <p className="text-sm text-gray-400 mt-1">
+                Latest messages from customers
+              </p>
             </div>
-          ) : visitors.length === 0 ? (
-            <div className="text-center py-8">
-              <p className={darkMode ? "text-gray-400" : "text-gray-600"}>No visitors tracked yet</p>
+            <button className="text-xs text-pink-400 hover:text-pink-300 transition-colors">
+              View All
+            </button>
+          </div>
+
+          {inquiries.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center py-12 text-gray-500">
+              <Mail size={48} className="mb-4 opacity-20" />
+              <p>No inquiries yet</p>
             </div>
           ) : (
-            <div className='overflow-x-auto'>
-              <table className='w-full text-left border-collapse'>
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className='text-pink-400 border-b border-gray-700'>
-                    <th className='pb-2 px-4'>IP Address</th>
-                    <th className='pb-2 px-4'>Location</th>
-                    <th className='pb-2 px-4'>City</th>
-                    <th className='pb-2 px-4'>Status</th>
+                  <tr className="border-b border-white/10 text-xs uppercase tracking-wider text-gray-500">
+                    <th className="py-3 px-4 font-medium">Customer</th>
+                    <th className="py-3 px-4 font-medium">Product</th>
+                    <th className="py-3 px-4 font-medium">Price</th>
+                    <th className="py-3 px-4 font-medium text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {visitors.slice(0, 10).map((v) => (
+                <tbody className="text-sm">
+                  {inquiries.slice(0, 5).map((inquiry) => (
+                    <tr
+                      key={inquiry.id}
+                      className="border-b border-white/5 hover:bg-white/5 transition-colors group"
+                    >
+                      <td className="py-3 px-4">
+                        <div>
+                          <p className="font-medium text-white group-hover:text-pink-400 transition-colors">
+                            {inquiry.name}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate max-w-[120px]">
+                            {inquiry.email}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-gray-300 bg-white/5 px-2 py-1 rounded text-xs">
+                          {inquiry.product}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <p className="font-medium text-green-400">
+                          {inquiry.price}
+                        </p>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => setSelectedInquiry(inquiry)}
+                            className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors"
+                            title="View Details"
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
+                            onClick={() => deleteInquiry(inquiry.id)}
+                            className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Product Interest Chart */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-[#111] border border-white/5 rounded-xl p-6 shadow-lg flex flex-col"
+        >
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-white">Product Interest</h3>
+            <p className="text-sm text-gray-400 mt-1">
+              Inquiry distribution by product category
+            </p>
+          </div>
+
+          <div className="flex-1 min-h-[250px]">
+            {productData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={productData}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#333"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    stroke="#666"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    dy={10}
+                  />
+                  <YAxis
+                    stroke="#666"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "rgba(255,255,255,0.05)" }}
+                    contentStyle={{
+                      backgroundColor: "#1a1a1a",
+                      borderColor: "#333",
+                      color: "white",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    }}
+                  />
+                  <Bar dataKey="inquiries" radius={[4, 4, 0, 0]} barSize={40}>
+                    {productData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={index % 2 === 0 ? "#ec4899" : "#8b5cf6"}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-gray-500">
+                <BarChartIcon size={48} className="mb-4 opacity-20" />
+                <p>No product data available yet</p>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* visitors tracking table */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Map Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <EnhancedMapCard />
+        </motion.div>
+
+        {/* Visitors tracking table */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-[#111] border border-white/5 rounded-xl p-6 shadow-lg flex flex-col"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-white">Who's Connected</h3>
+              <p className="text-sm text-gray-400 mt-1">
+                Live visitor session data
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full animate-pulse">
+              <div className="w-2 h-2 bg-green-400 rounded-full" />
+              Live
+            </div>
+          </div>
+
+          {visitorsLoading ? (
+            <div className="flex-1 flex items-center justify-center text-gray-500">
+              <p>Loading visitors...</p>
+            </div>
+          ) : visitors.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center text-gray-500">
+              <p>No visitors tracked yet</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-white/10">
+                    <th className="pb-3 px-4 font-medium">IP Address</th>
+                    <th className="pb-3 px-4 font-medium">Location</th>
+                    <th className="pb-3 px-4 font-medium">City</th>
+                    <th className="pb-3 px-4 font-medium text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {visitors.slice(0, 8).map((v) => (
                     <tr
                       key={v.id}
-                      className='border-b border-gray-700 hover:bg-gray-800/50'
+                      className="border-b border-white/5 hover:bg-white/5 transition-colors"
                     >
-                      <td className='py-3 px-4 text-sm'>{v.ipAddress}</td>
-                      <td className='py-3 px-4'>{v.location}</td>
-                      <td className='py-3 px-4'>{v.city || "N/A"}</td>
-                      <td className='py-3 px-4'>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          v.status === 'Active' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
-                        }`}>
+                      <td className="py-3 px-4 text-gray-300 font-mono text-xs">
+                        {v.ipAddress}
+                      </td>
+                      <td className="py-3 px-4 text-gray-300">{v.location}</td>
+                      <td className="py-3 px-4 text-gray-400">
+                        {v.city || "N/A"}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                            v.status === "Active"
+                              ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                              : "bg-gray-500/10 text-gray-400 border border-gray-500/20"
+                          }`}
+                        >
                           {v.status}
                         </span>
                       </td>
@@ -537,104 +550,118 @@ const EnhancedMapCard = () => {
                   ))}
                 </tbody>
               </table>
-              {visitors.length > 10 && (
-                <p className={`text-xs mt-2 text-center ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
-                  Showing 10 of {visitors.length} visitors
-                </p>
-              )}
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
-      {/* map */}
-
-    
       {/* Inquiry Details Modal */}
       {selectedInquiry && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto ${
-            darkMode ? "bg-gray-800" : "bg-white"
-          }`}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className={`text-xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
-                Inquiry Details
-              </h3>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-[#111] border border-white/10 rounded-2xl p-6 sm:p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
+          >
+            {/* Modal Glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+            <div className="flex justify-between items-center mb-8 relative z-10">
+              <div>
+                <h3 className="text-2xl font-bold text-white">
+                  Inquiry Details
+                </h3>
+                <p className="text-sm text-gray-400 mt-1">
+                  Review customer request information
+                </p>
+              </div>
               <button
                 onClick={() => setSelectedInquiry(null)}
-                className={`p-2 rounded-full ${
-                  darkMode ? "text-gray-400 hover:text-white hover:bg-gray-700" : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                }`}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
               >
-                ✕
+                <ArrowUpRight size={20} className="rotate-45" />{" "}
+                {/* Using as close icon alternative or just X */}
+                <span className="sr-only">Close</span>
               </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <label className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Name</label>
-                  <p className={`mt-1 p-3 rounded-lg ${darkMode ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-900"}`}>
-                    {selectedInquiry.name}
-                  </p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+              <div className="space-y-6">
+                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1 block">
+                    Customer Info
+                  </label>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                      {selectedInquiry.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">
+                        {selectedInquiry.name}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        {selectedInquiry.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1 block">
+                    Product Details
+                  </label>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-400">Product</span>
+                    <span className="text-white font-medium">
+                      {selectedInquiry.product}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Price Quote</span>
+                    <span className="text-green-400 font-bold">
+                      {selectedInquiry.price}
+                    </span>
+                  </div>
                 </div>
 
                 <div>
-                  <label className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Email</label>
-                  <p className={`mt-1 p-3 rounded-lg ${darkMode ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-900"}`}>
-                    {selectedInquiry.email}
-                  </p>
-                </div>
-                <div>
-                  <label className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Product</label>
-                  <p className={`mt-1 p-3 rounded-lg ${darkMode ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-900"}`}>
-                    {selectedInquiry.product}
-                  </p>
-                </div>
-
-                <div>
-                  <label className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Price</label>
-                  <p className={`mt-1 p-3 rounded-lg ${darkMode ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-900"}`}>
-                    {selectedInquiry.price}
-                  </p>
-                </div>
-
-                <div>
-                  <label className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Status</label>
+                  <label className="text-sm font-medium text-gray-300 mb-2 block">
+                    Status
+                  </label>
                   <select
                     value={selectedInquiry.status}
-                    onChange={(e) => updateStatus(selectedInquiry.id, e.target.value)}
-                    className={`mt-1 w-full p-3 rounded-lg border ${
-                      darkMode 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-900"
-                    }`}
+                    onChange={(e) =>
+                      updateStatus(selectedInquiry.id, e.target.value)
+                    }
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-white focus:border-pink-500/50 focus:outline-none transition-colors"
                   >
-                    <option value="New">New</option>
+                    <option value="New">New Inquiry</option>
                     <option value="Contacted">Contacted</option>
                     <option value="Completed">Completed</option>
                   </select>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Message</label>
-                  <p className={`mt-1 p-3 rounded-lg min-h-[120px] ${
-                    darkMode ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-900"
-                  }`}>
+                  <label className="text-sm font-medium text-gray-300 mb-2 block">
+                    Message
+                  </label>
+                  <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4 min-h-[120px] text-gray-300 text-sm leading-relaxed">
                     {selectedInquiry.message}
-                  </p>
+                  </div>
                 </div>
 
                 {selectedInquiry.imageUrl && (
                   <div>
-                    <label className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Sample Layout</label>
-                    <div className="mt-2 border rounded-lg overflow-hidden">
+                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Attached Reference
+                    </label>
+                    <div className="border border-white/10 rounded-xl overflow-hidden bg-[#0a0a0a] p-2">
                       <img
                         src={selectedInquiry.imageUrl}
                         alt="Sample layout"
-                        className="w-full h-64 object-contain bg-gray-100"
+                        className="w-full h-48 object-contain rounded-lg"
                       />
                     </div>
                   </div>
@@ -642,20 +669,26 @@ const EnhancedMapCard = () => {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-700">
+            <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-white/10 relative z-10">
+              <button
+                onClick={() => setSelectedInquiry(null)}
+                className="px-6 py-2.5 rounded-lg bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-colors font-medium"
+              >
+                Close
+              </button>
               <button
                 onClick={() => deleteInquiry(selectedInquiry.id)}
-                className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 flex items-center space-x-2"
+                className="px-6 py-2.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors font-medium flex items-center gap-2"
               >
-                <Trash2 size={16} />
+                <Trash2 size={18} />
                 <span>Delete Inquiry</span>
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
-   </div>
-  )
-}
+    </div>
+  );
+};
 
-export default DashboardContent
+export default DashboardContent;

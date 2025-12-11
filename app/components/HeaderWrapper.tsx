@@ -68,12 +68,8 @@ export default function HeaderWrapper() {
 
 
 
-  //block admin if shortcut key hasn't been use dapat short cutkey gagamitin
-  useEffect(() => {
-    if(pathname.startsWith("/admin") && !allowAdmin) {
-      router.push("/");
-    }
-  })
+  // Do not redirect away from /admin; header stays hidden on admin pages.
+  // Access to admin pages is controlled server-side and via UI role checks.
 
 
   // naka hide dito si header kahit globally

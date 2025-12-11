@@ -64,12 +64,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Only allow dashboard access for ADMIN or STAFF
+    if (!['ADMIN', 'STAFF'].includes((user as any).role)) {
+      return NextResponse.json(
+        { error: 'Unauthorized role' },
+        { status: 403, headers: corsHeaders }
+      );
+    }
+
     // Generate token
     const token = generateToken(user.id);
 
     const response = NextResponse.json({
       message: 'Login successful',
-      user: { id: user.id, email: user.email }
+      user: { id: user.id, email: user.email, role: (user as any).role }
     },
     { headers: corsHeaders}
   );
