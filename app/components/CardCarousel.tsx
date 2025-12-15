@@ -95,12 +95,12 @@ export default function CardCarousel() {
     return Math.max(base, 0.35);
   };
 
-  const calcLeft = (offset: number) => `${50 + offset * 22}%`;
 
+  const calcLeft = (offset: number) => `${50 + offset * 22}%`;
 
   return (
     <section
-      id="home"
+     
       className="relative flex flex-col items-center justify-center min-h-screen w-full overflow-hidden"
     >
 

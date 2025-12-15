@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
-import { CardCarousel, EmailPopup, Maps } from "../components";
+import { CardCarousel, ComprehensiveServices, EmailPopup, Maps } from "../components";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Footer from "../components/Footer";
 import WhyChooseBurnboxPage from "../components/WhyChooseBurnBox";
 import GalleryPhotos from "../components/GalleryPhotos";
-import SectionScrollProgress from './ScrollProgressBar';
+import BrandPage from "../components/BrandPage";
 import WelcomeScreen from './WelcomeScreen';
+import CreativePage from './CreativePage';
+import BurnboxIdeal from './BurnboxIdeal';
+import SeamlessProcess from './SeamlessProcess';
+import QuotationPage from './QuotationPage';
+import ContactBurnbox from './ContactBurnbox';
+import QuestionAsk from './QuestionAsk';
 import ScrollReveal, { ScrollScale } from './ScrollReveal';
 
 const MainPage = () => {
+
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   
@@ -20,32 +27,29 @@ const MainPage = () => {
   };
   
   return (
-    <div className="min-h-screen w-full bg-[#050505] relative overflow-x-hidden text-white selection:bg-pink-500/30">
+    <div className="min-h-screen w-full bg-zinc-950 relative overflow-x-hidden text-white selection:bg-pink-500/30">
       
       {/* Global Background Effects - Matches the "Levitating Aura" theme */}
       <div className="fixed inset-0 z-0 pointer-events-none">
+        {/* Radial Gradient for depth - "Less Dark" center */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black opacity-80"></div>
+
         {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] opacity-10"></div>
         
         {/* Ambient Pink Glows */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-500/10 blur-[120px] rounded-full animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse delay-1000"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-500/5 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/5 blur-[120px] rounded-full animate-pulse delay-1000"></div>
       </div>
-
       {/* Content Wrapper with z-index to sit above background */}
       <div className="relative z-10 flex flex-col gap-12 sm:gap-20">
-        
         {/* Welcome Screen - Shows first */}
         {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
-        
-        {/* Scroll Progress Bar */}
-        <SectionScrollProgress />
-        
-        {/* Email Popup */}
+
+
         <AnimatePresence mode="wait">
           {showEmailPopup && <EmailPopup setShowEmailPopup={setShowEmailPopup} />}
         </AnimatePresence>
-        
         {/* Email Button */}
         <AnimatePresence mode="wait">
           {!showEmailPopup && !showWelcome && (
@@ -70,14 +74,32 @@ const MainPage = () => {
           )}
         </AnimatePresence>
         
-        {/* Main Content with Enhanced Scroll Animations */}
+        {/* Main Content - Static Layout */}
         
-        {/* Hero Carousel - Zoom entrance */}
+        <ScrollReveal direction="up" delay={0.1} duration={0.8}>
+          <BrandPage />
+        </ScrollReveal>
+        
         <ScrollReveal direction="zoom" delay={0.1} duration={1.2}>
           <CardCarousel />
         </ScrollReveal>
-        
-        {/* Why Choose - Blur & Slide Up */}
+
+        <ScrollReveal direction="up" delay={0.1} duration={0.8}>
+          <CreativePage />
+        </ScrollReveal>
+
+        <ScrollReveal direction="up" delay={0.1} duration={0.8}>
+          <BurnboxIdeal/>
+        </ScrollReveal>
+
+        <ScrollReveal direction="up" delay={0.1} duration={0.8}>
+          <ComprehensiveServices />
+        </ScrollReveal>
+
+        <ScrollReveal direction="up" delay={0.1} duration={0.8}>
+          <SeamlessProcess/>
+        </ScrollReveal>
+
         <ScrollReveal direction="blur" delay={0.2} distance={80} duration={1}>
           <div id="why-choose-burnbox" className="relative">
             {/* Section specific glow */}
@@ -85,23 +107,28 @@ const MainPage = () => {
             <WhyChooseBurnboxPage/>
           </div>
         </ScrollReveal>
-        
-        {/* Gallery - Scroll Scale Effect */}
+
         <ScrollScale scaleRange={[0.95, 1]}>
           <section id='gallery' className="w-full flex flex-col relative">
-             {/* Remove bg-white to keep dark theme */}
-            <GalleryPhotos/>
+              <GalleryPhotos/>
           </section>
         </ScrollScale>
-        
-        {/* Maps - Slide Up with 3D Flip */}
         <ScrollReveal direction="flipUp" delay={0.1} duration={0.8}>
           <div className="relative border-t border-white/5 bg-black/40 backdrop-blur-sm">
-             <Maps />
+              <Maps />
           </div>
+
         </ScrollReveal>
-        
-        {/* Footer */}
+        <ScrollReveal direction="up" delay={0.1}>
+          <QuotationPage/>
+        </ScrollReveal>
+        <ScrollReveal direction="up" delay={0.1}>
+          <QuestionAsk/>
+        </ScrollReveal>
+        <ScrollReveal direction="up" delay={0.1}>
+          <ContactBurnbox/>
+        </ScrollReveal>
+
         <ScrollReveal direction="up" delay={0.1}>
           <Footer/>
         </ScrollReveal>

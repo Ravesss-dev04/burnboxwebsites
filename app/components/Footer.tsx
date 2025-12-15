@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const Footer = () => {
   return (
-    <footer className="bg-black text-white px-6 sm:px-10 py-10">
+    <footer className="bg-zinc-950 text-white px-6 sm:px-10 py-10 border-t border-white/5">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 text-sm font-extralight w-full">
           {/* Column 1: Quick Links */}
@@ -57,9 +57,10 @@ const Footer = () => {
       </div>
 
       {/* Bottom */}
-      <div className="border-t border-gray-600 mt-8 pt-4 flex flex-col sm:flex-row justify-between items-center text-sm gap-4">
-        <p className="">© 2025, Burnbox Printing.</p>
-        <FaPaypal className="bg-blue-600 h-10 w-10 rounded-full" />
+      <div className="border-t border-white/10 mt-8 pt-4 flex justify-center items-center text-sm text-gray-400">
+        <p className="text-center">
+          Privacy Policy | Terms of Service | Contact info@burnbox.com | @ 2025 burnbox Printing company
+        </p>
       </div>
     </footer>
   );

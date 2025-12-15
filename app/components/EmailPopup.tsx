@@ -120,7 +120,7 @@ const EmailPopup = ({ setShowEmailPopup }: EmailPopupProps) => {
         duration: 1,
         ease: 'easeInOut'
       }}
-      className='fixed top-1/2 right-5 z-70 flex flex-col gap-3 w-[300px] sm:w-[350px] md:w-[400px] lg:w-[420px] max-w-[90vw]'
+      className='fixed top-1/2 right-5 z-[70] flex flex-col gap-3 w-[300px] sm:w-[350px] md:w-[400px] lg:w-[420px] max-w-[90vw]'
     >
       <div className='h-min w-full bg-[#201E1E] shadow-md rounded-lg p-3'>
         <span className='flex gap-2 items-center mb-5'>

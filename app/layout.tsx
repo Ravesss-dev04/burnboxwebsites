@@ -8,7 +8,6 @@ import { TooltipProvider } from "./context/TooltipContext";
 import { HeaderProvider } from "./context/HeaderContext";
 import { Suspense } from "react";
 import HeaderWrapper from "./components/HeaderWrapper";
-import SectionScrollProgress from "./components/ScrollProgressBar";
 import VisitorTracker from "./components/VisitorTracker";
 
 const outfit = Outfit({
@@ -38,7 +37,6 @@ export default function RootLayout({
             {children}
             <VisitorTracker />
           </HeaderProvider>
-            <SectionScrollProgress/>
         </TooltipProvider>
       </body>
     </html>

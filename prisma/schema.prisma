@@ -74,6 +74,9 @@ model Product {
   updatedAt   DateTime @updatedAt
 }
 
+
+
+
 model Feedback {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar(255)

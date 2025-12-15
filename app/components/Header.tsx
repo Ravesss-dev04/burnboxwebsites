@@ -1,29 +1,29 @@
 "use client";
-import React, { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
+import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import {
   HiMenu,
   HiOutlineSearch,
   HiOutlineShoppingCart,
-  HiX
-} from 'react-icons/hi'
-import { HiChevronDown } from 'react-icons/hi2'
+  HiX,
+} from "react-icons/hi";
+import { HiChevronDown } from "react-icons/hi2";
 import { RiMenu4Line } from "react-icons/ri";
-import ToolTip from './ToolTip'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import TooltipServices from './TooltipServices';
-import AboutTooltip from './AboutTooltip';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useHeaderContext } from '../context/HeaderContext';
+import ToolTip from "./ToolTip";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import TooltipServices from "./TooltipServices";
+import AboutTooltip from "./AboutTooltip";
+import { AnimatePresence, motion } from "framer-motion";
+import { useHeaderContext } from "../context/HeaderContext";
 
 const Header: React.FC = () => {
   const {
-    searchValue, 
-    setSearchValue, 
-    filteredProducts, 
-    selectProductById, 
+    searchValue,
+    setSearchValue,
+    filteredProducts,
+    selectProductById,
     setSelectedServiceFromHeader,
-    selectProductByName // Add this from your context
+    selectProductByName, // Add this from your context
   } = useHeaderContext();
 
   const pathname = usePathname();
@@ -52,12 +52,12 @@ const Header: React.FC = () => {
     selectProductByName(serviceName);
     setMobileMenuOpen(false);
     setShowServicesTooltip(false);
-    
+
     // Navigate to services page if not already there
     if (pathname !== "/services") {
       router.push("/services");
     }
-    
+
     // Scroll to products section after navigation
     setTimeout(() => {
       const productsSection = document.getElementById("products-section");
@@ -67,140 +67,144 @@ const Header: React.FC = () => {
     }, 300);
   };
   const [isSearchActive, setIsSearchActive] = useState(false);
-  
+
   const handleNavClick = (sectionId: string) => {
-    if(typeof window !== 'undefined' && window.location.pathname === '/') {
+    if (typeof window !== "undefined" && window.location.pathname === "/") {
       const section = document.getElementById(sectionId);
-      if(section) {
-        section.scrollIntoView({behavior: "smooth"});
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
       } else {
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } else {
       sessionStorage.setItem("scrollToSection", sectionId);
       router.push("/", { scroll: false });
     }
-  }; 
+  };
 
   const searchParams = useSearchParams();
   useEffect(() => {
-    const scrollTo = searchParams?.get('scrollTo');
-    if(scrollTo) {
+    const scrollTo = searchParams?.get("scrollTo");
+    if (scrollTo) {
       const section = document.getElementById(scrollTo);
-      if(section) {
-        section.scrollIntoView({behavior: 'smooth'});
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
       }
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   const [list, setList] = useState<string[]>([
-    'A4 Paper',
-    'about',
-    'services',
-    'PCV ID/Lanyard',
-    'Photo canvas',
-    'Wall Mural',
-    'gallery',
-    'burnbox',
-    'home',
-    'contact'
+    "A4 Paper",
+    "about",
+    "services",
+    "PCV ID/Lanyard",
+    "Photo canvas",
+    "Wall Mural",
+    "gallery",
+    "burnbox",
+    "home",
+    "contact",
   ]);
 
-  const aboutList = ['About Us', 'Mission and Vission', 'Why Choose Burnbox Printing?'];
-  
-  const servicesList  = [
+  const aboutList = [
+    "About Us",
+    "Mission and Vission",
+    "Why Choose Burnbox Printing?",
+  ];
+
+  const servicesList = [
     { id: 1, name: "Digital & Offset Printing" },
-    { id: 2, name: "Forms & Receipts"}, // Fixed typo: "Reciepts" to "Receipts"
-    { id: 3, name: "Panaflex-Signage"},
-    { id: 4, name: "Large format Services"},
-    { id: 5, name: "Sticker & Labels"},
-    { id: 6, name: "Acrylic Build-up"},
-    { id: 7, name: "Standee Signage"},
-    { id: 8, name: "Wall Mural"},
-    { id: 9, name: "Glass Frosted Sticker"},
-    { id: 10, name: "Sticker On Sintra"},
-    { id: 11, name: "Graphic Design"},
+    { id: 2, name: "Forms & Receipts" }, // Fixed typo: "Reciepts" to "Receipts"
+    { id: 3, name: "Panaflex-Signage" },
+    { id: 4, name: "Large format Services" },
+    { id: 5, name: "Sticker & Labels" },
+    { id: 6, name: "Acrylic Build-up" },
+    { id: 7, name: "Standee Signage" },
+    { id: 8, name: "Wall Mural" },
+    { id: 9, name: "Glass Frosted Sticker" },
+    { id: 10, name: "Sticker On Sintra" },
+    { id: 11, name: "Graphic Design" },
     { id: 12, name: "Logo design" },
-    { id: 13, name: "Flyer Design"},
-    { id: 14, name: "Other services", 
+    { id: 13, name: "Flyer Design" },
+    {
+      id: 14,
+      name: "Other services",
       nestedTooltip: ["Receipt types", "Forms customization", "Bulk orders"],
     },
   ];
 
-  const buttons = ['wallmural', 'labelsticker', 'photocanvas', 'pvclanyard']
-  const [showToolTip, setToolTip] = useState(false)
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [showMobileSubmenu, setShowMobileSubmenu] = useState(false)
+  const buttons = ["wallmural", "labelsticker", "photocanvas", "pvclanyard"];
+  const [showToolTip, setToolTip] = useState(false);
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showMobileSubmenu, setShowMobileSubmenu] = useState(false);
   const [isMobileSearchActive, setIsMobileSearchActive] = useState(false);
   const [showServicesTooltip, setShowServicesTooltip] = useState(false);
   const [showAboutTooltip, setShowAboutTooltip] = useState(false);
   const [isHoveringTooltip, setIsHoveringTooltip] = useState(false);
-  const tooltipRef = useRef<HTMLDivElement | null>(null)
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
   const hideTooltipTimeout = useRef<NodeJS.Timeout | null>(null);
   const hideTimeout = useRef<NodeJS.Timeout | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const filteredList = list.filter((item) => {
-    return item.toLowerCase().includes(searchValue.toLowerCase())
+    return item.toLowerCase().includes(searchValue.toLowerCase());
   });
 
   const handleSearch = () => {
-    if(filteredList.length === 1) {
-      const sectionId = filteredList[0].toLowerCase().replace(/\s+/g, '-');
+    if (filteredList.length === 1) {
+      const sectionId = filteredList[0].toLowerCase().replace(/\s+/g, "-");
       const section = document.getElementById(sectionId);
-      if(section) {
-        section.scrollIntoView({behavior:  'smooth'})
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
       }
     }
-  }
-
-  useEffect(() => {
-    const handleResize = () =>{
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    }
-  }, [])
-
-  useEffect(() => {
-    if(searchValue) {
-      handleSearch();
-    }
-  }, [searchValue])
+  };
 
   useEffect(() => {
     const handleResize = () => {
-      if(window.innerWidth >= 768) {
-        setMobileMenuOpen(false)
-        setShowMobileSubmenu(false); 
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (searchValue) {
+      handleSearch();
+    }
+  }, [searchValue]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false);
+        setShowMobileSubmenu(false);
       }
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [])
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleMobileNavClick = (id: string) => {
     const section = document.getElementById(id);
-    if(section) {
-      section.scrollIntoView({ behavior: 'smooth' });
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
     }
-    setMobileMenuOpen(false)
-    setShowMobileSubmenu(false)
-  }
+    setMobileMenuOpen(false);
+    setShowMobileSubmenu(false);
+  };
 
   const handleMouseLeaveLeaveAbout = () => {
-    if(!isHoveringTooltip) {
+    if (!isHoveringTooltip) {
       hideTooltipTimeout.current = setTimeout(() => {
         setShowAboutTooltip(false);
-      }, 200)
+      }, 200);
     }
-  }
-
-
+  };
 
   const handleMouseLeaveServices = () => {
     if (!isHoveringTooltip) {
@@ -209,8 +213,6 @@ const Header: React.FC = () => {
       }, 200);
     }
   };
-
-
 
   const handleMouseEnterTooltip = () => {
     if (hideTooltipTimeout.current) {
@@ -238,34 +240,35 @@ const Header: React.FC = () => {
     setIsHoveringTooltip(false);
     hideTooltipTimeout.current = setTimeout(() => {
       setShowAboutTooltip(false);
-    }, 200); 
+    }, 200);
   };
   return (
-    <div className='h-20 w-full flex items-center justify-between px-5 py-3 text-white font-extralight text-lg z-100 bg-black fixed'>
+    <div className="h-20 w-full flex items-center justify-between px-5 py-3 text-white font-extralight text-lg z-100 bg-zinc-950/90 backdrop-blur-md fixed border-b border-white/5">
       {/* Logo */}
-      <a href="#home" className='h-20 py-3 px-1'>
+      <a href="#home" className="h-20 py-3 px-1">
         <img
           height={500}
-          width={500} 
-          src={'/burnboxlogo.png.webp'}
-          alt='company logo'
-          className='h-full object-contain object-left'
+          width={500}
+          src={"/burnboxlogo.png.webp"}
+          alt="company logo"
+          className="h-full object-contain object-left"
         />
       </a>
       {/* Desktop Navigation */}
-      <div className='hidden md:flex items-center justify-end flex-1 '>
+      <div className="hidden md:flex items-center justify-end flex-1 ">
         {!isSearchActive ? (
           <>
             <a href="#home">
               <button
                 onClick={() => handleNavClick("home")}
                 type="button"
-                className='px-5 h-full hover:text-pink transition ease-in duration-200'
+                className="px-5 h-full hover:text-pink transition ease-in duration-200"
               >
                 Home
               </button>
             </a>
-            <span className='relative'
+            <span
+              className="relative"
               onMouseEnter={() => setShowAboutTooltip(true)}
               onMouseLeave={handleMouseLeaveLeaveAbout}
             >
@@ -273,22 +276,23 @@ const Header: React.FC = () => {
                 <button
                   onClick={() => handleNavClick("about")}
                   type="button"
-                  className='px-5 h-full hover:text-pink transition ease-in duration-200'
+                  className="px-5 h-full hover:text-pink transition ease-in duration-200"
                 >
                   About
                 </button>
               </a>
               {showAboutTooltip && (
-                <div ref={tooltipRef}
+                <div
+                  ref={tooltipRef}
                   onMouseEnter={handleMouseEnterTooltipAbout}
                   onMouseLeave={handleMouseLeaveTooltipAbout}
                 >
-                  <AboutTooltip aboutus={aboutList}/>
+                  <AboutTooltip aboutus={aboutList} />
                 </div>
               )}
             </span>
-            <span 
-              className='relative'
+            <span
+              className="relative"
               onMouseEnter={() => setShowServicesTooltip(true)}
               onMouseLeave={handleMouseLeaveServices}
             >
@@ -296,7 +300,7 @@ const Header: React.FC = () => {
                 <button
                   onClick={() => handleNavClick("product")}
                   type="button"
-                  className='px-5 h-full flex gap-2 items-center hover:text-pink transition ease-in duration-200'
+                  className="px-5 h-full flex gap-2 items-center hover:text-pink transition ease-in duration-200"
                 >
                   Services
                 </button>
@@ -307,9 +311,11 @@ const Header: React.FC = () => {
                   onMouseEnter={handleMouseEnterTooltip}
                   onMouseLeave={handleMouseLeaveTooltip}
                 >
-                  <TooltipServices 
-                    services={servicesList} 
-                    onServiceClick={(serviceName) => handleTooltipServiceClick(serviceName)}
+                  <TooltipServices
+                    services={servicesList}
+                    onServiceClick={(serviceName) =>
+                      handleTooltipServiceClick(serviceName)
+                    }
                   />
                 </div>
               )}
@@ -318,15 +324,12 @@ const Header: React.FC = () => {
               <button
                 onClick={() => handleNavClick("contact")}
                 type="button"
-                className='px-5 h-full hover:text-pink transition ease-in duration-200'
+                className="px-5 h-full hover:text-[#ff0060] transition ease-in duration-200"
               >
                 Contact
               </button>
             </a>
-            <button
-              type="button"
-              onClick={() => setIsSearchActive(true)}
-            >
+            <button type="button" onClick={() => setIsSearchActive(true)} className="hover:text-[#ff0060] transition ease-in duration-200">
               <HiOutlineSearch />
             </button>
           </>
@@ -339,7 +342,7 @@ const Header: React.FC = () => {
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 placeholder="Search..."
-                className="bg-transparent border border-pink-300 text-white px-4 py-2 rounded-md focus:outline-none transition-all duration-300 w-64 placeholder:text-gray-500"
+                className="bg-zinc-900 border border-white/10 text-white px-4 py-2 rounded-md focus:outline-none focus:border-[#ff0060] transition-all duration-300 w-64 placeholder:text-gray-500"
               />
               <button
                 type="button"
@@ -349,7 +352,7 @@ const Header: React.FC = () => {
                   setSearchValue("");
                 }}
               >
-                <HiX className="text-pink-500" />
+                <HiX className="text-[#ff0060]" />
               </button>
             </div>
 
@@ -360,7 +363,7 @@ const Header: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3 }}
-                  className="absolute mt-3 w-[260px] bg-zinc-900 text-gray-300 rounded-xl shadow-lg border border-gray-700 p-4 flex flex-col items-center gap-3 z-50"
+                  className="absolute mt-3 w-[260px] bg-zinc-900 text-gray-300 rounded-xl shadow-lg border border-white/10 p-4 flex flex-col items-center gap-3 z-50"
                 >
                   <img
                     src="/bblogo.png"
@@ -370,9 +373,12 @@ const Header: React.FC = () => {
                     className="object-contain"
                   />
                   <div className="text-center text-sm">
-                    <p className="text-white font-semibold">Looking for something?</p>
+                    <p className="text-white font-semibold">
+                      Looking for something?
+                    </p>
                     <p className="text-xs text-gray-400">
-                      Search Burnbox Printing for posts, photos, and other visible activity.
+                      Search Burnbox Printing for posts, photos, and other
+                      visible activity.
                     </p>
                   </div>
                 </motion.div>
@@ -382,7 +388,7 @@ const Header: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute mt-3 w-[265px] bg-zinc-900 border border-gray-700 rounded-xl shadow-lg p-2 z-50 max-h-[320px] overflow-y-auto"
+                  className="absolute mt-3 w-[265px] bg-zinc-900 border border-white/10 rounded-xl shadow-lg p-2 z-50 max-h-[320px] overflow-y-auto"
                 >
                   {filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
@@ -393,7 +399,7 @@ const Header: React.FC = () => {
                           setSearchValue("");
                           setIsSearchActive(false);
                         }}
-                        className="w-full text-left flex items-center gap-3 p-2 rounded-md hover:bg-zinc-800 transition"
+                        className="w-full text-left flex items-center gap-3 p-2 rounded-md hover:bg-white/5 transition"
                       >
                         <div className="w-14 h-14 relative flex-shrink-0 rounded overflow-hidden bg-zinc-800">
                           <img
@@ -403,13 +409,25 @@ const Header: React.FC = () => {
                           />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-white">{product.name}</p>
-                          <p className="text-xs text-pink-400"> {product.price === 0 ? "" : `₱ ${product.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}</p>
+                          <p className="text-sm font-semibold text-white">
+                            {product.name}
+                          </p>
+                          <p className="text-xs text-[#ff0060]">
+                            {" "}
+                            {product.price === 0
+                              ? ""
+                              : `₱ ${product.price.toLocaleString("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}`}
+                          </p>
                         </div>
                       </button>
                     ))
                   ) : (
-                    <p className="text-gray-400 text-center py-3">No products found.</p>
+                    <p className="text-gray-500 text-center py-3">
+                      No products found.
+                    </p>
                   )}
                 </motion.div>
               )}
@@ -419,20 +437,20 @@ const Header: React.FC = () => {
       </div>
 
       {/* Cart for Desktop */}
-      <div className='hidden md:flex ml-4'>
-        <button className='text-2xl p-3 rounded-full bg-pink hover:scale-110 ease-in-out duration-200'>
+      <div className="hidden md:flex ml-4">
+        <button className="text-2xl p-3 rounded-full bg-pink hover:scale-110 ease-in-out duration-200">
           <HiOutlineShoppingCart />
         </button>
       </div>
 
       {/* Mobile Menu Button */}
-      <div className='md:hidden flex items-center'>
+      <div className="md:hidden flex items-center">
         <motion.button
           whileTap={{ scale: 0.9 }}
-          className='text-3xl text-white relative z-50'
+          className="text-3xl text-white relative z-50"
           onClick={() => {
-            setMobileMenuOpen(!isMobileMenuOpen)
-            setShowMobileSubmenu(false)
+            setMobileMenuOpen(!isMobileMenuOpen);
+            setShowMobileSubmenu(false);
           }}
         >
           <AnimatePresence mode="wait">
@@ -444,7 +462,7 @@ const Header: React.FC = () => {
                 exit={{ rotate: 90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <RiMenu4Line className='text-pink-500'/>
+                <RiMenu4Line className="text-pink-500" />
               </motion.div>
             ) : (
               <motion.div
@@ -471,72 +489,72 @@ const Header: React.FC = () => {
             transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
             className="absolute top-full left-0 w-full bg-gradient-to-b from-black via-black to-black/95 backdrop-blur-md text-white px-7 py-6 space-y-4 shadow-2xl border-t border-pink-500/20"
           >
-            {['Home', 'About', 'Services', 'Contact'].map((item, index) => {
-              const isAbout = item === 'About';
-              const isServices = item === 'Services';
-              const isHome = item === 'Home';
-              const isContact = item === 'Contact';
-              
+            {["Home", "About", "Services", "Contact"].map((item, index) => {
+              const isAbout = item === "About";
+              const isServices = item === "Services";
+              const isHome = item === "Home";
+              const isContact = item === "Contact";
+
               return (
                 <motion.div
                   key={item}
                   initial={{ opacity: 0, x: -30, filter: "blur(10px)" }}
                   animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
                   exit={{ opacity: 0, x: -30, filter: "blur(10px)" }}
-                  transition={{ 
-                    duration: 0.4, 
+                  transition={{
+                    duration: 0.4,
                     delay: index * 0.1,
-                    ease: [0.6, -0.05, 0.01, 0.99]
+                    ease: [0.6, -0.05, 0.01, 0.99],
                   }}
                   className="w-full"
                 >
                   {/* Top-level Menu Item */}
-                  <motion.div 
+                  <motion.div
                     className="flex items-center gap-2"
                     whileHover={{ x: 5 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <motion.button  
+                    <motion.button
                       onClick={() => {
                         if (isAbout) {
                           if (isMobile) {
-                            router.push('/about');
+                            router.push("/about");
                             setMobileMenuOpen(false);
                           } else {
-                            setShowAboutTooltip(prev => !prev);
+                            setShowAboutTooltip((prev) => !prev);
                             setShowServicesTooltip(false);
                           }
                         } else if (isServices) {
                           if (isMobile) {
                             // UPDATED: Use the new function for mobile services
-                            setShowServicesTooltip(prev => !prev);
+                            setShowServicesTooltip((prev) => !prev);
                             setShowAboutTooltip(false);
                           } else {
-                            setShowServicesTooltip(prev => !prev);
+                            setShowServicesTooltip((prev) => !prev);
                             setShowAboutTooltip(false);
                           }
                         } else if (isHome) {
-                          router.push('/#home')
-                          setMobileMenuOpen(false)
+                          router.push("/#home");
+                          setMobileMenuOpen(false);
                         } else if (isContact) {
-                          router.push('/contact#contact')
-                          setMobileMenuOpen(false)
-                        } 
+                          router.push("/contact#contact");
+                          setMobileMenuOpen(false);
+                        }
                       }}
                       className="flex items-center gap-2 text-left hover:text-pink transition-colors duration-200 text-lg font-medium"
                       whileTap={{ scale: 0.95 }}
                     >
                       {item}
                     </motion.button>
-                    
+
                     {(isAbout || isServices) && (
                       <motion.button
                         onClick={() => {
                           if (isAbout) {
-                            setShowAboutTooltip(prev => !prev);
+                            setShowAboutTooltip((prev) => !prev);
                             setShowServicesTooltip(false);
                           } else if (isServices) {
-                            setShowServicesTooltip(prev => !prev);
+                            setShowServicesTooltip((prev) => !prev);
                             setShowAboutTooltip(false);
                           }
                         }}
@@ -544,15 +562,16 @@ const Header: React.FC = () => {
                         whileTap={{ scale: 0.9 }}
                       >
                         <motion.div
-                          animate={{ 
-                            rotate: ((isAbout && showAboutTooltip) || (isServices && showServicesTooltip)) ? 180 : 0 
+                          animate={{
+                            rotate:
+                              (isAbout && showAboutTooltip) ||
+                              (isServices && showServicesTooltip)
+                                ? 180
+                                : 0,
                           }}
                           transition={{ duration: 0.3, ease: "easeInOut" }}
                         >
-                          <HiChevronDown
-                            className="text-pink-500"
-                            size={18}
-                          />
+                          <HiChevronDown className="text-pink-500" size={18} />
                         </motion.div>
                       </motion.button>
                     )}
@@ -565,10 +584,13 @@ const Header: React.FC = () => {
                         initial={{ opacity: 0, height: 0, y: -10 }}
                         animate={{ opacity: 1, height: "auto", y: 0 }}
                         exit={{ opacity: 0, height: 0, y: -10 }}
-                        transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
+                        transition={{
+                          duration: 0.3,
+                          ease: [0.6, -0.05, 0.01, 0.99],
+                        }}
                         className="overflow-hidden"
                       >
-                        <motion.div 
+                        <motion.div
                           className="ml-4 mt-3 space-y-2 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 rounded-lg p-4 w-[280px] border border-pink-500/20 shadow-xl"
                           initial={{ scale: 0.95 }}
                           animate={{ scale: 1 }}
@@ -578,15 +600,20 @@ const Header: React.FC = () => {
                             const handleAboutNavigation = (label: string) => {
                               const routeMap: Record<string, string> = {
                                 "About Us": "/about#about-us",
-                                "Mission and Vission": "/about#mission-and-vision",
-                                "Why Choose Burnbox Printing?": "#why-choose-burnbox",
+                                "Mission and Vission":
+                                  "/about#mission-and-vision",
+                                "Why Choose Burnbox Printing?":
+                                  "#why-choose-burnbox",
                               };
                               const target = routeMap[label];
                               if (!target) return;
                               if (label === "Why Choose Burnbox Printing?") {
                                 if (pathname === "/") {
-                                  const section = document.querySelector(target);
-                                  section?.scrollIntoView({ behavior: "smooth" });
+                                  const section =
+                                    document.querySelector(target);
+                                  section?.scrollIntoView({
+                                    behavior: "smooth",
+                                  });
                                 } else {
                                   router.push("/#why-choose-burnbox");
                                 }
@@ -624,10 +651,13 @@ const Header: React.FC = () => {
                         initial={{ opacity: 0, height: 0, y: -10 }}
                         animate={{ opacity: 1, height: "auto", y: 0 }}
                         exit={{ opacity: 0, height: 0, y: -10 }}
-                        transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
+                        transition={{
+                          duration: 0.3,
+                          ease: [0.6, -0.05, 0.01, 0.99],
+                        }}
                         className="overflow-hidden"
                       >
-                        <motion.div 
+                        <motion.div
                           className="ml-4 mt-3 space-y-2 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 rounded-lg p-4 w-[280px] border border-pink-500/20 shadow-xl max-h-[400px] overflow-y-auto"
                           initial={{ scale: 0.95 }}
                           animate={{ scale: 1 }}
@@ -642,7 +672,9 @@ const Header: React.FC = () => {
                               whileHover={{ x: 5, color: "#ec4899" }}
                               whileTap={{ scale: 0.95 }}
                               className="block text-sm hover:text-pink transition-colors duration-200 w-full text-left py-2 px-2 rounded-md hover:bg-pink/10"
-                              onClick={() => handleMobileServiceClick(service.name)} // UPDATED: Use new function
+                              onClick={() =>
+                                handleMobileServiceClick(service.name)
+                              } // UPDATED: Use new function
                             >
                               {service.name}
                             </motion.button>
@@ -655,20 +687,20 @@ const Header: React.FC = () => {
               );
             })}
             {/* Mobile Search and Cart */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.4 }}
-              className='relative flex items-center gap-4 mt-6 py-4 overflow-visible z-[9999]'
+              className="relative flex items-center gap-4 mt-6 py-4 overflow-visible z-[9999]"
             >
               {/* Cart Icon */}
-              <motion.div 
-                className='p-2 rounded-full bg-pink cursor-pointer'
+              <motion.div
+                className="p-2 rounded-full bg-pink cursor-pointer"
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ duration: 0.2 }}
               >
-                <HiOutlineShoppingCart className='text-xl' />
+                <HiOutlineShoppingCart className="text-xl" />
               </motion.div>
               {/* Search Input Field */}
               <AnimatePresence>
@@ -678,11 +710,11 @@ const Header: React.FC = () => {
                     animate={{ width: 200, opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    type='text'
+                    type="text"
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
-                    placeholder='Search...'
-                    className='bg-transparent border border-pink-300 text-white px-4 py-2 rounded-md focus:outline-none focus:border-pink-500 placeholder:text-gray-400'
+                    placeholder="Search..."
+                    className="bg-transparent border border-pink-300 text-white px-4 py-2 rounded-md focus:outline-none focus:border-pink-500 placeholder:text-gray-400"
                     autoFocus
                   />
                 )}
@@ -690,10 +722,10 @@ const Header: React.FC = () => {
 
               <motion.button
                 onClick={() => {
-                  setIsMobileSearchActive(prev => !prev);
-                  setSearchValue('');
+                  setIsMobileSearchActive((prev) => !prev);
+                  setSearchValue("");
                 }}
-                className='relative w-8 h-8'
+                className="relative w-8 h-8"
                 whileTap={{ scale: 0.9 }}
               >
                 <AnimatePresence mode="wait">
@@ -731,7 +763,7 @@ const Header: React.FC = () => {
                     transition={{ duration: 0.3 }}
                     className="absolute bottom-[-150px] left-12 w-52 bg-gradient-to-br from-zinc-900/95 via-zinc-800/95 to-zinc-900/95 text-gray-300 rounded-xl shadow-2xl border border-pink-500/30 p-4 flex flex-col items-center gap-3 z-[10000] backdrop-blur-md"
                   >
-                    {searchValue.trim() === '' ? (
+                    {searchValue.trim() === "" ? (
                       <>
                         <motion.img
                           initial={{ scale: 0.8, opacity: 0 }}
@@ -741,44 +773,55 @@ const Header: React.FC = () => {
                           alt="Burnbox Logo"
                           className="h-12 object-contain"
                         />
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
                           className="text-center text-sm"
                         >
-                          <p className="text-white font-semibold">Looking for something?</p>
+                          <p className="text-white font-semibold">
+                            Looking for something?
+                          </p>
                           <p className="text-xs text-gray-400">
-                            Search Burnbox Printing for posts, photos, and other visible activity.
+                            Search Burnbox Printing for posts, photos, and other
+                            visible activity.
                           </p>
                         </motion.div>
                       </>
                     ) : (
                       <>
                         {searchValue.length < 2 ? (
-                          <motion.div 
+                          <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             className="flex flex-col items-center justify-center w-full py-4"
                           >
-                            <motion.div 
+                            <motion.div
                               className="w-8 h-8 border-2 border-pink-400 border-t-transparent rounded-full mb-2"
                               animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              transition={{
+                                duration: 1,
+                                repeat: Infinity,
+                                ease: "linear",
+                              }}
                             />
-                            <p className="text-xs text-gray-400">Searching...</p>
+                            <p className="text-xs text-gray-400">
+                              Searching...
+                            </p>
                           </motion.div>
                         ) : (
                           <>
                             <div className="w-full flex flex-col gap-2">
                               {[
-                                { name: 'Home', id: 'home' },
-                                { name: 'About', id: 'about' },
-                                { name: 'Services', id: 'services' },
-                                { name: 'Contact', id: 'contact' },
+                                { name: "Home", id: "home" },
+                                { name: "About", id: "about" },
+                                { name: "Services", id: "services" },
+                                { name: "Contact", id: "contact" },
                               ]
                                 .filter((item) =>
-                                  item.name.toLowerCase().includes(searchValue.toLowerCase())
+                                  item.name
+                                    .toLowerCase()
+                                    .includes(searchValue.toLowerCase())
                                 )
                                 .map((item, index) => (
                                   <motion.button
@@ -789,9 +832,13 @@ const Header: React.FC = () => {
                                     whileHover={{ x: 5, color: "#ec4899" }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => {
-                                      const section = document.getElementById(item.id);
+                                      const section = document.getElementById(
+                                        item.id
+                                      );
                                       if (section) {
-                                        section.scrollIntoView({ behavior: 'smooth' });
+                                        section.scrollIntoView({
+                                          behavior: "smooth",
+                                        });
                                       } else {
                                         window.location.href = `/${item.id.toLowerCase()}`;
                                       }
@@ -803,14 +850,16 @@ const Header: React.FC = () => {
                                   </motion.button>
                                 ))}
                               {[
-                                { name: 'Home', id: 'home' },
-                                { name: 'About', id: 'about' },
-                                { name: 'Services', id: 'services' },
-                                { name: 'Contact', id: 'contact' },
+                                { name: "Home", id: "home" },
+                                { name: "About", id: "about" },
+                                { name: "Services", id: "services" },
+                                { name: "Contact", id: "contact" },
                               ].filter((item) =>
-                                item.name.toLowerCase().includes(searchValue.toLowerCase())
+                                item.name
+                                  .toLowerCase()
+                                  .includes(searchValue.toLowerCase())
                               ).length === 0 && (
-                                <motion.p 
+                                <motion.p
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   className="text-center py-4 text-xs text-gray-400"
@@ -831,7 +880,7 @@ const Header: React.FC = () => {
         )}
       </AnimatePresence>
     </div>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

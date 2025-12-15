@@ -216,7 +216,7 @@ const ProfileInfo = () => {
             initial={{opacity: 0, scale: 0.95, y: 20}}
             animate={{opacity: 1, scale: 1, y: 0}}
             exit={{opacity: 0, scale: 0.95, y: 20}}
-            className="fixed inset-0 m-auto z-50 w-full max-w-2xl h-fit max-h-[90vh] overflow-y-auto bg-[#111] border border-white/10 rounded-2xl shadow-2xl">
+            className="fixed inset-0 m-auto z-50 w-full max-w-2xl h-fit max-h-[90vh] overflow-y-auto bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl shadow-black/50">
               <div className="p-6 sm:p-8">
                 <div className="flex justify-between items-center mb-8">
                   <div>
@@ -243,7 +243,7 @@ const ProfileInfo = () => {
                       <div className="relative group cursor-pointer"
                         onClick={() => fileInputRef.current?.click()}
                       >
-                        <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-dashed border-gray-600 group-hover:border-pink-500 transition-colors bg-[#1a1a1a] flex items-center justify-center">
+                        <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-dashed border-gray-600 group-hover:border-pink-500 transition-colors bg-zinc-800 flex items-center justify-center">
                           {formData.picture ? (
                             <Image src={formData.picture} alt="Preview" fill className="object-cover" />
                           ) : (
@@ -348,7 +348,7 @@ const ProfileInfo = () => {
                        <select name="gender"
                         value={formData.gender}
                         onChange={handleInputChange}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-pink-500/50 transition-colors [&>option]:bg-[#111]"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-pink-500/50 transition-colors [&>option]:bg-[#0a0a0a]"
                        >
 
                         <option disabled> Select Gender</option>
@@ -394,66 +394,85 @@ const ProfileInfo = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.2 }}
-              className="group relative bg-[#111] border border-white/4 rounded-2xl p-6 hover:border-pink-500/30 transition-all hover:shadow-xl hover:shadow-pink-500/5 overflow-hidden"
+              className="group relative bg-[#0a0a0a] rounded-xl overflow-hidden border border-white/10 hover:border-pink-500/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(236,72,153,0.15)] flex flex-col h-[450px]"
             >
-              <div className="absolute top-0 right-0 bg-gradient-to-br from-pink-500/10 to-purple-500/10 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110" />
-              <div className="realtive z-10 flex flex-col items-center text-center">
-                {/* avatar */}
+              {/* ID Card Header / Lanyard Hole visual */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-4 bg-[#1a1a1a] rounded-b-xl border-b border-x border-white/10 z-20 flex justify-center items-center">
+                <div className="w-12 h-1 bg-black/50 rounded-full"></div>
+              </div>
+              
+              {/* Company Branding Strip */}
+              <div className="h-28 bg-gradient-to-br from-pink-600 via-purple-600 to-indigo-600 relative overflow-hidden">
+                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+                 <div className="absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-[#0a0a0a] to-transparent"></div>
+                 <div className="absolute top-5 left-5 font-black text-white/90 tracking-[0.2em] text-[10px]">BURNBOX INC.</div>
+                 <div className="absolute top-4 right-4 text-white/80">
+                    <div className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
+                        <span className="text-[10px] font-bold">BB</span>
+                    </div>
+                 </div>
+              </div>
 
-                <div className="relative w-24 h-24 mb-4">
-                  <div className="w-full h-full rounded-full overflow-hidden border-2 border-white/10 group-hover:border-pink-500/50 transition bg-[#1a1a1a] flex items-center justify-center">
-                    {staff.picture ? (
-                      <Image
-                        src={staff.picture}
-                        alt="firstName"
-                        fill
-                        className="object-cover"
-                      />
+              {/* Profile Content */}
+              <div className="px-6 pb-6 flex-1 flex flex-col items-center -mt-14 relative z-10">
+                {/* Avatar */}
+                <div className="relative w-28 h-28 mb-4 group-hover:scale-105 transition-transform duration-300">
+                  <div className="w-full h-full rounded-2xl overflow-hidden border-4 border-[#0a0a0a] bg-zinc-800 shadow-2xl relative">
+                     {staff.picture ? (
+                      <Image src={staff.picture} alt={staff.firstName} fill className="object-cover" />
                     ) : (
-                      <User size={50} className="text-gray-600" />
+                      <div className="w-full h-full flex items-center justify-center bg-zinc-800 text-zinc-600">
+                        <User size={48} />
+                      </div>
                     )}
                   </div>
-                  <div
-                    className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-[#111] rounded-full"
-                    title="Active"
-                  />
+                  <div className="absolute -bottom-1 -right-1 bg-[#0a0a0a] p-1.5 rounded-full">
+                     <div className="w-3 h-3 bg-emerald-500 rounded-full border border-emerald-400 shadow-[0_0_10px_#10b981]"></div>
+                  </div>
                 </div>
-                {/* Name and Role */}
-                <h3 className="text-xl font-bold text-white mb-2">
-                  {staff.firstName} {staff.middleName && `${staff.middleName}.`}{" "}
-                  {staff.lastName}
+
+                {/* Name & Role */}
+                <h3 className="text-xl font-bold text-white text-center leading-tight mb-1">
+                  {staff.firstName} {staff.lastName}
                 </h3>
-                <span className="px-3 py-1 rounded-full bg-white/5 text-pink-400 text-xs font-medium border border-white/5 mb-6">
-                  {staff.position}
-                </span>
+                <div className="mb-6">
+                    <span className="px-3 py-1 rounded-md bg-pink-500/10 text-pink-400 text-[10px] font-bold uppercase tracking-wider border border-pink-500/20">
+                    {staff.position}
+                    </span>
+                </div>
 
-                {/* details */}
-                <div className="w-full space-y-3 text-sm text-gray-400 mb-6">
-                  <div className="flex items-center gap-3 bg-white/4 p-2 rounded-lg">
-                    <Mail size={16} className="text-gray-600" />
-                    <span className="truncate">{staff.email}</span>
+                {/* Info Grid */}
+                <div className="w-full space-y-3 mb-6 bg-white/5 rounded-xl p-4 border border-white/5">
+                  <div className="flex items-center justify-between text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                    <span className="text-zinc-500 text-[10px] uppercase font-semibold tracking-wider">ID No.</span>
+                    <span className="text-zinc-300 font-mono text-xs">BB-{staff.id.padStart(4, '0')}</span>
                   </div>
-                  <div className="flex items-center gap-3 bg-white/4 p-2 rounded-lg">
-                    <Phone size={16} className="text-gray-600" />
-                    <span>{staff.phone}</span>
+                  <div className="flex items-center justify-between text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                    <span className="text-zinc-500 text-[10px] uppercase font-semibold tracking-wider">Email</span>
+                    <span className="text-zinc-300 text-xs truncate max-w-[120px]" title={staff.email}>{staff.email}</span>
                   </div>
-
-                  <div className="flex items-center gap-3 bg-white/4 rounded-lg p-2">
-                    <User size={16} className="text-gray-600" />
-                    <span>{staff.gender}</span>
+                  <div className="flex items-center justify-between text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                    <span className="text-zinc-500 text-[10px] uppercase font-semibold tracking-wider">Phone</span>
+                    <span className="text-zinc-300 text-xs">{staff.phone}</span>
                   </div>
                 </div>
 
-                {/* actions */}
-                <div className="flex items-center gap-2 w-full">
-                  <button onClick={() => handleEdit(staff)} className="flex-1 flex items-center justify-center gap-2 py-2 bg-white/5 rounded-lg hover:bg-white/10 text-white text-sm font-medium transition-colors">
-                    <Edit size={16} /> Edit
-                  </button>
-                  <button onClick={() => handleDelete(staff.id)} className="flex-1 flex items-center justify-center gap-2 py-2 bg-white/5 rounded-lg hover:bg-white/10 text-white text-sm font-medium transition-colors">
-                    <Trash size={16} /> Remove
-
-                  </button>
+                {/* Barcode / Footer */}
+                <div className="w-full mt-auto pt-2 opacity-30 group-hover:opacity-60 transition-opacity flex flex-col items-center gap-1">
+                   <div className="h-6 w-3/4 bg-white/20 mask-image: repeating-linear-gradient(90deg, black, black 2px, transparent 2px, transparent 4px)"></div>
+                   <span className="text-[8px] text-zinc-600 tracking-[0.5em] uppercase">Authorized Personnel</span>
                 </div>
+                
+                {/* Hover Actions Overlay */}
+                <div className="absolute inset-0 bg-[#0a0a0a]/95 backdrop-blur-sm flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20 rounded-xl">
+                   <button onClick={() => handleEdit(staff)} className="w-32 py-2.5 bg-white text-black font-bold rounded-lg hover:scale-105 transition-transform flex items-center justify-center gap-2 text-sm">
+                      <Edit size={14} /> Edit
+                   </button>
+                   <button onClick={() => handleDelete(staff.id)} className="w-32 py-2.5 bg-red-500/10 text-red-400 border border-red-500/20 font-bold rounded-lg hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2 text-sm">
+                      <Trash size={14} /> Remove
+                   </button>
+                </div>
+
               </div>
             </motion.div>
           ))}
