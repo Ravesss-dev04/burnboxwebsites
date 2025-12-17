@@ -10,7 +10,7 @@ import { FaViber } from "react-icons/fa";
 const EmailPopup = ({ setShowEmailPopup }: EmailPopupProps) => {
   const [formData, setFormData] = useState({
     email: '',
-    message: 'Write us a message...'
+    message: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
@@ -34,7 +34,7 @@ const EmailPopup = ({ setShowEmailPopup }: EmailPopupProps) => {
       // Silently succeed to avoid giving feedback to bots
       setIsSent(true);
       setTimeout(() => {
-        setFormData({ email: '', message: 'Write us a message...' });
+        setFormData({ email: '', message: '' });
         setShowEmailPopup(false);
         setIsSent(false);
       }, 2000);
@@ -42,7 +42,7 @@ const EmailPopup = ({ setShowEmailPopup }: EmailPopupProps) => {
     }
 
     // Basic client-side validation
-    if (!formData.email || !formData.message || formData.message === 'Write us a message...') {
+    if (!formData.email || !formData.message) {
       alert('Please fill in all fields');
       return;
     }
@@ -78,7 +78,7 @@ const EmailPopup = ({ setShowEmailPopup }: EmailPopupProps) => {
         
         // Close popup after 2 seconds
         setTimeout(() => {
-          setFormData({ email: '', message: 'Write us a message...' });
+          setFormData({ email: '', message: '' });
           setShowEmailPopup(false);
           setIsSent(false);
         }, 2000);
@@ -93,54 +93,45 @@ const EmailPopup = ({ setShowEmailPopup }: EmailPopupProps) => {
     }
   };
 
-  const handleTextareaFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-    if (e.target.value === 'Write us a message...') {
-      setFormData({
-        ...formData,
-        message: ''
-      });
-    }
-  };
-
-  const handleTextareaBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-    if (e.target.value === '') {
-      setFormData({
-        ...formData,
-        message: 'Write us a message...'
-      });
-    }
-  };
-
   return (
     <motion.div 
-      initial={{ x: 399 }}
-      animate={{ x: 0 }}
-      exit={{ x: 399 }}
-      transition={{
-        duration: 1,
-        ease: 'easeInOut'
-      }}
-      className='fixed top-1/2 right-5 z-[70] flex flex-col gap-3 w-[300px] sm:w-[350px] md:w-[400px] lg:w-[420px] max-w-[90vw]'
+      initial={{ x: 100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: 100, opacity: 0 }}
+      transition={{ duration: 0.5, ease: 'circOut' }}
+      className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:left-auto md:translate-x-0 md:right-5 z-[70] flex flex-col gap-4 w-[350px] md:w-[400px] max-w-[90vw] max-h-[90vh] overflow-y-auto scrollbar-hide'
     >
-      <div className='h-min w-full bg-[#201E1E] shadow-md rounded-lg p-3'>
-        <span className='flex gap-2 items-center mb-5'>
-          <Image
-            height={500}
-            width={500}
-            alt='gmail icon'
-            src={'/gmail.png'}
-            className='h-5 w-5 object-center object-contain'
-          />
-          <h2 className='text-white font-semibold'>Reach us out via gmail.</h2>
+      {/* Main Form Card */}
+      <div className='w-full backdrop-blur-xl bg-[#1a1a1a]/90 border border-white/10 shadow-2xl rounded-2xl p-6 overflow-hidden relative'>
+        {/* Gradient Glow Effect */}
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-pink-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Header */}
+        <div className='flex items-center justify-between mb-6 relative z-10'>
+          <div className='flex items-center gap-3'>
+            <div className="p-2 bg-white/5 rounded-lg border border-white/5">
+              <Image
+                height={20}
+                width={20}
+                alt='gmail icon'
+                src={'/gmail.png'}
+                className='w-5 h-5 object-contain'
+              />
+            </div>
+            <h2 className='text-white font-medium text-sm tracking-wide'>Reach us out via gmail.</h2>
+          </div>
           <button 
             type="button" 
-            className='ml-auto text-2xl rounded-full bg-black/20 p-1 hover:bg-black/50 focus:bg-black/75 focus:text-white ease-in-out duration-200'
+            className='p-2 rounded-full hover:bg-white/10 transition-colors group'
             onClick={() => setShowEmailPopup(false)}
           >
-            <HiOutlineArrowSmallRight className='text-white' />
+            <HiOutlineArrowSmallRight className='text-white/60 group-hover:text-white text-xl' />
           </button>
-        </span>
-        <form className='w-full flex flex-col gap-2 items-end' onSubmit={handleSubmit}>
+        </div>
+
+        {/* Form */}
+        <form className='flex flex-col gap-4 relative z-10' onSubmit={handleSubmit}>
           {/* Honeypot Field - Hidden from real users */}
           <input
             type="text"
@@ -152,33 +143,39 @@ const EmailPopup = ({ setShowEmailPopup }: EmailPopupProps) => {
             aria-hidden="true"
           />
           
-          <input 
-            type="email" 
-            name="email" 
-            placeholder='Input your email address'
-            className='p-3 outline-none text-white/80 bg-black/5 focus:bg-pink/10 placeholder-zinc-400 rounded-md w-full'
-            value={formData.email}
-            onChange={handleChange}
-            required
-            autoComplete="email"
-          />
-          <textarea 
-            name="message"
-            className='resize-none text-white/40 h-32 p-3 bg-black/5 rounded-md w-full' 
-            value={formData.message}
-            onChange={handleChange}
-            onFocus={handleTextareaFocus}
-            onBlur={handleTextareaBlur}
-            required
-            minLength={5}
-          />
-          <div className="flex items-center gap-2 w-full justify-end">
+          <div className="space-y-4">
+            <input 
+              type="email" 
+              name="email" 
+              placeholder='Input your email address'
+              className='w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-black/40 transition-all'
+              value={formData.email}
+              onChange={handleChange}
+              required
+              autoComplete="email"
+            />
+            <textarea 
+              name="message"
+              placeholder='Write us a message...'
+              className='w-full h-32 bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-pink-500/50 focus:bg-black/40 transition-all resize-none' 
+              value={formData.message}
+              onChange={handleChange}
+              required
+              minLength={5}
+            />
+          </div>
+
+          <div className="flex justify-end mt-2">
             <button 
               type="submit" 
               disabled={isLoading || isSent}
-              className={`flex items-center justify-center px-3 py-2 rounded-md bg-[#FA7EA0] hover:bg-pink/65 focus:bg-pink focus:text-white ease-in-out duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                isSent ? 'w-12' : 'w-20'
-              }`}
+              className={`
+                flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl 
+                bg-[#FA7EA0] hover:bg-[#f06d90] active:scale-95
+                text-white font-medium text-sm shadow-lg shadow-pink-500/20
+                transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                ${isSent ? 'w-14' : 'w-auto'}
+              `}
             >
               {isSent ? (
                 <Image
@@ -186,51 +183,59 @@ const EmailPopup = ({ setShowEmailPopup }: EmailPopupProps) => {
                   alt="Sent"
                   width={24}
                   height={24}
-                  className="h-10 w-10"
+                  className="w-6 h-6"
                 />
               ) : (
-                <div className="flex items-center gap-2 ">
-                  <RiMailSendLine /> 
+                <>
+                  <RiMailSendLine className="text-lg" /> 
                   <span>{isLoading ? 'Sending...' : 'Send'}</span>
-                </div>
+                </>
               )}
             </button>        
           </div>
         </form>
       </div>
-      <div className='h-min w-full text-white/70 flex gap-3 rounded-lg shadow-md bg-[#201E1E] white py-3 px-5 items-center '>
-        other ways to contact us
-        <a
-          href="https://facebook.com/burnboxprinting"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-md hover:scale-110 ease-in-out duration-200 text-3xl ml-auto"
-          aria-label="Facebook"
-        >
-          <FaFacebook className='text-blue-500'/>
-        </a>
-        <a
-          href="https://www.instagram.com/burnboxprinting/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-md hover:scale-110 ease-in-out duration-200 text-3xl"
-          aria-label="Instagram"
-        >
-          <Image
-            height={500}
-            width={500}
-            alt='instagram image'
-            src='/instagram.png'
-            className='h-7 w-7 object-contain'
-          />
-        </a>
-        <a
-          href="viber://chat?number=YOUR_PHONE_NUMBER"
-          className="p-1 flex h-min items-center rounded-md bg-purple-600 hover:scale-110 ease-in-out duration-200 text-2xl"
-          aria-label="Viber"
-        >
-          <FaViber className='text-white'/>
-        </a>
+
+      {/* Footer Card */}
+      <div className='w-full backdrop-blur-xl bg-[#1a1a1a]/90 border border-white/10 shadow-xl rounded-2xl p-4 flex items-center justify-between relative overflow-hidden'>
+         {/* Gradient Glow Effect */}
+         <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none" />
+         
+        <span className='text-white/50 text-sm font-medium relative z-10'>other ways to contact us</span>
+        
+        <div className="flex items-center gap-3 relative z-10">
+          <a
+            href="https://facebook.com/burnboxprinting"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] transition-all hover:scale-110"
+            aria-label="Facebook"
+          >
+            <FaFacebook className='text-xl'/>
+          </a>
+          <a
+            href="https://www.instagram.com/burnboxprinting/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 transition-all hover:scale-110"
+            aria-label="Instagram"
+          >
+            <Image
+              height={20}
+              width={20}
+              alt='instagram'
+              src='/instagram.png'
+              className='w-5 h-5 object-contain'
+            />
+          </a>
+          <a
+            href="viber://chat?number=YOUR_PHONE_NUMBER"
+            className="p-2 rounded-lg bg-[#7360f2]/10 hover:bg-[#7360f2]/20 text-[#7360f2] transition-all hover:scale-110"
+            aria-label="Viber"
+          >
+            <FaViber className='text-xl'/>
+          </a>
+        </div>
       </div>
     </motion.div>
   )

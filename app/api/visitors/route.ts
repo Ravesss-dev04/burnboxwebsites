@@ -31,40 +31,47 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { ipAddress, inquiryId, trackVisit, pagePath } = await req.json();
+    // Normalize IPs robustly (IPv4/IPv6, with possible ports)
+    const normalizeIp = (raw?: string | null): string => {
+      if (!raw) return 'unknown';
+      let ip = String(raw).trim();
+      if (ip.includes(',')) ip = ip.split(',')[0].trim();
+      ip = ip.replace(/%[0-9A-Za-z_.-]+$/, '');
+      const bracketMatch = ip.match(/^\[([^\]]+)\]:(\d+)$/);
+      if (bracketMatch) return bracketMatch[1];
+      const ipv4Port = ip.match(/^(\d{1,3}(?:\.\d{1,3}){3}):(\d+)$/);
+      if (ipv4Port) return ipv4Port[1];
+      if (ip.startsWith('[') && ip.endsWith(']')) return ip.slice(1, -1);
+      return ip;
+    };
+
     // Get IP from request if not provided (for page visits)
     // Try multiple headers in order of reliability
-    let clientIp = ipAddress;
+    let clientIp = ipAddress ? normalizeIp(ipAddress) : undefined;
     if (!clientIp) {
       const forwardedFor = req.headers.get('x-forwarded-for');
       const realIp = req.headers.get('x-real-ip');
       const cfConnectingIp = req.headers.get('cf-connecting-ip'); // Cloudflare
       const xClientIp = req.headers.get('x-client-ip');
       const trueClientIp = req.headers.get('true-client-ip');
-      // Extract first IP from x-forwarded-for (can contain multiple IPs)
       const firstForwardedIp = forwardedFor?.split(',')[0]?.trim();
-      
-      clientIp = firstForwardedIp || 
-                 cfConnectingIp || 
-                 realIp || 
-                 xClientIp || 
-                 trueClientIp || 
+      clientIp = normalizeIp(firstForwardedIp) ||
+                 normalizeIp(cfConnectingIp) ||
+                 normalizeIp(realIp) ||
+                 normalizeIp(xClientIp) ||
+                 normalizeIp(trueClientIp) ||
                  'unknown';
     }
-    // Clean up IP address (remove port if present, handle IPv6)
-    if (clientIp && clientIp !== 'unknown') {
-      // Remove port number if present (e.g., "192.168.1.1:8080" -> "192.168.1.1")
-      clientIp = clientIp.split(':')[0];
-      // Remove brackets from IPv6 (e.g., "[::1]" -> "::1")
-      clientIp = clientIp.replace(/^\[|\]$/g, '');
-    }
+
     // Skip localhost IPs in production - they are not real visitors
-    const isLocalhost = clientIp === '::1' || 
-                       clientIp === '127.0.0.1' || 
-                       clientIp === 'localhost' || 
-                       clientIp?.startsWith('192.168.') ||
-                       clientIp?.startsWith('10.') ||
-                       clientIp?.startsWith('172.16.') ||
-                       clientIp === 'unknown';
+    const isPrivateIPv4 = /^10\./.test(clientIp) || /^192\.168\./.test(clientIp) || /^172\.(1[6-9]|2\d|3[0-1])\./.test(clientIp);
+    const isLocalhost = clientIp === '::1' ||
+                        clientIp === '127.0.0.1' ||
+                        clientIp === 'localhost' ||
+                        isPrivateIPv4 ||
+                        /^fe80:/i.test(clientIp) ||
+                        /^fc00:/i.test(clientIp) || /^fd/i.test(clientIp) ||
+                        clientIp === 'unknown';
     
     if (isLocalhost && process.env.NODE_ENV === 'production') {
       // In production, skip tracking localhost/internal IPs

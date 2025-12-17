@@ -3,10 +3,12 @@
 import { usePathname, useRouter } from "next/navigation";
 import Header from "./Header";
 import { useEffect, useState } from "react";
+import { useHeaderContext } from "../context/HeaderContext";
 
 export default function HeaderWrapper() {
   const pathname = usePathname();
   const router =useRouter();
+  const { isHeaderVisible } = useHeaderContext();
   const [allowAdmin, setAllowAdmin] = useState(false);
   // hide header for all admin routes
   
@@ -74,6 +76,7 @@ export default function HeaderWrapper() {
 
   // naka hide dito si header kahit globally
   if (pathname.startsWith("/admin")) return null;
+  if (!isHeaderVisible) return null;
 
   return <Header />;
 }

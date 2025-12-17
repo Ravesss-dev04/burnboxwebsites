@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CardCarousel, ComprehensiveServices, EmailPopup, Maps } from "../components";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
@@ -14,17 +14,28 @@ import QuotationPage from './QuotationPage';
 import ContactBurnbox from './ContactBurnbox';
 import QuestionAsk from './QuestionAsk';
 import ScrollReveal, { ScrollScale } from './ScrollReveal';
+import { useHeaderContext } from '../context/HeaderContext';
 
 const MainPage = () => {
 
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
+  const { setIsHeaderVisible } = useHeaderContext();
+
+  useEffect(() => {
+    if (showWelcome) {
+      setIsHeaderVisible(false);
+    } else {
+      setIsHeaderVisible(true);
+    }
+    return () => setIsHeaderVisible(true);
+  }, [showWelcome, setIsHeaderVisible]);
   
-  const handleWelcomeComplete = () => {
+  const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
     // Smooth scroll to top after welcome screen
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
   
   return (
     <div className="min-h-screen w-full bg-zinc-950 relative overflow-x-hidden text-white selection:bg-pink-500/30">
@@ -41,7 +52,9 @@ const MainPage = () => {
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-500/5 blur-[120px] rounded-full animate-pulse"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/5 blur-[120px] rounded-full animate-pulse delay-1000"></div>
       </div>
+
       {/* Content Wrapper with z-index to sit above background */}
+
       <div className="relative z-10 flex flex-col gap-12 sm:gap-20">
         {/* Welcome Screen - Shows first */}
         {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
@@ -71,7 +84,9 @@ const MainPage = () => {
                 className='h-6 w-6 object-contain opacity-80 group-hover:opacity-100'
               />
             </motion.button>
+
           )}
+
         </AnimatePresence>
         
         {/* Main Content - Static Layout */}
@@ -95,6 +110,8 @@ const MainPage = () => {
         <ScrollReveal direction="up" delay={0.1} duration={0.8}>
           <ComprehensiveServices />
         </ScrollReveal>
+
+      
 
         <ScrollReveal direction="up" delay={0.1} duration={0.8}>
           <SeamlessProcess/>

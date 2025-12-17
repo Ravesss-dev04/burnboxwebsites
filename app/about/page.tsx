@@ -29,6 +29,7 @@ const page = () => {
       {/* Content */}
       <div className='relative z-10'>
         <AboutPages/>
+       
         <Footer/>
       </div>
     </motion.div>

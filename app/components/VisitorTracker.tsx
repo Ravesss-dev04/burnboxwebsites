@@ -11,6 +11,28 @@ export default function VisitorTracker() {
       try {
         // Get current page path for better tracking
         const currentPath = pathname || window.location.pathname;
+        
+        // Try to get public IP from client side (prefer IPv4 for compatibility)
+        // This helps when server sees localhost or internal IP
+        let publicIp: string | undefined = undefined;
+        try {
+          // Prefer IPv4
+          const v4 = await fetch('https://api.ipify.org?format=json');
+          if (v4.ok) {
+            const d = await v4.json();
+            publicIp = d.ip;
+          }
+        } catch {}
+        if (!publicIp) {
+          try {
+            const v6 = await fetch('https://api64.ipify.org?format=json');
+            if (v6.ok) {
+              const d6 = await v6.json();
+              publicIp = d6.ip;
+            }
+          } catch {}
+        }
+
         // Call the API to track this visitor
         const response = await fetch('/api/visitors', {
           method: 'POST',
@@ -19,7 +41,8 @@ export default function VisitorTracker() {
           },
           body: JSON.stringify({
             trackVisit: true, // Flag to indicate this is a page visit, not an inquiry
-            pagePath: currentPath // Track which page was visited
+            pagePath: currentPath, // Track which page was visited
+            ipAddress: publicIp // Send the detected public IP
           }),
         });
         if (response.ok) {

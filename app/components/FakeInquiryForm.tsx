@@ -275,6 +275,26 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
       // Re-check moderation
       await checkModeration(images[0]);
       if (isBlock) return;
+
+      // Try to get public IP from client side (prefer IPv4)
+      let publicIp: string | undefined = undefined;
+      try {
+        const v4 = await fetch('https://api.ipify.org?format=json');
+        if (v4.ok) {
+          const d = await v4.json();
+          publicIp = d.ip;
+        }
+      } catch {}
+      if (!publicIp) {
+        try {
+          const v6 = await fetch('https://api64.ipify.org?format=json');
+          if (v6.ok) {
+            const d6 = await v6.json();
+            publicIp = d6.ip;
+          }
+        } catch {}
+      }
+
       // Send inquiry
       const res = await fetch("/api/send-inquiry", {
         method: "POST",
@@ -285,7 +305,8 @@ function FakeInquiryForm({ product }: { product: { name: string; price: string }
           message: formMessage,
           imageBase64,
           productName: product.name,
-          productPrice: product.price
+          productPrice: product.price,
+          ipAddress: publicIp
         }),
       });
       const data = await res.json();

@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { email, password, role = 'STAFF', position } = await request.json();
+    const { email, password, role = 'STAFF', position, name, image, bio } = await request.json();
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400, headers: corsHeaders });
     }
@@ -61,16 +61,10 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await hashPassword(password);
     const assignedRole = isBootstrapMode ? 'ADMIN' : role;
-    // Enforce single-admin: if creating an ADMIN (either bootstrap or explicit), demote others first
-    if (assignedRole === 'ADMIN') {
-      await prisma.user.updateMany({
-        where: {},
-        data: ({ role: 'STAFF' } as any)
-      });
-    }
+    
     const user = await prisma.user.create({
       // Cast to any to avoid type mismatch until prisma generate runs
-      data: ({ email, password: hashedPassword, role: assignedRole, position } as any)
+      data: ({ email, password: hashedPassword, role: assignedRole, position, name, image, bio } as any)
     });
 
     return NextResponse.json({

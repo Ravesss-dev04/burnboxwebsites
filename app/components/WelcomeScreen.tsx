@@ -1,179 +1,181 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface WelcomeScreenProps {
   onComplete: () => void;
+  onStartExit?: () => void;
 }
 
-const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [rotX, setRotX] = useState(-20);
-  const [rotY, setRotY] = useState(30);
-  const [phase, setPhase] = useState("shuffling");
-  const [tick, setTick] = useState(0);
-  const animRef = useRef<number | undefined>(undefined);
-  const controls = useAnimation();
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete, onStartExit }) => {
+  const [stage, setStage] = useState<"initial" | "opening" | "open" | "closing" | "rotating" | "finished">("initial");
+  const [exitProps, setExitProps] = useState({ x: 0, y: 0, scale: 1 });
 
   useEffect(() => {
-    let x = -20, y = 30;
-    const spin = () => {
-      y += 1.5;
-      x += 0.5;
-      setRotX(x);
-      setRotY(y);
-      animRef.current = requestAnimationFrame(spin);
+    const calculateExit = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      
+      // Current Logo Size (approximate based on classes)
+      let currentSize = 288; // w-72
+      if (width >= 768) currentSize = 384; // w-96
+      if (width >= 1024) currentSize = 512; // w-[32rem]
+
+      // Target Logo Size (Header logo height is approx 56px)
+      // We want the box part to match the header logo box size.
+      // Header logo is ~56px high.
+      const targetSize = 56; 
+      const scale = targetSize / currentSize;
+
+      // Target Position (Top Left)
+      // Header logo is roughly at x: 24px, y: 12px (padding) relative to viewport
+      // But we need to center our logo at that position.
+      // Center of header logo box is approx x: 24 + (56/2) = 52px, y: 12 + (56/2) = 40px.
+      const targetX = 52; 
+      const targetY = 40;
+
+      setExitProps({
+        x: targetX - (width / 2),
+        y: targetY - (height / 2),
+        scale: scale
+      });
     };
-    spin();
+    
+    calculateExit();
+    window.addEventListener('resize', calculateExit);
+    return () => window.removeEventListener('resize', calculateExit);
+  }, []);
 
-    const t1 = setInterval(() => setTick(t => t + 1), 300);
-    const t2 = setTimeout(() => { clearInterval(t1); setPhase("solving"); }, 2500);
-    const t3 = setTimeout(() => setPhase("complete"), 4000);
-    const t4 = setTimeout(async () => {
-      await controls.start({ opacity: 0, scale: 0.9, transition: { duration: 0.5 } });
-      setIsVisible(false);
-      onComplete();
-    }, 4500);
+  useEffect(() => {
+    // Prevent restarting if already in progress
+    if (stage !== "initial") return;
 
-    return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-      clearInterval(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
+    const sequence = async () => {
+      // Initial delay before starting
+      await new Promise(r => setTimeout(r, 500));
+      setStage("opening");
+      
+      // Allow time for the opening animation
+      await new Promise(r => setTimeout(r, 1200));
+      setStage("open");
+
+      // Hold the text visible for a moment
+      await new Promise(r => setTimeout(r, 2000));
+      setStage("closing");
+
+      // Allow time for the closing animation
+      await new Promise(r => setTimeout(r, 1200));
+      
+      // Start Exit Phase
+      if (onStartExit) onStartExit();
+      setStage("rotating");
+      
+      // Wait for animation to complete via onAnimationComplete callback
     };
-  }, [controls, onComplete]);
-  if (!isVisible) return null;
 
-  const cubeStyle = {
-    transformStyle: "preserve-3d" as const,
-    transform: "rotateX(" + rotX + "deg) rotateY(" + rotY + "deg)"
-  };
+    sequence();
+  }, [onComplete, onStartExit]); // Dependencies kept for linter, but logic prevents re-run
+
+  if (stage === "finished") return null;
 
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black"
+        className="fixed inset-0 z-[10000] flex flex-col items-center justify-center overflow-hidden"
         initial={{ opacity: 1 }}
-        animate={controls}
+        animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-900/20 via-black to-purple-900/20" />
+        {/* Background - Remains opaque until the component exits */}
+        <motion.div 
+            className="absolute inset-0 bg-black"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+        />
         
-        <div style={{ perspective: "1200px" }}>
-          <div className="relative w-60 h-60 md:w-72 md:h-72" style={cubeStyle}>
-            <CubeFace rot="rotateY(0deg)" tr="translateZ(120px)" phase={phase} tick={tick} idx={0} />
-            <CubeFace rot="rotateY(180deg)" tr="translateZ(120px)" phase={phase} tick={tick} idx={1} />
-            <CubeFace rot="rotateY(90deg)" tr="translateZ(120px)" phase={phase} tick={tick} idx={2} />
-            <CubeFace rot="rotateY(-90deg)" tr="translateZ(120px)" phase={phase} tick={tick} idx={3} />
-            <CubeFace rot="rotateX(90deg)" tr="translateZ(120px)" phase={phase} tick={tick} idx={4} />
-            <CubeFace rot="rotateX(-90deg)" tr="translateZ(120px)" phase={phase} tick={tick} idx={5} />
-          </div>
-        </div>
+        {/* Gradient - Remains opaque until the component exits */}
+        <motion.div 
+            className="absolute inset-0 bg-gradient-to-br from-pink-900/20 via-black to-purple-900/20" 
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+        />
 
-        <motion.div
-          className="absolute bottom-16 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <h2 className="text-4xl md:text-5xl font-black text-white">
-            <span className="text-pink-500">BURN</span>BOX PRINTING
-          </h2>
-          <p className="text-neutral-400 text-sm mt-2 tracking-widest uppercase">
-            {phase === "shuffling" ? "Loading..." : phase === "solving" ? "Assembling..." : "Welcome"}
-          </p>
-        </motion.div>
+        <div className="relative flex items-center justify-center w-full h-full" style={{ perspective: "1000px" }}>
+          
+          {/* Text Container - Appears in the center when logo opens */}
+          <motion.div
+            className="absolute z-10 flex flex-col items-center justify-center text-center w-full px-4"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ 
+              opacity: (stage === "opening" || stage === "open") ? 1 : 0,
+              scale: (stage === "opening" || stage === "open") ? 1 : 0.9,
+              filter: (stage === "opening" || stage === "open") ? "blur(0px)" : "blur(70px)"
+            }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-wider whitespace-nowrap">
+              <span className="text-pink-500">BURN</span>BOX
+            </h2>
+            <p className="text-white/80 text-2xl md:text-3xl lg:text-4xl font-light tracking-[0.5em] mt-2 md:mt-4 uppercase">
+              Printing
+            </p>
+          </motion.div>
+
+          {/* Logo Container */}
+          <motion.div 
+            className="relative z-[10001] w-72 h-72 md:w-96 md:h-96 lg:w-[32rem] lg:h-[32rem] flex items-center justify-center"
+            animate={stage === "rotating" ? { 
+                rotate: -360, // Rotate counter-clockwise for a "rolling" effect towards top-left
+                x: exitProps.x,
+                y: exitProps.y,
+                scale: exitProps.scale,
+            } : {}}
+            transition={stage === "rotating" ? { duration: 1.5, ease: "easeInOut" } : {}}
+            onAnimationComplete={() => {
+              if (stage === "rotating") {
+                setStage("finished");
+                onComplete();
+              }
+            }}
+          >
+              {/* Left Half of the Logo */}
+              <motion.div
+                className="absolute inset-0 w-full h-full"
+                initial={{ x: 0 }}
+                animate={{ 
+                  x: (stage === "opening" || stage === "open") ? "-55%" : "0%" 
+                }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+              >
+                 <img 
+                    src="/bblogo.png" 
+                    alt="Logo Left" 
+                    className="w-full h-full object-contain"
+                    style={{ clipPath: "inset(0 50% 0 0)" }} 
+                 />
+              </motion.div>
+
+              {/* Right Half of the Logo */}
+              <motion.div
+                className="absolute inset-0 w-full h-full"
+                initial={{ x: 0 }}
+                animate={{ 
+                  x: (stage === "opening" || stage === "open") ? "55%" : "0%" 
+                }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+              >
+                 <img 
+                    src="/bblogo.png" 
+                    alt="Logo Right" 
+                    className="w-full h-full object-contain"
+                    style={{ clipPath: "inset(0 0 0 50%)" }} 
+                 />
+              </motion.div>
+          </motion.div>
+        </div>
       </motion.div>
     </AnimatePresence>
-  );
-};
-
-
-
-interface FaceProps {
-  rot: string;
-  tr: string;
-  phase: string;
-  tick: number;
-  idx: number;
-}
-
-const CubeFace: React.FC<FaceProps> = ({ rot, tr, phase, tick, idx }) => {
-  const style = {
-    transform: rot + " " + tr,
-    backfaceVisibility: "visible" as const,
-    transformStyle: "preserve-3d" as const
-  };
-
-  return (
-    <div className="absolute inset-0" style={style}>
-      <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1 p-1 bg-neutral-900/10 rounded-lg">
-        {[0,1,2,3,4,5,6,7,8].map(i => (
-          <Cell key={i} cellIdx={i} phase={phase} tick={tick} faceIdx={idx} />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-interface CellProps {
-  cellIdx: number;
-  phase: string;
-  tick: number;
-  faceIdx: number;
-}
-
-const Cell: React.FC<CellProps> = ({ cellIdx, phase, tick, faceIdx }) => {
-  const row = Math.floor(cellIdx / 3);
-  const col = cellIdx % 3;
-  const correctX = col * 50;
-  const correctY = row * 50;
-  
-  const getPos = () => {
-    if (phase === "complete" || phase === "solving") {
-      return { x: correctX, y: correctY };
-    }
-    const seed = tick + cellIdx + faceIdx;
-    return { x: (seed % 3) * 50, y: ((seed + cellIdx) % 3) * 50 };
-  };
-  
-  const getOffset = () => {
-    if (phase === "complete") return { x: 0, y: 0, r: 0 };
-    if (phase === "solving") return { x: 0, y: 0, r: 0 };
-    const seed = tick + cellIdx + faceIdx;
-    const dir = seed % 2 === 0 ? 1 : -1;
-    const mag = 60 + (seed % 30);
-    return {
-      x: seed % 3 === 0 ? dir * mag : 0,
-      y: seed % 3 !== 0 ? dir * mag : 0,
-      r: dir * (5 + (seed % 15))
-    };
-  };
-
-  const pos = getPos();
-  const off = getOffset();
-  const bgPos = pos.x + "% " + pos.y + "%";
-
-  return (
-    <motion.div
-      className="relative overflow-hidden rounded-sm bg-black/70 border border-pink-500/30"
-      animate={{ x: off.x, y: off.y, rotate: off.r, scale: phase === "complete" ? 1.02 : 1 }}
-      transition={{ type: "spring", stiffness: 200, damping: 20 }}
-      style={{ boxShadow: phase === "complete" ? "0 0 15px rgba(236,72,153,0.5)" : "none" }}
-    >
-      <motion.div
-        className="absolute inset-0"
-        animate={{ backgroundPosition: bgPos }}
-        transition={{ duration: phase === "solving" ? 0.5 : 0.1 }}
-        style={{
-          backgroundImage: "url(/bbbbblogo.png)",
-          backgroundSize: "300% 300%",
-          backgroundRepeat: "no-repeat"
-        }}
-      />
-    </motion.div>
   );
 };
 

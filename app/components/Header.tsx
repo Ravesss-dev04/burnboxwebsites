@@ -249,7 +249,7 @@ const Header: React.FC = () => {
         <img
           height={500}
           width={500}
-          src={"/burnboxlogo.png.webp"}
+          src={"/burnboxlogo.png"}
           alt="company logo"
           className="h-full object-contain object-left"
         />

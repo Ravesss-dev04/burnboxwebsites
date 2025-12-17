@@ -9,23 +9,30 @@ const prisma = new PrismaClient();
 // Helper function to track visitor location
 async function trackVisitorLocation(ipAddress: string, inquiryId: number) {
   try {
-    // Clean up IP address (remove port if present, handle IPv6)
-    let clientIp = ipAddress;
-    if (clientIp && clientIp !== 'unknown') {
-      // Remove port number if present (e.g., "192.168.1.1:8080" -> "192.168.1.1")
-      clientIp = clientIp.split(':')[0];
-      // Remove brackets from IPv6 (e.g., "[::1]" -> "::1")
-      clientIp = clientIp.replace(/^\[|\]$/g, '');
-    }
+    // Robust IP normalization (IPv4/IPv6 and ports)
+    const normalizeIp = (raw?: string | null): string => {
+      if (!raw) return 'unknown';
+      let ip = String(raw).trim();
+      if (ip.includes(',')) ip = ip.split(',')[0].trim();
+      ip = ip.replace(/%[0-9A-Za-z_.-]+$/, '');
+      const bracketMatch = ip.match(/^\[([^\]]+)\]:(\d+)$/);
+      if (bracketMatch) return bracketMatch[1];
+      const ipv4Port = ip.match(/^(\d{1,3}(?:\.\d{1,3}){3}):(\d+)$/);
+      if (ipv4Port) return ipv4Port[1];
+      if (ip.startsWith('[') && ip.endsWith(']')) return ip.slice(1, -1);
+      return ip;
+    };
+    let clientIp = normalizeIp(ipAddress);
     
     // Skip localhost IPs in production - they are not real visitors
+    const isPrivateIPv4 = /^10\./.test(clientIp) || /^192\.168\./.test(clientIp) || /^172\.(1[6-9]|2\d|3[0-1])\./.test(clientIp);
     const isLocalhost = clientIp === '::1' || 
-                       clientIp === '127.0.0.1' || 
-                       clientIp === 'localhost' || 
-                       clientIp?.startsWith('192.168.') ||
-                       clientIp?.startsWith('10.') ||
-                       clientIp?.startsWith('172.16.') ||
-                       clientIp === 'unknown';
+               clientIp === '127.0.0.1' || 
+               clientIp === 'localhost' || 
+               isPrivateIPv4 ||
+               /^fe80:/i.test(clientIp) ||
+               /^fc00:/i.test(clientIp) || /^fd/i.test(clientIp) ||
+               clientIp === 'unknown';
     
     if (isLocalhost && process.env.NODE_ENV === 'production') {
       // In production, skip tracking localhost/internal IPs
@@ -337,7 +344,7 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, message, imageBase64, productName, productPrice } = await req.json();
+    const { name, email, message, imageBase64, productName, productPrice, ipAddress: bodyIpAddress } = await req.json();
     
     if (!name || !email || !message) {
       return NextResponse.json(
@@ -391,19 +398,30 @@ export async function POST(req: NextRequest) {
     // Extract first IP from x-forwarded-for (can contain multiple IPs)
     const firstForwardedIp = forwardedFor?.split(',')[0]?.trim();
     
-    let ipAddress = firstForwardedIp || 
-                   cfConnectingIp || 
-                   realIp || 
-                   xClientIp || 
-                   trueClientIp || 
+    // Robust normalization to preserve IPv6 and strip ports safely
+    const normalizeIp = (raw?: string | null): string => {
+      if (!raw) return 'unknown';
+      let ip = String(raw).trim();
+      if (ip.includes(',')) ip = ip.split(',')[0].trim();
+      ip = ip.replace(/%[0-9A-Za-z_.-]+$/, '');
+      const bracketMatch = ip.match(/^\[([^\]]+)\]:(\d+)$/);
+      if (bracketMatch) return bracketMatch[1];
+      const ipv4Port = ip.match(/^(\d{1,3}(?:\.\d{1,3}){3}):(\d+)$/);
+      if (ipv4Port) return ipv4Port[1];
+      if (ip.startsWith('[') && ip.endsWith(']')) return ip.slice(1, -1);
+      return ip;
+    };
+
+    let ipAddress = normalizeIp(bodyIpAddress) || 
+                   normalizeIp(firstForwardedIp) || 
+                   normalizeIp(cfConnectingIp) || 
+                   normalizeIp(realIp) || 
+                   normalizeIp(xClientIp) || 
+                   normalizeIp(trueClientIp) || 
                    'unknown';
     
-    // Clean up IP address (remove port if present, handle IPv6)
     if (ipAddress && ipAddress !== 'unknown') {
-      // Remove port number if present (e.g., "192.168.1.1:8080" -> "192.168.1.1")
-      ipAddress = ipAddress.split(':')[0];
-      // Remove brackets from IPv6 (e.g., "[::1]" -> "::1")
-      ipAddress = ipAddress.replace(/^\[|\]$/g, '');
+      ipAddress = normalizeIp(ipAddress);
     }
 
     // Save inquiry to database

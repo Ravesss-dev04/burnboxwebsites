@@ -22,6 +22,8 @@ type HeaderContextType = {
   selectProductById: (id: number) => void;
   selectProductByName: (name: string) => void;
   loading: boolean;
+  isHeaderVisible: boolean;
+  setIsHeaderVisible: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
@@ -34,6 +36,7 @@ export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   // Fetch products from database on component mount
   useEffect(() => {
     const fetchProducts = async () => {
@@ -138,7 +141,9 @@ export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
         setSelectedProduct,
         selectProductById,
         selectProductByName,
-        loading
+        loading,
+        isHeaderVisible,
+        setIsHeaderVisible
       }}
     >
       {children}

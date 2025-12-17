@@ -78,7 +78,7 @@ const WhyChooseBurnBox: React.FC<AboutSectionProps> = ({ editable = false }) => 
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-gray-900/50 backdrop-blur-sm">
 
               <Image
-                src="/aboutusimage.png"
+                src="/onefive.jpg"
                 alt="Why Choose BurnBox"
                 width={800}
                 height={800}

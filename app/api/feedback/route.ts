@@ -95,6 +95,39 @@ export async function GET(req: Request) {
   }
 }
 
+// Delete feedback
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Feedback ID is required" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    await prisma.feedback.delete({
+      where: {
+        id: Number(id)
+      }
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      message: "Feedback deleted successfully" 
+    }, { headers: corsHeaders });
+
+  } catch (error: any) {
+    console.error("Error deleting feedback:", error);
+    return NextResponse.json(
+      { error: "Failed to delete feedback" },
+      { status: 500, headers: corsHeaders }
+    );
+  }
+}
+
 // Send feedback notification to business
 async function sendFeedbackNotification({ 
   name, 

@@ -35,7 +35,7 @@ const BrandPage = () => {
           <div className="relative w-full h-full min-h-[300px] lg:min-h-[500px] order-2 lg:order-2">
             <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-white/10">
               <img
-                src="/aboutusimage.png" 
+                src="/onetwo.jpg" 
                 alt="Burnbox Team"
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
               />

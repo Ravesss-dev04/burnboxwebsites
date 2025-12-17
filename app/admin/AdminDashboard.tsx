@@ -23,6 +23,7 @@ import CalculatorBox from './components/CalculatorBox';
 import AdminServices from './AdminServices';
 import SettingsAdmin from './SettingsAdmin';
 import ProfileInfo from './ProfileInfo';
+import FeedbackContent from './FeedbackContent';
 
 interface AdminDashboardProps {
   userMail?: string;
@@ -32,7 +33,7 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'STAFF', onLogout }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("dashboard");
   const [mounted, setMounted] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -41,11 +42,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
     dashboard: React.createElement(DashboardContent as any, { userMail, onLogout, darkMode: true }),
     services: <AdminServices/>,
     gallery: <GalleryManager darkMode={true} />,
-    inquiry: <div className="text-white">Inquiry Component Placeholder</div>, // Placeholder if component missing
+    Feedback: <FeedbackContent />,
     profile: <ProfileInfo/>,
     settings: <SettingsAdmin/>,
   }
-
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -73,11 +73,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
   const menuItems = [
     { category: "Main", items: [
       { id: "dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
-      // Placeholder
     ]},
     { category: "Management", items: [
       { id: "services", icon: <ShoppingBag size={20} />, label: "Services" },
-      { id: "inquiry", icon: <MessageSquare size={20} />, label: "Inquiries" },
+      { id: "Feedback", icon: <MessageSquare size={20} />, label: "Feedback" },
       { id: "gallery", icon: <ImageIcon size={20} />, label: "Gallery" },
     ]},
     { category: "System", items: [
@@ -86,20 +85,39 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
     ]}
   ];
 
+  // Flatten menu items for radial menu
+  const flatMenuItems = menuItems.flatMap(group => group.items);
+
+  // Radial Menu Calculations
+  const radius = 140; // Distance from center
+  const totalItems = flatMenuItems.length;
+  // Spread items in a semi-circle on the right (-75 to 75 degrees)
+  const startAngle = -75;
+  const endAngle = 75;
+  const angleStep = (endAngle - startAngle) / (totalItems - 1);
+
+  const getItemPosition = (index: number) => {
+    const angleInDegrees = startAngle + (index * angleStep);
+    const angleInRadians = angleInDegrees * (Math.PI / 180);
+    return {
+      x: Math.cos(angleInRadians) * radius,
+      y: Math.sin(angleInRadians) * radius,
+    };
+  };
 
   return (
     <div className="flex w-full min-h-screen bg-[#030303] text-white overflow-hidden font-sans">
       
-      {/* Sidebar */}
+      {/* Desktop Sidebar (Hidden on Mobile) */}
       <motion.aside 
         initial={false}
         animate={{ width: isOpen ? 280 : 80 }}
-        className="relative h-screen bg-[#0a0a0a] border-r border-white/5 flex flex-col z-30"
+        className="hidden md:flex relative h-screen bg-[#0a0a0a] border-r border-white/5 flex-col z-30"
       >
         {/* Logo Area */}
         <div className="h-20 flex items-center px-6 border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shadow-lg shadow-pink-500/20">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/30 to-purple-600/10 flex items-center justify-center shadow-lg shadow-pink-500/20">
               <Image src="/bblogo.png" alt="logo" width={24} height={24} className="w-6 h-6" />
             </div>
             {isOpen && (
@@ -171,6 +189,86 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
         </div>
       </motion.aside>
 
+      {/* Mobile Floating Horizontal Menu (Hidden on Desktop) */}
+      <div className="md:hidden fixed left-4 bottom-4 z-50 flex items-center gap-3 max-w-[calc(100vw-2rem)]">
+        {/* Main Toggle Button */}
+        <motion.button
+          onClick={() => setIsOpen(!isOpen)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className={`shrink-0 relative z-50 w-12 h-12 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 backdrop-blur-xl border border-white/10 ${
+            isOpen 
+              ? "bg-pink-600 text-white shadow-[0_0_30px_rgba(236,72,153,0.6)]" 
+              : "bg-black/60 text-white hover:border-pink-500/50"
+          }`}
+        >
+          <AnimatePresence mode="wait">
+            {isOpen ? (
+              <motion.div
+                key="close"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+              >
+                <X size={20} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="menu"
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -90, opacity: 0 }}
+              >
+                <Menu size={20} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.button>
+
+        {/* Horizontal Menu Items */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div 
+              initial={{ opacity: 0, x: -20, width: 0 }}
+              animate={{ opacity: 1, x: 0, width: "auto" }}
+              exit={{ opacity: 0, x: -20, width: 0 }}
+              className="flex items-center gap-2 p-1.5 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl overflow-x-auto scrollbar-hide"
+            >
+              {flatMenuItems.map((item, index) => (
+                <motion.button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveSection(item.id);
+                    setIsOpen(false);
+                  }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 400, 
+                    damping: 25, 
+                    delay: index * 0.05 
+                  }}
+                  className={`shrink-0 relative w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 group ${
+                    activeSection === item.id 
+                      ? "bg-pink-600 text-white shadow-lg shadow-pink-500/30" 
+                      : "text-gray-400 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  {item.icon}
+                  
+                  {/* Tooltip Label */}
+                  <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 rounded-md bg-black/80 border border-white/10 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-md">
+                    {item.label}
+                  </span>
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Background Effects */}
@@ -180,15 +278,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
         </div>
 
         {/* Top Header */}
-        <header className="h-20 px-8 flex items-center justify-between border-b border-white/5 bg-[#030303]/50 backdrop-blur-xl z-20">
+        <header className="h-20 px-4 md:px-8 flex items-center justify-between border-b border-white/5 bg-[#030303]/50 backdrop-blur-xl z-20">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="hidden md:block p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
             >
               {isOpen ? <Menu size={20} /> : <Menu size={20} />}
             </button>
-            <h1 className="text-xl font-semibold text-white">Admin Panel</h1>
+            <h1 className="text-xl font-semibold text-white ml-12 md:ml-0">Admin Panel</h1>
           </div>
 
           <div className="flex items-center gap-6">
@@ -256,7 +354,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-8 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           <div className="max-w-7xl mx-auto">
             {sectionMap[activeSection] || (
               <div className="flex flex-col items-center justify-center h-96 text-gray-500">

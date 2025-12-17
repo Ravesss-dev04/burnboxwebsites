@@ -44,14 +44,6 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400, headers: corsHeaders });
     }
 
-    // If setting a new ADMIN, demote all other users to STAFF first
-    if (role === 'ADMIN') {
-      await prisma.user.updateMany({
-        where: { NOT: { email } },
-        data: ({ role: 'STAFF' } as any)
-      });
-    }
-
     const user = await prisma.user.update({
       where: { email },
       data: ({ role } as any)
