@@ -1,7 +1,12 @@
+"use client";
 
 import React from 'react'
+import { useSiteConfig } from '../context/SiteConfigContext'
+import EditableImage from './EditableImage';
 
 const BrandPage = () => {
+  const { config } = useSiteConfig();
+
   return (
     <section id="home" className="w-full py-20 md:py-32 relative overflow-hidden">
       {/* Background Gradient */}
@@ -11,20 +16,21 @@ const BrandPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left: Text Content */}
           <div className="flex flex-col justify-center order-1 lg:order-1">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white mb-6">
-              Elevate Your Brand <br className="hidden lg:block" />
-              With Professional <br className="hidden lg:block" />
-              Printing
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white mb-6 whitespace-pre-line">
+              {config.heroTitle || "Elevate Your Brand\nWith Professional\nPrinting"}
             </h1>
             
             <p className="text-base md:text-lg text-gray-300 mb-8 max-w-xl leading-relaxed font-medium">
-              Discover how Burnbox Printing transforms your business visibility with expert signage and
-              creative print solutions. Make your brand impossible to ignore and stand out in Las Piñas and beyond.
+              {config.heroSubtitle || "Discover how Burnbox Printing transforms your business visibility with expert signage and creative print solutions. Make your brand impossible to ignore and stand out in Las Piñas and beyond."}
             </p>
             
             <div>
               <button
-                className="bg-[#ff0060] hover:bg-[#d60050] text-white font-bold py-4 px-8 rounded-full transition-all duration-300 text-lg shadow-[0_0_20px_rgba(255,0,96,0.3)] hover:shadow-[0_0_30px_rgba(255,0,96,0.5)] hover:-translate-y-1"
+                style={{ 
+                  backgroundColor: config.primaryColor || '#ff0060',
+                  boxShadow: `0 0 20px ${config.primaryColor ? config.primaryColor + '4D' : 'rgba(255,0,96,0.3)'}`
+                }}
+                className="hover:brightness-110 text-white font-bold py-4 px-8 rounded-full transition-all duration-300 text-lg hover:-translate-y-1"
               >
                 Get a Free Quotation
               </button>
@@ -34,10 +40,11 @@ const BrandPage = () => {
           {/* Right: Image */}
           <div className="relative w-full h-full min-h-[300px] lg:min-h-[500px] order-2 lg:order-2">
             <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-              <img
-                src="/onetwo.jpg" 
+              <EditableImage
+                configKey="heroImage"
+                defaultSrc="/onetwo.jpg" 
                 alt="Burnbox Team"
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                className="w-full h-full rounded-2xl overflow-hidden"
               />
             </div>
           </div>

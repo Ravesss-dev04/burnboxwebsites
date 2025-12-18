@@ -1,6 +1,6 @@
 import Header from "./Header";
 import IntroductionVideo from "./IntroductionVideo";
-import CardCarousel from "./CardCarousel";
+
 
 
 import EmailPopup from "./EmailPopup";
@@ -11,7 +11,7 @@ import FAQ from "./FAQ";
 
 export {
     Header,
-    CardCarousel,
+   
     IntroductionVideo,
     EmailPopup,
     Maps,

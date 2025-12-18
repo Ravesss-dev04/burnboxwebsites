@@ -30,13 +30,12 @@ export function middleware(request: NextRequest) {
           message: 'Too many requests. Your IP has been temporarily blocked.',
           retryAfter: Math.ceil((blockedEntry.blockedUntil - now) / 1000)
         },
-        { 
+        {   
           status: 429,
           headers: securityHeaders
         }
       );
     }
-
     // Rate limiting configuration
     const MAX_REQUESTS = 5; // Max requests per window
     const WINDOW_MS = 60 * 1000; // 1 minute window

@@ -54,6 +54,7 @@ export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
           const transformedProducts: Product[] = services.map((service: any) => ({
             id: service.id,
             name: service.name,
+
             // Convert imageUrl string to array of images (handle null/undefined)
             image: service.imageUrl 
               ? (typeof service.imageUrl === 'string' 
@@ -75,7 +76,7 @@ export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
         setLoading(false);
       }
     };
-
+    
     fetchProducts();
   }, []);
 
@@ -150,6 +151,8 @@ export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
     </HeaderContext.Provider>
   );
 };
+
+
 
 export const useHeaderContext = () => {
   const context = useContext(HeaderContext);

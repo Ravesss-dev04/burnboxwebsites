@@ -2,15 +2,18 @@ import { FaPaypal, FaFacebook } from "react-icons/fa";
 import { FaSquareInstagram } from "react-icons/fa6";
 import React from 'react';
 import Image from "next/image";
+import { useSiteConfig } from "../context/SiteConfigContext";
 
 const Footer = () => {
+  const { config } = useSiteConfig();
+
   return (
     <footer className="bg-zinc-950 text-white px-6 sm:px-10 py-10 border-t border-white/5">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 text-sm font-extralight w-full">
           {/* Column 1: Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-2 text-pink-400">Quick Links</h4>
+            <h4 className="text-lg font-semibold mb-2" style={{ color: config.primaryColor || '#f472b6' }}>Quick Links</h4>
             <p>Offset Printing / Forms & Receipt</p>
             <p>Corporate Giveaways</p>
             <p>Stickers & Labels</p>
@@ -37,12 +40,12 @@ const Footer = () => {
           
           {/* Column 4: Follow Us */}
           <div>
-            <h4 className="text-lg font-semibold  text-pink-400">Follow Us</h4>
+            <h4 className="text-lg font-semibold" style={{ color: config.primaryColor || '#f472b6' }}>Follow Us</h4>
             <div className="flex space-x-4 text-2xl">
-              <a href="https://www.facebook.com/photo/?fbid=1237045431770415&set=a.469292898545676" target="_blank" rel="noopener noreferrer">
+              <a href={config.facebookUrl || "https://www.facebook.com/photo/?fbid=1237045431770415&set=a.469292898545676"} target="_blank" rel="noopener noreferrer">
                 <FaFacebook className="bg-[#1877F2] rounded-full w-6 h-6" />
               </a>
-              <a href="#" target="_blank" rel="noopener noreferrer">
+              <a href={config.instagramUrl || "#"} target="_blank" rel="noopener noreferrer">
                 <Image
                   height={500}
                   width={500}
@@ -59,7 +62,7 @@ const Footer = () => {
       {/* Bottom */}
       <div className="border-t border-white/10 mt-8 pt-4 flex justify-center items-center text-sm text-gray-400">
         <p className="text-center">
-          Privacy Policy | Terms of Service | Contact info@burnbox.com | @ 2025 burnbox Printing company
+          Privacy Policy | Terms of Service | Contact {config.contactEmail || "info@burnbox.com"} | {config.footerText || "@ 2025 burnbox Printing company"}
         </p>
       </div>
     </footer>

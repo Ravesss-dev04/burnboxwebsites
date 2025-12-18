@@ -166,6 +166,7 @@ const ServicesProduct = () => {
     return `https://www.gravatar.com/avatar/${emailHash}?d=404&s=${size}`;
   };
 
+
   // Get initials from email address (uses the part before @)
   const getInitials = (email: string) => {
     if (!email) return "U";
@@ -173,6 +174,7 @@ const ServicesProduct = () => {
     // Extract the part before @ from email
     const emailPrefix = email.split("@")[0];
     if (!emailPrefix) return "U";
+
 
     // Split by common separators (dots, underscores, hyphens) to get parts
     const parts = emailPrefix.split(/[._-]/).filter((part) => part.length > 0);
@@ -182,9 +184,12 @@ const ServicesProduct = () => {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
 
+
     // If single part (e.g., "animateevi"), use only first letter
+
     return emailPrefix.charAt(0).toUpperCase();
   };
+
 
   // Fetch feedback from API
   useEffect(() => {
@@ -217,6 +222,8 @@ const ServicesProduct = () => {
     setShowModal(false);
   };
 
+
+  
   // Sort feedbacks based on Latest/Old
   const sortedFeedbacks = isOld
     ? [...feedbacks].sort(

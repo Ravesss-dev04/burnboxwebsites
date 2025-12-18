@@ -6,6 +6,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { TooltipProvider } from "./context/TooltipContext";
 import { HeaderProvider } from "./context/HeaderContext";
+import { SiteConfigProvider } from "./context/SiteConfigContext";
 import { Suspense } from "react";
 import HeaderWrapper from "./components/HeaderWrapper";
 import VisitorTracker from "./components/VisitorTracker";
@@ -28,15 +29,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${outfit.variable} antialiased h-[100vh] max-w-[100vw]`}>
         <TooltipProvider>
-          <HeaderProvider>
-          
-            <Suspense fallback={<div></div>}>
-              <HeaderWrapper/>
-            </Suspense>
+          <SiteConfigProvider>
+            <HeaderProvider>
             
-            {children}
-            <VisitorTracker />
-          </HeaderProvider>
+              <Suspense fallback={<div></div>}>
+                <HeaderWrapper/>
+              </Suspense>
+              
+              {children}
+              <VisitorTracker />
+            </HeaderProvider>
+          </SiteConfigProvider>
         </TooltipProvider>
       </body>
     </html>

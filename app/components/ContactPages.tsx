@@ -18,7 +18,7 @@ const ContactPages = () => {
       id: "person1",
       name: "JOHANNAH MAE ",
       role: "SALES REPRESENTATIVE",
-      phones: ["(02) 7007-2412", "+63 977 247 3179", "+63 993 981 9964"],
+      phones: ["(02) 7007-2412", "(02) 7373 4602", "+63 917 700 8364", "+63 977 247 3179", "+63 993 981 9964"],
       email: "johannahmaebantiling2@gmail.com",
       address: "17 Vatican City Dr, BF Resort Village, Talon 2, Las Piñas City",
       image: "/maam.png",
@@ -29,7 +29,7 @@ const ContactPages = () => {
       id: "person2",
       name: "ALJUN PEREIRA",
       role: "SALES CONSULTANT",
-      phones: ["(02) 7007-2412", "+63 928 693 5815", "+63 915 342 5780"],
+      phones: ["(02) 7007-2412", "(02) 7373 4602", "+63 917 700 8364", "+63 977 247 3179", "+63 928 693 5815"],
       email: "aljun.sales@burnboxprinting.com",
       address: "17 Vatican City Dr, BF Resort Village, Talon 2, Las Piñas City",
       image: "/siraljun.png",
@@ -52,6 +52,7 @@ const ContactPages = () => {
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px] -translate-y-1/2"
         />
+
         <motion.div
           animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.2, 1] }}
           transition={{
@@ -63,7 +64,6 @@ const ContactPages = () => {
           className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-pink-900/10 rounded-full blur-[120px] translate-y-1/2"
         />
       </div>
-
       <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center">
         {showCards && (
           <motion.div

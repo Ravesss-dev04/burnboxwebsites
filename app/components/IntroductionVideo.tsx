@@ -10,6 +10,7 @@ const IntroductionVideo = ({ isVideoVisible }: IntroductionVideoProps) => {
   const [skipTimer, setSkipTimer] = useState(5);
   const [canSkip, setCanSkip] = useState(false);
 
+  
   useEffect(() => {
     const interval = setInterval(() => {
       setSkipTimer((prev) => {
@@ -23,11 +24,16 @@ const IntroductionVideo = ({ isVideoVisible }: IntroductionVideoProps) => {
     }, 1000);
 
     const video = videoRef.current;
+
     if(video) {
       video.play().catch((err) => console.log("Autoplay blocked:", err))
     }
     return () => clearInterval(interval);
   }, [])
+
+
+
+
 
   return (
     <div className="h-full w-full z-[99] bg-black/40 backdrop-blur-md top-0 left-0 fixed flex items-center justify-center px-4">

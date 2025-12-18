@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, ReactNode } from 'react';
 import { motion, useInView, useAnimation, Variants } from 'framer-motion';
+import { useSiteConfig } from '../context/SiteConfigContext';
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -73,12 +74,16 @@ export default function ScrollReveal({
   distance = 30,
   duration = 0.8
 }: ScrollRevealProps) {
+  const { config } = useSiteConfig();
   const ref = useRef(null);
   const isInView = useInView(ref, { 
     once: true, 
     margin: "-50px" // Trigger slightly earlier
   });
   const controls = useAnimation();
+
+  // Override direction if global transition is set
+  const effectiveDirection = config.transitionType || direction;
 
   useEffect(() => {
     if (isInView) {
@@ -87,7 +92,7 @@ export default function ScrollReveal({
   }, [isInView, controls]);
 
   const getDirectionOffset = () => {
-    switch (direction) {
+    switch (effectiveDirection) {
       case 'up': return { y: distance };
       case 'down': return { y: -distance };
       case 'left': return { x: distance };
@@ -95,7 +100,8 @@ export default function ScrollReveal({
       case 'zoom': return { scale: 0.8 };
       case 'blur': return { y: distance, filter: 'blur(10px)' };
       case 'flipUp': return { y: distance, rotateX: 15 };
-      default: return {};
+      case 'fade': return {}; // Just opacity
+      default: return { y: distance }; // Default to up
     }
   };
 

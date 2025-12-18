@@ -15,6 +15,7 @@ const QuestionAsk = () => {
             questions: "What Areas do you serve",
             answer: "We primarily serve the Metro Manila area and nearby provinces. For specific locations or long-distance projects, please contact us to discuss logistics."
         },
+        
         {
             questions: "Can you handle rush orders?",
             answer: "Yes, we understand that deadlines can be tight. We do accept rush orders depending on our current production schedule. Please mention your deadline when inquiring."

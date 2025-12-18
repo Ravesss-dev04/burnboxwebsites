@@ -5,8 +5,6 @@ import LoginAdmin from './LoginAdmin'
 
 
 
-export const dynamic = 'force-dynamic'
-
 const AdminPage = () => {
   return (
    <div className='w-full h-full bg-gray-400'>

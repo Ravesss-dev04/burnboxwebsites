@@ -24,6 +24,8 @@ import AdminServices from './AdminServices';
 import SettingsAdmin from './SettingsAdmin';
 import ProfileInfo from './ProfileInfo';
 import FeedbackContent from './FeedbackContent';
+import Customize from './Customize';
+import { Palette } from 'lucide-react';
 
 interface AdminDashboardProps {
   userMail?: string;
@@ -45,7 +47,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
     Feedback: <FeedbackContent />,
     profile: <ProfileInfo/>,
     settings: <SettingsAdmin/>,
+    customize: <Customize/>,
   }
+
+  
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -78,6 +83,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
       { id: "services", icon: <ShoppingBag size={20} />, label: "Services" },
       { id: "Feedback", icon: <MessageSquare size={20} />, label: "Feedback" },
       { id: "gallery", icon: <ImageIcon size={20} />, label: "Gallery" },
+      { id: "customize", icon: <Palette size={20} />, label: "Customization" },
     ]},
     { category: "System", items: [
       { id: "profile", icon: <User size={20} />, label: "Profile" },
@@ -104,6 +110,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
       y: Math.sin(angleInRadians) * radius,
     };
   };
+
+  // If in customization mode, render full screen
+  if (activeSection === 'customize') {
+    return (
+      <div className="fixed inset-0 z-50 bg-black w-full h-full">
+        <button 
+          onClick={() => setActiveSection('dashboard')}
+          className="absolute top-4 right-4 z-[60] bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg flex items-center gap-2"
+        >
+          <LogOut size={16} /> Exit Customization
+        </button>
+        <Customize />
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-full min-h-screen bg-[#030303] text-white overflow-hidden font-sans">

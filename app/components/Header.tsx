@@ -15,8 +15,10 @@ import TooltipServices from "./TooltipServices";
 import AboutTooltip from "./AboutTooltip";
 import { AnimatePresence, motion } from "framer-motion";
 import { useHeaderContext } from "../context/HeaderContext";
+import { useSiteConfig } from "../context/SiteConfigContext";
 
 const Header: React.FC = () => {
+  const { config } = useSiteConfig();
   const {
     searchValue,
     setSearchValue,
@@ -249,7 +251,7 @@ const Header: React.FC = () => {
         <img
           height={500}
           width={500}
-          src={"/burnboxlogo.png"}
+          src={config.logo || "/burnboxlogo.png"}
           alt="company logo"
           className="h-full object-contain object-left"
         />
@@ -398,6 +400,15 @@ const Header: React.FC = () => {
                           selectProductById(product.id);
                           setSearchValue("");
                           setIsSearchActive(false);
+                          if (pathname !== "/services") {
+                            router.push("/services");
+                          }
+                          setTimeout(() => {
+                            const productsSection = document.getElementById("products-section");
+                            if (productsSection) {
+                              productsSection.scrollIntoView({ behavior: "smooth" });
+                            }
+                          }, 300);
                         }}
                         className="w-full text-left flex items-center gap-3 p-2 rounded-md hover:bg-white/5 transition"
                       >
@@ -810,61 +821,66 @@ const Header: React.FC = () => {
                             </p>
                           </motion.div>
                         ) : (
+                          
                           <>
-                            <div className="w-full flex flex-col gap-2">
-                              {[
-                                { name: "Home", id: "home" },
-                                { name: "About", id: "about" },
-                                { name: "Services", id: "services" },
-                                { name: "Contact", id: "contact" },
-                              ]
-                                .filter((item) =>
-                                  item.name
-                                    .toLowerCase()
-                                    .includes(searchValue.toLowerCase())
-                                )
-                                .map((item, index) => (
+                            <div className="w-full flex flex-col gap-2 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-pink-500/20 scrollbar-track-transparent">
+                              {filteredProducts.length > 0 ? (
+                                filteredProducts.map((product, index) => (
                                   <motion.button
-                                    key={index}
+                                    key={product.id}
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.05 }}
-                                    whileHover={{ x: 5, color: "#ec4899" }}
+                                    whileHover={{ x: 5, backgroundColor: "rgba(255, 255, 255, 0.05)" }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => {
-                                      const section = document.getElementById(
-                                        item.id
-                                      );
-                                      if (section) {
-                                        section.scrollIntoView({
-                                          behavior: "smooth",
-                                        });
-                                      } else {
-                                        window.location.href = `/${item.id.toLowerCase()}`;
-                                      }
+                                      selectProductById(product.id);
+                                      setSearchValue("");
                                       setIsMobileSearchActive(false);
+                                      setMobileMenuOpen(false);
+                                      
+                                      if (pathname !== "/services") {
+                                        router.push("/services");
+                                      }
+                                      
+                                      setTimeout(() => {
+                                        const productsSection = document.getElementById("products-section");
+                                        if (productsSection) {
+                                          productsSection.scrollIntoView({ behavior: "smooth" });
+                                        }
+                                      }, 300);
                                     }}
-                                    className="w-full sm:w-full px-3 py-2 rounded-md hover:bg-pink/10 transition-all duration-200 text-sm text-left"
+                                    className="w-full flex items-center gap-3 p-2 rounded-md transition-all duration-200 text-left group"
                                   >
-                                    {item.name}
+                                    <div className="w-10 h-10 relative flex-shrink-0 rounded overflow-hidden bg-zinc-800 border border-white/10">
+                                      <img
+                                        src={product.image[0]}
+                                        alt={product.name}
+                                        className="object-contain w-full h-full"
+                                      />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-semibold text-white truncate group-hover:text-pink-500 transition-colors">
+                                        {product.name}
+                                      </p>
+                                      <p className="text-xs text-[#ff0060]">
+                                        {product.price === 0
+                                          ? ""
+                                          : `₱ ${product.price.toLocaleString("en-US", {
+                                              minimumFractionDigits: 2,
+                                              maximumFractionDigits: 2,
+                                            })}`}
+                                      </p>
+                                    </div>
                                   </motion.button>
-                                ))}
-                              {[
-                                { name: "Home", id: "home" },
-                                { name: "About", id: "about" },
-                                { name: "Services", id: "services" },
-                                { name: "Contact", id: "contact" },
-                              ].filter((item) =>
-                                item.name
-                                  .toLowerCase()
-                                  .includes(searchValue.toLowerCase())
-                              ).length === 0 && (
+                                ))
+                              ) : (
                                 <motion.p
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   className="text-center py-4 text-xs text-gray-400"
                                 >
-                                  No results found.
+                                  No products found.
                                 </motion.p>
                               )}
                             </div>
