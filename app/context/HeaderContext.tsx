@@ -9,7 +9,6 @@ type Product = {
   description?: string;
   related?: Product[]; 
 };
-
 type HeaderContextType = {
   searchValue: string;
   setSearchValue: React.Dispatch<React.SetStateAction<string>>;
@@ -25,9 +24,7 @@ type HeaderContextType = {
   isHeaderVisible: boolean;
   setIsHeaderVisible: React.Dispatch<React.SetStateAction<boolean>>;
 };
-
 const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
-
 export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
