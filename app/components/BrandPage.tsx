@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useSiteConfig } from '../context/SiteConfigContext'
-import EditableImage from './EditableImage';
+import Editable from './Editable';
 
 const BrandPage = () => {
   const { config } = useSiteConfig();
@@ -16,13 +16,21 @@ const BrandPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left: Text Content */}
           <div className="flex flex-col justify-center order-1 lg:order-1">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white mb-6 whitespace-pre-line">
-              {config.heroTitle || "Elevate Your Brand\nWith Professional\nPrinting"}
-            </h1>
+            <Editable 
+              name="heroTitle" 
+              as="h1" 
+              type="text"
+              defaultValue="Elevate Your Brand\nWith Professional\nPrinting"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white mb-6 whitespace-pre-line"
+            />
             
-            <p className="text-base md:text-lg text-gray-300 mb-8 max-w-xl leading-relaxed font-medium">
-              {config.heroSubtitle || "Discover how Burnbox Printing transforms your business visibility with expert signage and creative print solutions. Make your brand impossible to ignore and stand out in Las Piñas and beyond."}
-            </p>
+            <Editable 
+              name="heroSubtitle" 
+              as="p" 
+              type="text"
+              defaultValue="Discover how Burnbox Printing transforms your business visibility with expert signage and creative print solutions. Make your brand impossible to ignore and stand out in Las Piñas and beyond."
+              className="text-base md:text-lg text-gray-300 mb-8 max-w-xl leading-relaxed font-medium"
+            />
             
             <div>
               <button
@@ -40,10 +48,10 @@ const BrandPage = () => {
           {/* Right: Image */}
           <div className="relative w-full h-full min-h-[300px] lg:min-h-[500px] order-2 lg:order-2">
             <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-              <EditableImage
-                configKey="heroImage"
-                defaultSrc="/onetwo.jpg" 
-                alt="Burnbox Team"
+              <Editable
+                name="heroImage"
+                type="image"
+                defaultValue="/onetwo.jpg" 
                 className="w-full h-full rounded-2xl overflow-hidden"
               />
             </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Lightbulb, Clock, Headphones } from 'lucide-react';
+import Editable from './Editable';
 
 const BurnboxIdeal = () => {
   const features = [
@@ -26,9 +27,13 @@ const BurnboxIdeal = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-pink-500/5 blur-[100px] rounded-full pointer-events-none"></div>
       
       <div className="max-w-7xl mx-auto relative z-10">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 md:mb-16 text-[#ff0060]">
-          Why burnbox is your ideal advertising Partner
-        </h2>
+        <Editable 
+          name="idealTitle" 
+          as="h2" 
+          type="text"
+          defaultValue="Why burnbox is your ideal advertising Partner"
+          className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 md:mb-16 text-[#ff0060]"
+        />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {features.map((feature, index) => (
@@ -42,12 +47,22 @@ const BurnboxIdeal = () => {
               </div>
               
               <h3 className="text-xl md:text-2xl font-bold text-white mb-6">
-                {feature.title}
+                <Editable 
+                  name={`idealTitle_${index}`}
+                  as="span"
+                  type="text"
+                  defaultValue={feature.title}
+                />
               </h3>
               
-              <p className="text-gray-300 leading-relaxed text-sm md:text-base font-medium">
-                {feature.description}
-              </p>
+              <div className="text-gray-300 leading-relaxed text-sm md:text-base font-medium">
+                <Editable 
+                  name={`idealDesc_${index}`}
+                  as="p"
+                  type="text"
+                  defaultValue={feature.description}
+                />
+              </div>
             </div>
           ))}
         </div>

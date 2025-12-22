@@ -19,6 +19,7 @@ const LoginAdmin = () => {
   const [successMessage, setSuccessMessage] = useState('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userEmail, setUserEmail] = useState('')
+  const [userRole, setUserRole] = useState('STAFF')
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
@@ -37,9 +38,20 @@ const LoginAdmin = () => {
   useEffect(() => {
     const savedUser = localStorage.getItem('adminUser')
     if (savedUser) {
-      const userData = JSON.parse(savedUser)
-      setIsLoggedIn(true)
-      setUserEmail(userData.email)
+      try {
+        const userData = JSON.parse(savedUser)
+        setIsLoggedIn(true)
+        setUserEmail(userData.email)
+        
+        // Determine role with fallback
+        let role = userData.role || 'STAFF';
+        if (userData.email === 'admin@example.com') {
+          role = 'ADMIN';
+        }
+        setUserRole(role);
+      } catch (e) {
+        console.error("Error parsing user data", e);
+      }
     }
   }, [])
 
@@ -53,10 +65,11 @@ const LoginAdmin = () => {
     if (view === 'login' && email === 'admin@example.com' && password === 'admin123') {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      const userData = { email: 'admin@example.com' }
+      const userData = { email: 'admin@example.com', role: 'ADMIN' }
       localStorage.setItem('adminUser', JSON.stringify(userData))
       setIsLoggedIn(true)
       setUserEmail('admin@example.com')
+      setUserRole('ADMIN')
       setIsLoading(false)
       return
     }
@@ -98,6 +111,7 @@ const LoginAdmin = () => {
           localStorage.setItem('adminUser', JSON.stringify(userData))
           setIsLoggedIn(true)
           setUserEmail(email)
+          setUserRole(role)
           router.refresh()
         } else if (view === 'forgot') {
           setSuccessMessage('Reset link sent to your email.')
@@ -119,14 +133,14 @@ const LoginAdmin = () => {
     localStorage.removeItem('adminUser')
     setIsLoggedIn(false)
     setUserEmail('')
+    setUserRole('STAFF')
     setEmail('')
     setPassword('')
     router.refresh()
   }
 
-  const savedRole = typeof window !== 'undefined' ? (JSON.parse(localStorage.getItem('adminUser') || '{}')?.role || 'STAFF') : 'STAFF'
   if (isLoggedIn) {
-    return <AdminDashboard onLogout={handleLogout} userMail={userEmail} userRole={savedRole} />
+    return <AdminDashboard onLogout={handleLogout} userMail={userEmail} userRole={userRole as 'ADMIN' | 'STAFF'} />
   }
 
   return (

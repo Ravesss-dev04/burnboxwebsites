@@ -16,6 +16,8 @@ import QuestionAsk from "./QuestionAsk";
 import ScrollReveal, { ScrollScale } from "./ScrollReveal";
 import { useHeaderContext } from "../context/HeaderContext";
 
+import GlobalElementsRenderer from "./GlobalElementsRenderer";
+
 const MainPage = () => {
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -38,6 +40,7 @@ const MainPage = () => {
 
   return (
     <div className="min-h-screen w-full bg-zinc-950 relative overflow-x-hidden text-white selection:bg-pink-500/30">
+      <GlobalElementsRenderer />
       {/* Global Background Effects - Matches the "Levitating Aura" theme */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         {/* Radial Gradient for depth - "Less Dark" center */}

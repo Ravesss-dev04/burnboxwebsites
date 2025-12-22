@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Minus } from 'lucide-react';
+import { useSiteConfig } from '../context/SiteConfigContext';
 
 const FAQ = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const { config } = useSiteConfig();
 
-  const faqs = [
+  const defaultFaqs = [
     {
       question: "how do i request a quotation",
       answer: "You can request a quotation by clicking the email button in the bottom right corner, or by visiting our contact page to send us a direct message with your project details."
@@ -24,6 +26,9 @@ const FAQ = () => {
     }
   ];
 
+  const faqs = config.faqData || defaultFaqs;
+  const title = config.faqTitle || "Frequently Asked Questions";
+
   const toggleFAQ = (index: number) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
@@ -33,11 +38,11 @@ const FAQ = () => {
     <section className="w-full py-16 px-4 md:px-8 lg:px-16">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 text-white">
-          Frequently Asked Questions
+          {title}
         </h2>
         
         <div className="flex flex-col gap-4">
-          {faqs.map((faq, index) => (
+          {faqs.map((faq: any, index: number) => (
             <div 
               key={index}
               className="border border-white/10 rounded-lg overflow-hidden bg-[#1F1F1F] hover:border-[#ff0060]/50 transition-colors duration-300"

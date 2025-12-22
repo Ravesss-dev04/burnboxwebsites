@@ -1,5 +1,6 @@
 import React from 'react'
 import { ClipboardList, PenTool, Factory, Hammer } from 'lucide-react'
+import Editable from './Editable';
 
 const SeamlessProcess = () => {
 
@@ -31,7 +32,13 @@ const SeamlessProcess = () => {
   return (
     <section className='w-full py-20 md:py-30 px-4 md:px-8 lg:px-16 relative bg-transparent'>
         <div className='max-w-7xl mx-auto '>
-            <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 md:mb-16 text-white'>Our Seamless Process </h2>
+            <Editable 
+              name="processTitle" 
+              as="h2" 
+              type="text"
+              defaultValue="Our Seamless Process"
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 md:mb-16 text-white"
+            />
             <div className='grid grid-cols-1 md:grid-cols-4 gap-6 lg:gap-8'>
                 {services.map((service, index) => (
                     <div

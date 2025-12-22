@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSiteConfig } from '../context/SiteConfigContext'
-import EditableImage from './EditableImage';
+import Editable from './Editable';
 
 const ContactBurnbox = () => {
   const { config } = useSiteConfig();
@@ -12,12 +12,21 @@ const ContactBurnbox = () => {
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10'>
             <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center'>
                 <div className='flex flex-col justify-center order-1 lg:order-1'>
-                <h1 className='text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white mb-6 whitespace-pre-line'>
-                {config.contactTitle || "Contact Burnbox for\nYour Next Project"}
-                </h1>
-                <p className='text-base md:text-lg text-gray-300 mb-8 max-w-xl leading-relaxed font-medium'>
-                    {config.contactSubtitle || "Let's bring your vision to life. Request a site visit or contact us to discuss your project needs. Our team is ready to help you stand out."}
-                </p>
+                <Editable 
+                    name="contactTitle" 
+                    as="h1" 
+                    type="text"
+                    defaultValue="Contact Burnbox for\nYour Next Project"
+                    className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white mb-6 whitespace-pre-line"
+                />
+                
+                <Editable 
+                    name="contactSubtitle" 
+                    as="p" 
+                    type="text"
+                    defaultValue="Let's bring your vision to life. Request a site visit or contact us to discuss your project needs. Our team is ready to help you stand out."
+                    className="text-base md:text-lg text-gray-300 mb-8 max-w-xl leading-relaxed font-medium"
+                />
                 
                 <div>
                   <button
@@ -27,17 +36,22 @@ const ContactBurnbox = () => {
                     }}
                     className="hover:brightness-110 text-white font-bold py-4 px-8 rounded-full transition-all duration-300 text-lg hover:-translate-y-1"
                   >
-                    {config.contactButtonText || "Contact Us Now"}
+                    <Editable 
+                        name="contactButtonText" 
+                        as="span" 
+                        type="text"
+                        defaultValue="Contact Us Now"
+                    />
                   </button>
                 </div>
             </div>
                
                 <div className='relative w-full h-full min-h-[300px] lg:min-h-[500px] order-2 lg:order-2'>
                     <div className='w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-white/10'>
-                        <EditableImage
-                          configKey="contactImage"
-                          defaultSrc="/aboutusimage.png" 
-                          alt="Contact Burnbox" 
+                        <Editable
+                          name="contactImage"
+                          type="image"
+                          defaultValue="/aboutusimage.png" 
                           className="w-full h-full rounded-2xl overflow-hidden"
                         />
                     </div>

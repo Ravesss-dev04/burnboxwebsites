@@ -16,6 +16,7 @@ import AboutTooltip from "./AboutTooltip";
 import { AnimatePresence, motion } from "framer-motion";
 import { useHeaderContext } from "../context/HeaderContext";
 import { useSiteConfig } from "../context/SiteConfigContext";
+import Editable from "./Editable";
 
 const Header: React.FC = () => {
   const { config } = useSiteConfig();
@@ -247,13 +248,12 @@ const Header: React.FC = () => {
   return (
     <div className="h-20 w-full flex items-center justify-between px-5 py-3 text-white font-extralight text-lg z-100 bg-zinc-950/90 backdrop-blur-md fixed border-b border-white/5">
       {/* Logo */}
-      <a href="#home" className="h-20 py-3 px-1">
-        <img
-          height={500}
-          width={500}
-          src={config.logo || "/burnboxlogo.png"}
-          alt="company logo"
-          className="h-full object-contain object-left"
+      <a href="#home" className="h-20 py-3 px-1 block relative w-auto">
+        <Editable
+            name="headerLogo"
+            type="image"
+            defaultValue="/burnboxlogo.png"
+            className="h-full w-auto object-contain object-left"
         />
       </a>
       {/* Desktop Navigation */}
@@ -266,7 +266,7 @@ const Header: React.FC = () => {
                 type="button"
                 className="px-5 h-full hover:text-pink transition ease-in duration-200"
               >
-                Home
+                <Editable name="navHome" as="span" defaultValue="Home" />
               </button>
             </a>
             <span
@@ -280,7 +280,7 @@ const Header: React.FC = () => {
                   type="button"
                   className="px-5 h-full hover:text-pink transition ease-in duration-200"
                 >
-                  About
+                  <Editable name="navAbout" as="span" defaultValue="About" />
                 </button>
               </a>
               {showAboutTooltip && (
@@ -304,7 +304,7 @@ const Header: React.FC = () => {
                   type="button"
                   className="px-5 h-full flex gap-2 items-center hover:text-pink transition ease-in duration-200"
                 >
-                  Services
+                  <Editable name="navServices" as="span" defaultValue="Services" />
                 </button>
               </a>
               {showServicesTooltip && (
@@ -328,7 +328,7 @@ const Header: React.FC = () => {
                 type="button"
                 className="px-5 h-full hover:text-[#ff0060] transition ease-in duration-200"
               >
-                Contact
+                <Editable name="navContact" as="span" defaultValue="Contact" />
               </button>
             </a>
             <button type="button" onClick={() => setIsSearchActive(true)} className="hover:text-[#ff0060] transition ease-in duration-200">
@@ -555,7 +555,11 @@ const Header: React.FC = () => {
                       className="flex items-center gap-2 text-left hover:text-pink transition-colors duration-200 text-lg font-medium"
                       whileTap={{ scale: 0.95 }}
                     >
-                      {item}
+                      <Editable 
+                        name={`navMobile${item}`} 
+                        as="span" 
+                        defaultValue={item} 
+                      />
                     </motion.button>
 
                     {(isAbout || isServices) && (

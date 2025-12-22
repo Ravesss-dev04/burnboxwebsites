@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react'
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
+import Editable from './Editable';
 
 const QuestionAsk = () => {
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -32,7 +33,13 @@ const QuestionAsk = () => {
   return (
    <section className='w-full py-20 md:py-32 px-4 md:px-8 lg:px-16 bg-transparent relative'>
     <div className='max-w-4xl mx-auto relative z-10'>
-        <h2 className='text-3xl text-white md:text-4xl lg:text-5xl font-bold text-center mb-12'>Frequently Asked Questions</h2>
+        <Editable 
+          name="faqTitle" 
+          as="h2" 
+          type="text"
+          defaultValue="Frequently Asked Questions"
+          className="text-3xl text-white md:text-4xl lg:text-5xl font-bold text-center mb-12"
+        />
 
 
         <div className='flex flex-col gap-4'>
@@ -45,11 +52,13 @@ const QuestionAsk = () => {
                     className='w-full p-6 flex items-center justify-between text-left gap-4 group'
                         onClick={() => toggleFAQ(index)}
                     >
-                        <span
+                        <Editable
+                            name={`faqQuestion_${index}`}
+                            as="span"
+                            type="text"
+                            defaultValue={faq.questions}
                             className='text-lg md:text-xl font-semibold text-white group-hover:text-[#ff0060] transition-colors duration-300'
-                        >
-                            {faq.questions}
-                        </span>
+                        />
                         <span className='text-[#ff0060] flex-shrink-0'>
                             {activeIndex === index ? <IoIosArrowUp size={24} /> : <IoIosArrowDown size={24} /> }
                         </span>
@@ -63,7 +72,12 @@ const QuestionAsk = () => {
                                 transition={{duration: 0.3, ease: "easeInOut"}}
                             >
                                 <div className='px-6 pb-6 text-gray-300 leading-relaxed'>
-                                    {faq.answer}
+                                    <Editable
+                                        name={`faqAnswer_${index}`}
+                                        as="p"
+                                        type="text"
+                                        defaultValue={faq.answer}
+                                    />
                                 </div>
                             </motion.div>
                         )}

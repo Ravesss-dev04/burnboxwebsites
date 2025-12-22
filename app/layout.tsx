@@ -10,6 +10,7 @@ import { SiteConfigProvider } from "./context/SiteConfigContext";
 import { Suspense } from "react";
 import HeaderWrapper from "./components/HeaderWrapper";
 import VisitorTracker from "./components/VisitorTracker";
+import GlobalStyleInjector from "./components/GlobalStyleInjector";
 
 const outfit = Outfit({
   variable: "--font-geist-sans",
@@ -27,11 +28,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${outfit.variable} antialiased h-[100vh] max-w-[100vw]`}>
+      <body className={`${outfit.variable} antialiased h-[100vh] max-w-[100vw] relative`}>
         <TooltipProvider>
           <SiteConfigProvider>
+            <GlobalStyleInjector />
             <HeaderProvider>
-            
               <Suspense fallback={<div></div>}>
                 <HeaderWrapper/>
               </Suspense>

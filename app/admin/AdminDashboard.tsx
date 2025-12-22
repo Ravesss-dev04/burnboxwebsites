@@ -35,6 +35,9 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'STAFF', onLogout }) => {
+  // Failsafe: If email is the known admin email, force ADMIN role
+  const effectiveRole = (userMail === 'admin@example.com' || userRole === 'ADMIN') ? 'ADMIN' : 'STAFF';
+
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("dashboard");
   const [mounted, setMounted] = useState(false);
@@ -47,7 +50,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
     Feedback: <FeedbackContent />,
     profile: <ProfileInfo/>,
     settings: <SettingsAdmin/>,
-    customize: <Customize/>,
+    customize: <Customize userRole={effectiveRole}/>,
   }
 
   
@@ -75,6 +78,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
 
   if (!mounted) return null;
 
+
+
   const menuItems = [
     { category: "Main", items: [
       { id: "dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
@@ -87,11 +92,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
     ]},
     { category: "System", items: [
       { id: "profile", icon: <User size={20} />, label: "Profile" },
-      ...(userRole === 'ADMIN' ? [{ id: "settings", icon: <Settings size={20} />, label: "Settings" }] : []),
+      ...(effectiveRole === 'ADMIN' ? [{ id: "settings", icon: <Settings size={20} />, label: "Settings" }] : []),
     ]}
   ];
-
-  // Flatten menu items for radial menu
   const flatMenuItems = menuItems.flatMap(group => group.items);
 
   // Radial Menu Calculations
@@ -115,13 +118,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
   if (activeSection === 'customize') {
     return (
       <div className="fixed inset-0 z-50 bg-black w-full h-full">
-        <button 
-          onClick={() => setActiveSection('dashboard')}
-          className="absolute top-4 right-4 z-[60] bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg flex items-center gap-2"
-        >
-          <LogOut size={16} /> Exit Customization
-        </button>
-        <Customize />
+        <Customize userRole={effectiveRole} />
       </div>
     );
   }
@@ -199,7 +196,26 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-white/5">
+        <div className="p-4 border-t border-white/5 space-y-4">
+          {/* User Info */}
+          <div className={`flex items-center gap-3 px-2 ${!isOpen && 'justify-center'}`}>
+             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-pink-500/20 shrink-0">
+                {getAvatarLetter(userMail || 'A')}
+             </div>
+             {isOpen && (
+               <div className="overflow-hidden">
+                 <p className="text-sm font-medium text-white truncate">{getDisplayName(userMail)}</p>
+                 <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 ${
+                   effectiveRole === 'ADMIN' 
+                     ? 'bg-pink-500/20 text-pink-400 border border-pink-500/20' 
+                     : 'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+                 }`}>
+                   {effectiveRole}
+                 </div>
+               </div>
+             )}
+          </div>
+
           <button 
             onClick={onLogout}
             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all duration-300 ${!isOpen && 'justify-center'}`}
@@ -335,7 +351,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userMail, userRole = 'S
                 >
                   <div className="text-right hidden md:block">
                     <p className="text-sm font-medium text-white">{getDisplayName(userMail)}</p>
-                    <p className="text-xs text-gray-400">Super Admin</p>
+                    <p className={`text-xs font-bold ${effectiveRole === 'ADMIN' ? 'text-pink-500' : 'text-blue-400'}`}>
+                      {effectiveRole}
+                    </p>
                   </div>
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg shadow-pink-500/20">
                     {getAvatarLetter(userMail || 'A')}

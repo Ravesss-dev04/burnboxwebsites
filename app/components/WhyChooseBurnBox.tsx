@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import EditableText from "../admin/components/EditableText";
+import Editable from "./Editable";
 import { Printer, Gem, PenTool, ShieldCheck, Clock, CheckCircle2 } from "lucide-react";
 
 interface AboutSectionProps {
@@ -54,8 +54,6 @@ const itemVariants = {
 };
 
 const WhyChooseBurnBox: React.FC<AboutSectionProps> = ({ editable = false }) => {
-  const [title, setTitle] = useState("Why Choose BurnBox?");
-
   return (
     <section className="relative py-24 bg-[#0a0a0a] overflow-hidden text-white" id="why-choose-burnbox">
       {/* Background Elements */}
@@ -77,11 +75,10 @@ const WhyChooseBurnBox: React.FC<AboutSectionProps> = ({ editable = false }) => 
 
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-gray-900/50 backdrop-blur-sm">
 
-              <Image
-                src="/onefive.jpg"
-                alt="Why Choose BurnBox"
-                width={800}
-                height={800}
+              <Editable
+                name="whyChooseImage"
+                type="image"
+                defaultValue="/onefive.jpg"
                 className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-106"
               />
 
@@ -104,17 +101,20 @@ const WhyChooseBurnBox: React.FC<AboutSectionProps> = ({ editable = false }) => 
           {/* Right Column: Content */}
           <div className="space-y-8">
             <div className="space-y-4">
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
-                <EditableText
-                  text={title}
-                  onChange={setTitle}
-                  editable={editable}
-                  className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400"
-                />
-              </h2>
-              <p className="text-lg text-gray-400 max-w-lg">
-                We combine cutting-edge technology with creative passion to deliver printing solutions that make your brand stand out.
-              </p>
+              <Editable 
+                name="whyChooseTitle" 
+                as="h2" 
+                type="text"
+                defaultValue="Why Choose BurnBox?"
+                className="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400"
+              />
+              <Editable
+                name="whyChooseSubtitle"
+                as="p"
+                type="text"
+                defaultValue="We combine cutting-edge technology with creative passion to deliver printing solutions that make your brand stand out."
+                className="text-lg text-gray-400 max-w-lg"
+              />
             </div>
             <motion.div
               variants={containerVariants}
@@ -133,12 +133,20 @@ const WhyChooseBurnBox: React.FC<AboutSectionProps> = ({ editable = false }) => 
                     {feature.icon}
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-1">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                      {feature.description}
-                    </p>
+                    <Editable
+                        name={`featureTitle_${index}`}
+                        as="h3"
+                        type="text"
+                        defaultValue={feature.title}
+                        className="text-xl font-semibold text-white mb-1"
+                    />
+                    <Editable
+                        name={`featureDesc_${index}`}
+                        as="p"
+                        type="text"
+                        defaultValue={feature.description}
+                        className="text-gray-400 text-sm leading-relaxed"
+                    />
                   </div>
                 </motion.div>
               ))}

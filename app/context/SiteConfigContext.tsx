@@ -15,6 +15,10 @@ interface SiteConfigContextType {
   setEditing: (editing: boolean) => void;
   editKey: string | null;
   setEditKey: (key: string | null) => void;
+  undo: () => void;
+  redo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
 const SiteConfigContext = createContext<SiteConfigContextType | undefined>(
@@ -27,6 +31,8 @@ export const SiteConfigProvider = ({
   children: React.ReactNode;
 }) => {
   const [config, setConfig] = useState<SiteConfig>({});
+  const [history, setHistory] = useState<SiteConfig[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setEditing] = useState(false);
   const [editKey, setEditKey] = useState<string | null>(null);
@@ -41,6 +47,8 @@ export const SiteConfigProvider = ({
       if (res.ok) {
         const data = await res.json();
         setConfig(data);
+        setHistory([data]);
+        setHistoryIndex(0);
       }
     } catch (error) {
       console.error("Error fetching config:", error);
@@ -50,7 +58,35 @@ export const SiteConfigProvider = ({
   };
 
   const updateConfig = (key: string, value: any) => {
-    setConfig((prev) => ({ ...prev, [key]: value }));
+    setConfig((prev) => {
+      const newConfig = { ...prev, [key]: value };
+      
+      // Add to history
+      const newHistory = history.slice(0, historyIndex + 1);
+      newHistory.push(newConfig);
+      
+      // Limit history size if needed (e.g., 50 steps)
+      if (newHistory.length > 50) newHistory.shift();
+      
+      setHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+      
+      return newConfig;
+    });
+  };
+
+  const undo = () => {
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+      setConfig(history[historyIndex - 1]);
+    }
+  };
+
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+      setConfig(history[historyIndex + 1]);
+    }
   };
 
   const saveConfig = async () => {
@@ -72,7 +108,20 @@ export const SiteConfigProvider = ({
 
   return (
     <SiteConfigContext.Provider
-      value={{ config, updateConfig, saveConfig, isLoading, isEditing, setEditing, editKey, setEditKey }}
+      value={{ 
+        config, 
+        updateConfig, 
+        saveConfig, 
+        isLoading, 
+        isEditing, 
+        setEditing, 
+        editKey, 
+        setEditKey,
+        undo,
+        redo,
+        canUndo: historyIndex > 0,
+        canRedo: historyIndex < history.length - 1
+      }}
     >
       {children}
     </SiteConfigContext.Provider>
