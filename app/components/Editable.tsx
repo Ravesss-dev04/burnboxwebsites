@@ -144,9 +144,12 @@ const Editable = ({
     zIndex: isSelected ? 50 : undefined, // Bring to front when selected
   };
 
+
+
   // Motion Component
   const MotionComponent = motion(Component);
 
+  
   if (!isEditing) {
     if (isHidden) return null;
     // Render normally when not editing (with saved position)

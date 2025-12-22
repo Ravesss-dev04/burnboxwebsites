@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma as db } from "@/lib/db";
+import { corsHeaders } from "@/lib/corsHeaders";
+
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 
 export async function GET() {
   try {
@@ -15,7 +22,7 @@ export async function GET() {
     console.error("Error fetching site config:", error);
     return NextResponse.json(
       { error: "Failed to fetch site configuration" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -38,12 +45,12 @@ export async function POST(req: Request) {
 
     await db.$transaction(updates);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, { headers: corsHeaders });
   } catch (error) {
     console.error("Error saving site config:", error);
     return NextResponse.json(
       { error: "Failed to save site configuration" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
