@@ -17,7 +17,7 @@ export async function GET() {
       return acc;
     }, {} as Record<string, any>);
 
-    return NextResponse.json(configMap),{ headers: corsHeaders };
+    return NextResponse.json(configMap, { headers: corsHeaders });
   } catch (error) {
     console.error("Error fetching site config:", error);
     return NextResponse.json(
