@@ -43,7 +43,7 @@ export const SiteConfigProvider = ({
 
   const fetchConfig = async () => {
     try {
-      const res = await fetch("https://burnboxadvertising.vercel.app/api/site-config");
+      const res = await fetch("/api/site-config");
       if (res.ok) {
         const data = await res.json();
         setConfig(data);
@@ -105,11 +105,10 @@ export const SiteConfigProvider = ({
       alert("Failed to save configuration.");
     }
   };
-
   return (
     <SiteConfigContext.Provider
-      value={{ 
-        config, 
+      value={{  
+        config,   
         updateConfig, 
         saveConfig, 
         isLoading, 
@@ -127,7 +126,6 @@ export const SiteConfigProvider = ({
     </SiteConfigContext.Provider>
   );
 };
-
 export const useSiteConfig = () => {
   const context = useContext(SiteConfigContext);
   if (context === undefined) {

@@ -41,7 +41,7 @@ export const HeaderProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('/api/sservices');
+        const response = await fetch('https://burnboxadvertising.vercel.app/api/sservices');
         if (response.ok) {
           const services = await response.json();
           // Check if services is an array
